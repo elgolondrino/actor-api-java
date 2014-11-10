@@ -32,7 +32,7 @@ public class SenderActor extends Actor {
             public SenderActor create() {
                 return new SenderActor(proto);
             }
-        }), "proto_sender");
+        }), proto.getPath() + "/sender");
     }
 
 

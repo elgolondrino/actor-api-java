@@ -17,6 +17,7 @@ public class MTProto {
     private MTProtoParams params;
     private EndpointProvider endpointProvider;
     private MTUids uids;
+    private String path;
     private int connectionCount;
 
     private ActorRef manager;
@@ -25,7 +26,9 @@ public class MTProto {
 
     private ActorRef stateBroker;
 
-    public MTProto(final MTProtoParams params, final int desiredConnectionCount,
+    public MTProto(final MTProtoParams params,
+                   final String path,
+                   final int desiredConnectionCount,
                    final ActorRef stateBroker) {
         if (params.getSessionId() == 0) {
             throw new RuntimeException("Session can't be zero");
@@ -33,6 +36,7 @@ public class MTProto {
         if (params.getAuthId() == 0) {
             throw new RuntimeException("AuthId can't be zero");
         }
+        this.path = path;
         this.params = params;
         this.endpointProvider = new EndpointProvider(params.getConfig().getEndpoints());
         this.stateBroker = stateBroker;
@@ -41,6 +45,10 @@ public class MTProto {
         this.manager = system().actorOf(ManagerActor.manager(this));
         this.sender = system().actorOf(SenderActor.senderActor(this));
         this.receiver = system().actorOf(ReceiverActor.receiver(this));
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public int getConnectionCount() {

@@ -8,6 +8,7 @@ import im.actor.proto.api.ActorApiCallback;
 import im.actor.proto.api.ActorApiConfig;
 import im.actor.proto.api.ActorApiScheme;
 import im.actor.proto.api.LogInterface;
+import im.actor.proto.crypto.Crypto;
 import im.actor.proto.mtp.MTProto;
 import im.actor.proto.mtp.MTProtoParams;
 import im.actor.proto.mtp.messages.*;
@@ -33,7 +34,7 @@ public class ApiBrokerActor extends Actor {
             public ApiBrokerActor create() {
                 return new ApiBrokerActor(id, config);
             }
-        }), "actor-api/" + id + "/api_broker");
+        }), "/actor-api/" + id + "/broker");
     }
 
     private static final String TAG = "ApiBroker";
@@ -70,13 +71,13 @@ public class ApiBrokerActor extends Actor {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "We have auth id, creating proto");
             }
-            MTProtoParams params = new MTProtoParams(CONFIG.getApiStorage().getAuthKey(), Entropy.randomId(), CONFIG);
-            protocol = new MTProto(params, CONNECTIONS_COUNT, self());
+            MTProtoParams params = new MTProtoParams(CONFIG.getApiStorage().getAuthKey(), Crypto.generateSessionId(), CONFIG);
+            protocol = new MTProto(params, "/actor-api/" + ID + "/mtp", CONNECTIONS_COUNT, self());
         } else {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "Requesting auth id");
             }
-            ask(KeyBuildActor.key(CONFIG, backoff), new AskCallback<Long>() {
+            ask(new ActorSelection(AuthBuildActor.auth(CONFIG, backoff), "/actor-api/" + ID + "/auth_id"), new AskCallback<Long>() {
                 @Override
                 public void onResult(Long result) {
                     self().send(new KeyCreated(result));
@@ -256,8 +257,8 @@ public class ApiBrokerActor extends Actor {
 
     private void onKeyCreated(long key) {
         CONFIG.getApiStorage().saveAuthKey(key);
-        MTProtoParams params = new MTProtoParams(key, Entropy.randomId(), CONFIG);
-        protocol = new MTProto(params, CONNECTIONS_COUNT, self());
+        MTProtoParams params = new MTProtoParams(key, Crypto.generateSessionId(), CONFIG);
+        protocol = new MTProto(params, "/actor-api/" + ID + "/mtp", CONNECTIONS_COUNT, self());
         for (RequestHolder holder : requests.values()) {
             if (holder.protoId != 0) {
                 continue;

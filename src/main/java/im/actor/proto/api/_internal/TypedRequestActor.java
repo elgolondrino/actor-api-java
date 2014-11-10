@@ -26,7 +26,8 @@ public class TypedRequestActor extends TypedActor<TypedRequestInt> implements Ty
     @Override
     public Future<Message> request(Message message) {
         final TypedFuture<Message> res = future();
-        ask(RawRequestActor.request(NEXT_RPC_ID.getAndIncrement(), message, broker),
+        ask(RawRequestActor.request(getPath() + "/" + NEXT_RPC_ID.incrementAndGet(),
+                        NEXT_RPC_ID.getAndIncrement(), message, broker),
                 new AskCallback<Message>() {
                     @Override
                     public void onResult(Message result) {
@@ -44,7 +45,8 @@ public class TypedRequestActor extends TypedActor<TypedRequestInt> implements Ty
     @Override
     public Future<Message> request(Message message, long timeout) {
         final TypedFuture<Message> res = future();
-        ask(RawRequestActor.request(NEXT_RPC_ID.getAndIncrement(), message, broker), timeout,
+        ask(RawRequestActor.request(getPath() + "/" + NEXT_RPC_ID.incrementAndGet(),
+                        NEXT_RPC_ID.getAndIncrement(), message, broker), timeout,
                 new AskCallback<Message>() {
                     @Override
                     public void onResult(Message result) {

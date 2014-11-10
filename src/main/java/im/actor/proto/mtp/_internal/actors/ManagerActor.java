@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by ex3ndr on 02.09.14.
@@ -28,8 +29,10 @@ public class ManagerActor extends Actor {
             public ManagerActor create() {
                 return new ManagerActor(proto);
             }
-        }), "proto_manager");
+        }), proto.getPath() + "/manager");
     }
+
+    private static final AtomicInteger NEXT_CONNECTION = new AtomicInteger(1);
 
     private final ArrayList<TcpConnection> connections = new ArrayList<TcpConnection>();
     private final LogInterface LOG;
@@ -70,7 +73,7 @@ public class ManagerActor extends Actor {
             onConnectionDie((TcpConnection.ConnectionDie) message);
         } else if (message instanceof TcpConnection.RawMessage) {
             if (LOG != null && DEBUG) {
-                LOG.d("PackageTcp", "Received #" + ((TcpConnection.RawMessage) message).getId());
+                LOG.d(TAG, "Received #" + ((TcpConnection.RawMessage) message).getId());
             }
             onRawMessage((TcpConnection.RawMessage) message);
         } else if (message instanceof SendMessage) {
@@ -90,30 +93,32 @@ public class ManagerActor extends Actor {
                 if (LOG != null && DEBUG) {
                     LOG.d(TAG, "Checking connection");
                 }
-                ask(CreateTcpConnectionActor.createConnection(endpointProvider.fetchEndpoint(), proto.getParams(), self()), new AskCallback<TcpConnection>() {
-                    @Override
-                    public void onResult(TcpConnection result) {
-                        if (LOG != null && DEBUG) {
-                            LOG.d(TAG, "Connection created");
-                        }
-                        isCheckingConnections = false;
-                        connections.add(result);
-                        backoff.onSuccess();
+                ask(new ActorSelection(CreateTcpConnectionActor.props(endpointProvider.fetchEndpoint(), proto.getParams(), self()),
+                                getPath() + "/connect/" + NEXT_CONNECTION.getAndIncrement()),
+                        new AskCallback<TcpConnection>() {
+                            @Override
+                            public void onResult(TcpConnection result) {
+                                if (LOG != null && DEBUG) {
+                                    LOG.d(TAG, "Connection created");
+                                }
+                                isCheckingConnections = false;
+                                connections.add(result);
+                                backoff.onSuccess();
 
-                        self().send(new PerformConnectionCheck(), self());
-                        sender.send(new SenderActor.ConnectionCreated(result.getConnectionId()), self());
-                    }
+                                self().send(new PerformConnectionCheck(), self());
+                                sender.send(new SenderActor.ConnectionCreated(result.getConnectionId()), self());
+                            }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        if (LOG != null) {
-                            LOG.d(TAG, "Connection creation error");
-                        }
-                        isCheckingConnections = false;
-                        backoff.onFailure();
-                        self().send(new PerformConnectionCheck(), backoff.exponentialWait(), self());
-                    }
-                });
+                            @Override
+                            public void onError(Throwable throwable) {
+                                if (LOG != null) {
+                                    LOG.d(TAG, "Connection creation error");
+                                }
+                                isCheckingConnections = false;
+                                backoff.onFailure();
+                                self().send(new PerformConnectionCheck(), backoff.exponentialWait(), self());
+                            }
+                        });
             }
         }
     }

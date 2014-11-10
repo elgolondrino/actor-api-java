@@ -16,13 +16,13 @@ import java.util.UUID;
  */
 public class CreateTcpConnectionActor extends TaskActor<TcpConnection> {
 
-    public static ActorSelection createConnection(final MTProtoEndpoint endpoint, final MTProtoParams params, final ActorRef reciever) {
-        return new ActorSelection(Props.create(CreateTcpConnectionActor.class, new ActorCreator<CreateTcpConnectionActor>() {
+    public static Props props(final MTProtoEndpoint endpoint, final MTProtoParams params, final ActorRef reciever) {
+        return Props.create(CreateTcpConnectionActor.class, new ActorCreator<CreateTcpConnectionActor>() {
             @Override
             public CreateTcpConnectionActor create() {
                 return new CreateTcpConnectionActor(endpoint, params, reciever);
             }
-        }), "create_connection_" + UUID.randomUUID());
+        });
     }
 
     private ActorRef reciever;

@@ -6,20 +6,18 @@ import com.google.protobuf.Message;
 
 import im.actor.proto.api.ApiRequestException;
 
-import java.util.UUID;
-
 /**
  * Created by ex3ndr on 03.09.14.
  */
 public class RawRequestActor extends TaskActor<Message> {
 
-    public static ActorSelection request(final long id, final Message request, final ActorRef broker) {
+    public static ActorSelection request(String path, final long id, final Message request, final ActorRef broker) {
         return new ActorSelection(Props.create(RawRequestActor.class, new ActorCreator<RawRequestActor>() {
             @Override
             public RawRequestActor create() {
                 return new RawRequestActor(id, request, broker);
             }
-        }), "request_" + UUID.randomUUID());
+        }), path);
     }
 
     private Message request;

@@ -30,7 +30,7 @@ public class ActorApi {
             public TypedRequestActor create() {
                 return new TypedRequestActor(broker);
             }
-        }), "actor-api/0/request"), TypedRequestInt.class);
+        }), "/actor-api/0/rpc"), TypedRequestInt.class);
     }
 
     public void notifyNetworkChanged() {
@@ -59,6 +59,10 @@ public class ActorApi {
 
     public <T extends Message> Future<T> rpc(Message message, long timeout) {
         return rpc(message, timeout, null);
+    }
+
+    public <T extends Message> T rpcSync(Message message) throws TimeoutException, ApiRequestException {
+        return rpcSync(message, 5000);
     }
 
     public <T extends Message> T rpcSync(Message message, long timeout) throws TimeoutException, ApiRequestException {
