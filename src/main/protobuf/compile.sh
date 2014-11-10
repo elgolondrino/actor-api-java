@@ -1,0 +1,1 @@
+protoc secret.proto --java_out=../java/
