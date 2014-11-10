@@ -39,4 +39,9 @@ public class ApiRequestException extends Exception {
     public byte[] getRelatedData() {
         return relatedData;
     }
+
+    @Override
+    public String toString() {
+        return "<" + errorTag + "#" + errorCode + ": " + errorUserMessage + ">";
+    }
 }
