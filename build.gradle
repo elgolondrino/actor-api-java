@@ -2,15 +2,13 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-group = 'im.actor'
-version = '0.5.0'
-
 compileJava {
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
 }
 
-project.version = '1.0'
+group = 'im.actor'
+version = '1.0.1'
 
 repositories {
     mavenCentral()
