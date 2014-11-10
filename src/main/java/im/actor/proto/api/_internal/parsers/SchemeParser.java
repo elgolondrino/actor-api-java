@@ -1,11 +1,10 @@
-package im.actor.proto.api.parsers;
+package im.actor.proto.api._internal.parsers;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by ex3ndr on 03.09.14.

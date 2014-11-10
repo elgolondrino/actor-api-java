@@ -4,20 +4,17 @@ import com.droidkit.actors.*;
 import com.droidkit.actors.tasks.AskCallback;
 import com.google.protobuf.Message;
 
+import im.actor.proto.api.ActorApiCallback;
 import im.actor.proto.api.ActorApiConfig;
 import im.actor.proto.api.ActorApiScheme;
 import im.actor.proto.api.LogInterface;
-import im.actor.proto.api.parsers.RpcParser;
-import im.actor.proto.api.parsers.SchemeParser;
-import im.actor.proto.api.messages.SeqFatUpdate;
-import im.actor.proto.api.messages.SeqTooLong;
-import im.actor.proto.api.messages.SeqUpdate;
-import im.actor.proto.api.messages.WeakUpdate;
-import im.actor.proto.api.parsers.UpdatesParser;
 import im.actor.proto.mtp.MTProto;
 import im.actor.proto.mtp.MTProtoParams;
 import im.actor.proto.mtp.messages.*;
 import im.actor.proto.mtp._internal.entity.message.rpc.RpcRequest;
+import im.actor.proto.api._internal.parsers.RpcParser;
+import im.actor.proto.api._internal.parsers.UpdatesParser;
+import im.actor.proto.api._internal.parsers.SchemeParser;
 import im.actor.proto.mtp.messages.AuthIdInvalidated;
 import im.actor.proto.mtp.messages.NewSessionCreated;
 import im.actor.proto.util.ExponentialBackoff;
@@ -30,35 +27,38 @@ import java.util.HashMap;
  */
 public class ApiBrokerActor extends Actor {
 
-    public static ActorSelection broker(final ActorApiConfig config) {
+    public static ActorSelection broker(final String id, final ActorApiConfig config) {
         return new ActorSelection(Props.create(ApiBrokerActor.class, new ActorCreator<ApiBrokerActor>() {
             @Override
             public ApiBrokerActor create() {
-                return new ApiBrokerActor(config);
+                return new ApiBrokerActor(id, config);
             }
-        }), "react/api_broker");
+        }), "actor-api/" + id + "/api_broker");
     }
 
     private static final String TAG = "ApiBroker";
     private static final int CONNECTIONS_COUNT = 1;
 
-    private final ActorApiConfig config;
     private final LogInterface LOG;
     private final boolean DEBUG;
+    private final String ID;
+    private final ActorApiConfig CONFIG;
+
     private final SchemeParser rpcParser;
     private final SchemeParser updatesParser;
 
     private MTProto protocol;
     private HashMap<Long, RequestHolder> requests = new HashMap<Long, RequestHolder>();
     private HashMap<Long, Long> idMap = new HashMap<Long, Long>();
-    private ActorRef stateBroker;
+    private ActorApiCallback apiCallback;
     private ExponentialBackoff backoff;
 
-    public ApiBrokerActor(ActorApiConfig config) {
+    public ApiBrokerActor(String id, ActorApiConfig config) {
         this.LOG = config.getLogInterface();
         this.DEBUG = config.isDebugLog();
-        this.config = config;
-        this.stateBroker = config.getStateBroker();
+        this.ID = id;
+        this.CONFIG = config;
+        this.apiCallback = config.getApiCallback();
         this.rpcParser = new RpcParser();
         this.updatesParser = new UpdatesParser();
         this.backoff = new ExponentialBackoff();
@@ -66,17 +66,17 @@ public class ApiBrokerActor extends Actor {
 
     @Override
     public void preStart() {
-        if (config.getApiStorage().getAuthKey() != 0) {
+        if (CONFIG.getApiStorage().getAuthKey() != 0) {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "We have auth id, creating proto");
             }
-            MTProtoParams params = new MTProtoParams(config.getApiStorage().getAuthKey(), Entropy.randomId(), config);
+            MTProtoParams params = new MTProtoParams(CONFIG.getApiStorage().getAuthKey(), Entropy.randomId(), CONFIG);
             protocol = new MTProto(params, CONNECTIONS_COUNT, self());
         } else {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "Requesting auth id");
             }
-            ask(KeyBuildActor.key(config, backoff), new AskCallback<Long>() {
+            ask(KeyBuildActor.key(CONFIG, backoff), new AskCallback<Long>() {
                 @Override
                 public void onResult(Long result) {
                     self().send(new KeyCreated(result));
@@ -98,7 +98,7 @@ public class ApiBrokerActor extends Actor {
             }
             SendRequest req = (SendRequest) message;
             if (!rpcParser.supportMessage(req.getMessage())) {
-                sender().send(new RequestActor.RpcError(
+                sender().send(new RawRequestActor.RpcError(
                         0,
                         "APP_ERROR",
                         "Unsupported API Method " + req.getMessage().getClass(),
@@ -144,7 +144,7 @@ public class ApiBrokerActor extends Actor {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "AuthIdInvalidated");
             }
-            stateBroker.send(new im.actor.proto.api.messages.AuthIdInvalidated());
+            apiCallback.onAuthIdInvalidated();
         } else if (message instanceof Confirmed) {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "Confirmed #" + ((Confirmed) message).getMessageId());
@@ -154,7 +154,7 @@ public class ApiBrokerActor extends Actor {
             if (DEBUG && LOG != null) {
                 LOG.d(TAG, "NewSessionCreated");
             }
-            stateBroker.send(new im.actor.proto.api.messages.NewSessionCreated());
+            apiCallback.onNewSessionCreated();
         } else if (message instanceof im.actor.proto.mtp.messages.RpcError) {
             im.actor.proto.mtp.messages.RpcError rpcError = (im.actor.proto.mtp.messages.RpcError) message;
             if (DEBUG && LOG != null) {
@@ -165,7 +165,7 @@ public class ApiBrokerActor extends Actor {
                 RequestHolder holder = requests.remove(pubId);
                 if (holder != null) {
                     holder.receiver.send(
-                            new RequestActor.RpcError(
+                            new RawRequestActor.RpcError(
                                     rpcError.getErrorCode(),
                                     rpcError.getErrorTag(),
                                     rpcError.getErrorUserMessage(),
@@ -186,7 +186,7 @@ public class ApiBrokerActor extends Actor {
                         Message result = rpcParser.read(rpcMessage.getPayloadType(), rpcMessage.getPayload());
                         requests.remove(pubId);
                         idMap.remove(rpcMessage.getMessageId());
-                        holder.receiver.send(new RequestActor.RpcResult(result));
+                        holder.receiver.send(new RawRequestActor.RpcResult(result));
                     } catch (IOException e) {
                         e.printStackTrace();
                         // Just ignore message
@@ -207,37 +207,43 @@ public class ApiBrokerActor extends Actor {
                     }
                     try {
                         Message upd = updatesParser.read(commonUpdate.getUpdateHeader(), commonUpdate.getUpdate().toByteArray());
-                        stateBroker.send(new SeqUpdate(
-                                commonUpdate.getSeq(),
+                        apiCallback.onSeqUpdate(commonUpdate.getSeq(),
                                 commonUpdate.getState().toByteArray(),
-                                upd));
+                                upd);
                     } catch (IOException e) {
-                        stateBroker.send(new SeqTooLong());
+                        if (LOG != null) {
+                            LOG.w(TAG, "Unable to load update");
+                            LOG.e(TAG, e);
+                        }
+                        apiCallback.onSeqTooLong();
                     }
                 } else if (msg instanceof ActorApiScheme.FatSeqUpdate) {
                     ActorApiScheme.FatSeqUpdate seqUpdate = (ActorApiScheme.FatSeqUpdate) msg;
                     try {
                         Message upd = updatesParser.read(seqUpdate.getUpdateHeader(), seqUpdate.getUpdate().toByteArray());
-                        stateBroker.send(new SeqFatUpdate(
-                                seqUpdate.getSeq(),
+                        apiCallback.onSeqFatUpdate(seqUpdate.getSeq(),
                                 seqUpdate.getState().toByteArray(),
                                 upd,
-                                seqUpdate.getUsersList()));
+                                seqUpdate.getUsersList());
                     } catch (IOException e) {
-                        stateBroker.send(new SeqTooLong());
+                        if (LOG != null) {
+                            LOG.w(TAG, "Unable to load update");
+                            LOG.e(TAG, e);
+                        }
+                        apiCallback.onSeqTooLong();
                     }
                 } else if (msg instanceof ActorApiScheme.SeqUpdateTooLong) {
                     if (DEBUG && LOG != null) {
                         LOG.d(TAG, "Received update: too long");
                     }
-                    stateBroker.send(new SeqTooLong());
+                    apiCallback.onSeqTooLong();
                 } else if (msg instanceof ActorApiScheme.WeakUpdate) {
                     if (DEBUG && LOG != null) {
                         LOG.d(TAG, "Received update: weak update");
                     }
                     ActorApiScheme.WeakUpdate weakUpdate = (ActorApiScheme.WeakUpdate) msg;
                     Message weakMessage = updatesParser.read(weakUpdate.getUpdateId(), weakUpdate.getUpdate().toByteArray());
-                    stateBroker.send(new WeakUpdate(weakUpdate.getDate(), weakMessage));
+                    apiCallback.onWeakUpdate(weakUpdate.getDate(), weakMessage);
                 }
             } catch (IOException e) {
                 if (LOG != null) {
@@ -249,8 +255,8 @@ public class ApiBrokerActor extends Actor {
     }
 
     private void onKeyCreated(long key) {
-        config.getApiStorage().saveAuthKey(key);
-        MTProtoParams params = new MTProtoParams(key, Entropy.randomId(), config);
+        CONFIG.getApiStorage().saveAuthKey(key);
+        MTProtoParams params = new MTProtoParams(key, Entropy.randomId(), CONFIG);
         protocol = new MTProto(params, CONNECTIONS_COUNT, self());
         for (RequestHolder holder : requests.values()) {
             if (holder.protoId != 0) {

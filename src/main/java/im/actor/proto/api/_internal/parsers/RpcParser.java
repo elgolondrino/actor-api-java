@@ -1,4 +1,4 @@
-package im.actor.proto.api.parsers;
+package im.actor.proto.api._internal.parsers;
 
 import static im.actor.proto.api.ActorApiScheme.*;
 

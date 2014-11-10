@@ -11,13 +11,13 @@ import java.util.UUID;
 /**
  * Created by ex3ndr on 03.09.14.
  */
-public class RequestActor extends TaskActor<Message> {
+public class RawRequestActor extends TaskActor<Message> {
 
     public static ActorSelection request(final long id, final Message request, final ActorRef broker) {
-        return new ActorSelection(Props.create(RequestActor.class, new ActorCreator<RequestActor>() {
+        return new ActorSelection(Props.create(RawRequestActor.class, new ActorCreator<RawRequestActor>() {
             @Override
-            public RequestActor create() {
-                return new RequestActor(id, request, broker);
+            public RawRequestActor create() {
+                return new RawRequestActor(id, request, broker);
             }
         }), "request_" + UUID.randomUUID());
     }
@@ -26,7 +26,7 @@ public class RequestActor extends TaskActor<Message> {
     private ActorRef broker;
     private long id;
 
-    public RequestActor(long id, Message request, ActorRef broker) {
+    public RawRequestActor(long id, Message request, ActorRef broker) {
         this.id = id;
         this.request = request;
         this.broker = broker;

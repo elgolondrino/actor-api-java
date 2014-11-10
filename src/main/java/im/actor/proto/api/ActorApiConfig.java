@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 public class ActorApiConfig {
     private final MTProtoEndpoint[] endpoints;
-    private final ActorRef stateBroker;
+    private final ActorApiCallback apiCallback;
     private final LogInterface logInterface;
     private final ActorApiStorage apiStorage;
     private final boolean isChromeEnabled;
@@ -21,14 +21,14 @@ public class ActorApiConfig {
 
     public ActorApiConfig(ActorApiStorage apiStorage,
                           MTProtoEndpoint[] endpoints,
-                          ActorRef stateBroker,
+                          ActorApiCallback apiCallback,
                           LogInterface logInterface,
                           boolean isDebugLog,
                           boolean isDebugProto,
                           boolean isDebugTcp,
                           boolean isChromeEnabled) {
         this.endpoints = endpoints;
-        this.stateBroker = stateBroker;
+        this.apiCallback = apiCallback;
         this.logInterface = logInterface;
         this.apiStorage = apiStorage;
         this.isDebugLog = isDebugLog;
@@ -65,22 +65,22 @@ public class ActorApiConfig {
         return endpoints;
     }
 
-    public ActorRef getStateBroker() {
-        return stateBroker;
+    public ActorApiCallback getApiCallback() {
+        return apiCallback;
     }
 
     public static class Builder {
         private ActorApiStorage storage;
         private ArrayList<MTProtoEndpoint> endpoints = new ArrayList<MTProtoEndpoint>();
-        private ActorRef stateBroker;
+        private ActorApiCallback apiCallback;
         private LogInterface logInterface;
         private boolean chromeSupport = false;
         private boolean isDebugLogEnabled = false;
         private boolean isDebugProtoEnabled = false;
         private boolean isDebugTcpEnabled = false;
 
-        public Builder setStateBroker(ActorRef stateBroker) {
-            this.stateBroker = stateBroker;
+        public Builder setApiCallback(ActorApiCallback apiCallback) {
+            this.apiCallback = apiCallback;
             return this;
         }
 
@@ -137,10 +137,10 @@ public class ActorApiConfig {
             if (endpoints.size() == 0) {
                 throw new RuntimeException("endpoints not set");
             }
-            if (stateBroker == null) {
-                throw new RuntimeException("stateBroker not set");
+            if (apiCallback == null) {
+                throw new RuntimeException("apiCallback not set");
             }
-            return new ActorApiConfig(storage, endpoints.toArray(new MTProtoEndpoint[endpoints.size()]), stateBroker,
+            return new ActorApiConfig(storage, endpoints.toArray(new MTProtoEndpoint[endpoints.size()]), apiCallback,
                     logInterface, isDebugLogEnabled, isDebugProtoEnabled, isDebugTcpEnabled, chromeSupport);
         }
     }
