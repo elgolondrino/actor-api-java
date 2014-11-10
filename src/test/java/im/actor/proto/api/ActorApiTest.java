@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class ActorApiTest extends TestCase {
 
-    private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint("mtproto-api.actor.im", 443);
+    private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.TLS_TCP, "mtproto-api.actor.im", 443);
 
     private static final int APP_ID = 42;
     private static final String APP_KEY = "b815c437facc0f41157633d13221336b4d8484d9ff2289acc6bba4079e994d04";

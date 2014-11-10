@@ -33,7 +33,12 @@ public class AuthIdRetreiver {
             public void run() {
                 try {
                     final MTProtoEndpoint connectionInfo = new EndpointProvider(config.getEndpoints()).fetchEndpoint();
-                    Socket socket = SSLSocketFactory.getDefault().createSocket();
+                    Socket socket;
+                    if (connectionInfo.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                        socket = new Socket();
+                    } else {
+                        socket = SSLSocketFactory.getDefault().createSocket();
+                    }
                     socket.connect(new InetSocketAddress(connectionInfo.getHost(), connectionInfo.getPort()), 15000);
 
                     if (!config.isChromeEnabled()) {

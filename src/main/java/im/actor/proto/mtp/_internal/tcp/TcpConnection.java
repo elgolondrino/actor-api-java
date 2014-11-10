@@ -50,7 +50,11 @@ public class TcpConnection {
             this.TAG = "TcpConnection#" + connectionId;
             this.LOG = params.getConfig().getLogInterface();
             this.DEBUG = params.getConfig().isDebugTcp();
-            this.socket = SSLSocketFactory.getDefault().createSocket();
+            if (endpoint.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                this.socket = new Socket();
+            } else {
+                this.socket = SSLSocketFactory.getDefault().createSocket();
+            }
             this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
             this.socket.getInputStream();
             if (!params.getConfig().isChromeEnabled()) {
