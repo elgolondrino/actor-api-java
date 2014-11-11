@@ -5,6 +5,6 @@ package im.actor.stress.tools;
  */
 public class AppLog {
     public static synchronized void v(String log) {
-        System.out.println(log);
+        System.out.println(System.currentTimeMillis() + ":" + log);
     }
 }

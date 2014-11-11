@@ -14,6 +14,7 @@ import im.actor.proto.mtp.MTProtoEndpoint;
 import im.actor.stress.tools.AppLog;
 import im.actor.stress.tools.EmptyApiCallback;
 import im.actor.stress.tools.MemoryApiStorage;
+import im.actor.stress.tools.PerformanceLog;
 
 import java.security.KeyPair;
 
@@ -23,12 +24,13 @@ import java.security.KeyPair;
 public class AccountActor extends Actor {
 
     public static ActorSelection account(final long phoneNumber, final String smsCode, final long[] destPhones,
-                                         final ActorRef mainActor) {
+                                         final ActorRef mainActor,
+                                         final KeyPair keyPair) {
         String path = "account/" + phoneNumber + "/";
         return new ActorSelection(Props.create(AccountActor.class, new ActorCreator<AccountActor>() {
             @Override
             public AccountActor create() {
-                return new AccountActor(phoneNumber, smsCode, destPhones, mainActor);
+                return new AccountActor(phoneNumber, smsCode, destPhones, mainActor, keyPair);
             }
         }), path);
     }
@@ -47,18 +49,21 @@ public class AccountActor extends Actor {
     private ActorApiScheme.User myUser;
     private long myKey;
 
-    private KeyPair keyPair;
-
     private final ActorRef mainActor;
+
     private final long phoneNumber;
     private final String smsCode;
     private final long[] destPhones;
+    private final KeyPair keyPair;
 
-    public AccountActor(long phoneNumber, String smsCode, long[] destPhones, ActorRef mainActor) {
+    private long startTime;
+
+    public AccountActor(long phoneNumber, String smsCode, long[] destPhones, ActorRef mainActor, KeyPair keyPair) {
         this.phoneNumber = phoneNumber;
         this.smsCode = smsCode;
         this.destPhones = destPhones;
         this.mainActor = mainActor;
+        this.keyPair = keyPair;
     }
 
     @Override
@@ -69,6 +74,8 @@ public class AccountActor extends Actor {
                 .addEndpoint(ENDPOINT)
                 .build();
         actorApi = new ActorApi(config);
+
+        startTime = System.currentTimeMillis();
 
         ask(actorApi.rpc(ActorApiScheme.RequestAuthCode.newBuilder()
                                 .setAppId(APP_ID)
@@ -92,7 +99,6 @@ public class AccountActor extends Actor {
 
     private void onAuthCodeRequested(ActorApiScheme.ResponseAuthCode authCode) {
         // Create key
-        keyPair = KeyTools.generateNewRsaKey();
         byte[] publicKey = KeyTools.encodeRsaPublicKey(keyPair.getPublic());
 
         ask(actorApi.rpc(ActorApiScheme.RequestSignUp.newBuilder()
@@ -125,6 +131,9 @@ public class AccountActor extends Actor {
         myUser = auth.getUser();
         myKey = auth.getPublicKeyHash();
         isAuthCompleted = true;
-        AppLog.v("Authenticated:" + phoneNumber);
+
+        mainActor.send(new StressActor.OnLoggedIn(phoneNumber));
+
+        PerformanceLog.v("Authenticated", "phone", phoneNumber + "", "duration", "" + (System.currentTimeMillis() - startTime));
     }
 }

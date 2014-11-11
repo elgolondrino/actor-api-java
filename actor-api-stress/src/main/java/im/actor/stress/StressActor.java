@@ -1,8 +1,10 @@
 package im.actor.stress;
 
 import com.droidkit.actors.Actor;
+import im.actor.proto.crypto.KeyTools;
 import im.actor.stress.tools.AppLog;
 
+import java.security.KeyPair;
 import java.util.HashSet;
 
 /**
@@ -18,14 +20,25 @@ public class StressActor extends Actor {
         if (message instanceof LoginStress) {
             LoginStress stress = (LoginStress) message;
 
-            String smsCode = stress.startNumber + "".substring(0, 1);
+            String smsCode = (stress.startNumber + "").substring(0, 1);
             smsCode += smsCode;
             smsCode += smsCode;
+
+            long[] phonesList = new long[stress.count];
             for (int i = 0; i < stress.count; i++) {
-                long phone = Long.parseLong("7555" + (stress.startNumber + stress.count));
-                phones.add(phone);
-                allPhones.add(phone);
-                system().actorOf(AccountActor.account(phone, smsCode, new long[0], self()));
+                phonesList[i] = Long.parseLong("7555" + (stress.startNumber + i));
+            }
+
+            AppLog.v("Generating keys...");
+
+            KeyPair keyPair = KeyTools.generateNewRsaKey();
+
+            AppLog.v("Keys generated");
+
+            for (int i = 0; i < stress.count; i++) {
+                phones.add(phonesList[i]);
+                allPhones.add(phonesList[i]);
+                system().actorOf(AccountActor.account(phonesList[i], smsCode, phonesList, self(), keyPair));
             }
         } else if (message instanceof OnLoggedIn) {
             long phone = ((OnLoggedIn) message).phoneNumber;
