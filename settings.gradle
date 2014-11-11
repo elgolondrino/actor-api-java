@@ -1,2 +1,3 @@
-rootProject.name = 'actor-api-java'
+rootProject.name = 'actor-api'
+include ':actor-api-java', ':actor-api-stress'
 

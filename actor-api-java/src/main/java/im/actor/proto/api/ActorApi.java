@@ -53,13 +53,22 @@ public class ActorApi {
         return res;
     }
 
+    public <T extends Message> Future<T> rpc(Message message, Class<T> response) {
+        return rpc(message, (FutureCallback) null);
+    }
+
+    public <T extends Message> Future<T> rpc(Message message, long timeout, Class<T> response) {
+        return rpc(message, timeout, (FutureCallback) null);
+    }
+
     public <T extends Message> Future<T> rpc(Message message) {
-        return rpc(message, null);
+        return rpc(message, (FutureCallback) null);
     }
 
     public <T extends Message> Future<T> rpc(Message message, long timeout) {
-        return rpc(message, timeout, null);
+        return rpc(message, timeout, (FutureCallback) null);
     }
+
 
     public <T extends Message> T rpcSync(Message message) throws TimeoutException, ApiRequestException {
         return rpcSync(message, 5000);
