@@ -308,8 +308,27 @@ public class AccountActor extends Actor {
         // Sending message
 
         ActorApiScheme.EncryptedRSAMessage.Builder encryptedBuilder = ActorApiScheme.EncryptedRSAMessage.newBuilder();
-        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(encryptedMessage.getEncryptedMessage()));
+//        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(textMessage));
+//        for (long k : holder.keyHashes) {
+//            if (!holder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            encryptedBuilder.addKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
+//                    .setKeyHash(k)
+//                    .setAesEncryptedKey(ByteString.copyFrom(holder.fullKeys.get(k))));
+//        }
+//
+//        for (long k : myHolder.keyHashes) {
+//            if (!myHolder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            encryptedBuilder.addOwnKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
+//                    .setKeyHash(k)
+//                    .setAesEncryptedKey(ByteString.copyFrom(myHolder.fullKeys.get(k))));
+//        }
 
+
+        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(encryptedMessage.getEncryptedMessage()));
         if (encryptedMessage.getResult().containsKey(myUser.getId())) {
             for (RsaEncryptCipher.EncryptedPart part : encryptedMessage.getResult().get(myUser.getId())) {
                 encryptedBuilder.addOwnKeys(ActorApiScheme.EncryptedAESKey.newBuilder()

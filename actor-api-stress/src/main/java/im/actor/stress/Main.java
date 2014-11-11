@@ -14,16 +14,34 @@ import static com.droidkit.actors.ActorSystem.system;
  */
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
+        if (args.length < 3) {
+            System.out.println("USAGE [auth|msg] <threads> <delay>");
+            return;
+        }
+
+        Scenario.Type type;
+        if (args[0].equals("auth")) {
+            type = Scenario.Type.AUTH;
+        } else if (args[0].equals("msg")) {
+            type = Scenario.Type.MESSAGES;
+        } else {
+            System.out.println("Incorrect scenario");
+            return;
+        }
+
+        int threads = Integer.parseInt(args[1]);
+        int delay = Integer.parseInt(args[1]);
 
         AppLog.v("Starting stress testing...");
 
         system().setTraceInterface(new ActorTrace());
+
+
         ActorRef actorRef = system().actorOf(StressActor.class, "stress");
 
-        long baseOffset = (long) (new Random().nextFloat() * 1000000L);
-        long baseNumber = 80000000L + baseOffset;
+        long baseNumber = 80000000L + (long) (new Random().nextFloat() * 1000000L);
 
-        actorRef.send(new StressActor.StartStress(new Scenario(Scenario.Type.MESSAGES, baseNumber, 50, 0)));
+        actorRef.send(new StressActor.StartStress(new Scenario(type, baseNumber, threads, delay)));
 
         while (true) {
             Thread.sleep(1000);
