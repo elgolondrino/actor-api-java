@@ -8,6 +8,7 @@ import im.actor.stress.tools.ActorTrace;
 import im.actor.stress.tools.AppLog;
 
 import java.io.IOException;
+import java.util.Random;
 
 import static com.droidkit.actors.ActorSystem.system;
 
@@ -21,7 +22,10 @@ public class Main {
 
         system().setTraceInterface(new ActorTrace());
         ActorRef actorRef = system().actorOf(StressActor.class, "stress");
-        actorRef.send(new StressActor.LoginStress(1000, 80000001L));
+
+        long baseOffset = (long) (new Random().nextFloat() * 1000000L);
+
+        actorRef.send(new StressActor.LoginStress(1000, 80000000L + baseOffset));
 
         while (true) {
             Thread.sleep(10000);
