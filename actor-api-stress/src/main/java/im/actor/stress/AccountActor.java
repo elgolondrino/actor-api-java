@@ -3,6 +3,7 @@ package im.actor.stress;
 import com.droidkit.actors.*;
 import com.droidkit.actors.concurrency.Future;
 import com.droidkit.actors.concurrency.FutureCallback;
+import com.droidkit.actors.tasks.AskCallback;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import im.actor.proto.api.ActorApi;
@@ -17,6 +18,7 @@ import im.actor.stress.tools.MemoryApiStorage;
 import im.actor.stress.tools.PerformanceLog;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 
 /**
  * Created by ex3ndr on 11.11.14.
@@ -54,7 +56,10 @@ public class AccountActor extends Actor {
     private final long phoneNumber;
     private final String smsCode;
     private final long[] destPhones;
+    private final ArrayList<ActorApiScheme.User> destUsers = new ArrayList<ActorApiScheme.User>();
     private final KeyPair keyPair;
+
+    private int requestingUsers;
 
     private long startTime;
 
@@ -75,6 +80,10 @@ public class AccountActor extends Actor {
                 .build();
         actorApi = new ActorApi(config);
 
+        startAuth();
+    }
+
+    private void startAuth() {
         startTime = System.currentTimeMillis();
 
         ask(actorApi.rpc(ActorApiScheme.RequestAuthCode.newBuilder()
@@ -134,6 +143,45 @@ public class AccountActor extends Actor {
 
         mainActor.send(new StressActor.OnLoggedIn(phoneNumber));
 
+        AppLog.v("Authenticated phone: " + phoneNumber);
+
         PerformanceLog.v("Authenticated", "phone", phoneNumber + "", "duration", "" + (System.currentTimeMillis() - startTime));
+
+        startAuth();
+        // loadingUsers();
     }
+
+//    private void loadingUsers() {
+//        startTime = System.currentTimeMillis();
+//        requestingUsers = destPhones.length;
+//        for (int i = 0; i < destPhones.length; i++) {
+//            ask(actorApi.rpc(ActorApiScheme.RequestFindContacts.newBuilder()
+//                            .setRequest("+" + destPhones[i])
+//                            .build(), ActorApiScheme.ResponseFindContacts.class),
+//                    new FutureCallback<ActorApiScheme.ResponseFindContacts>() {
+//                        @Override
+//                        public void onResult(ActorApiScheme.ResponseFindContacts result) {
+//                            if (result.getUsersCount() == 1) {
+//                                destUsers.add(result.getUsers(0));
+//                            }
+//                            requestingUsers--;
+//                            if (requestingUsers == 0) {
+//                                usersLoaded();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onError(Throwable throwable) {
+//                            requestingUsers--;
+//                            if (requestingUsers == 0) {
+//                                usersLoaded();
+//                            }
+//                        }
+//                    });
+//        }
+//    }
+//
+//    private void usersLoaded() {
+//        PerformanceLog.v("Users loaded", "phone", phoneNumber + "", "duration", "" + (System.currentTimeMillis() - startTime));
+//    }
 }

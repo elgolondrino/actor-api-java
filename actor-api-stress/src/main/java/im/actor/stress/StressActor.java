@@ -41,13 +41,13 @@ public class StressActor extends Actor {
                 system().actorOf(AccountActor.account(phonesList[i], smsCode, phonesList, self(), keyPair));
             }
         } else if (message instanceof OnLoggedIn) {
-            long phone = ((OnLoggedIn) message).phoneNumber;
-            phones.remove(((OnLoggedIn) message).phoneNumber);
-            if (phones.size() == 0) {
-                AppLog.v("Authentication completed");
-            } else {
-                AppLog.v("Authenticated " + phone + " " + phones.size() + "/" + allPhones.size());
-            }
+//            long phone = ((OnLoggedIn) message).phoneNumber;
+//            phones.remove(((OnLoggedIn) message).phoneNumber);
+//            if (phones.size() == 0) {
+//                AppLog.v("Authentication completed");
+//            } else {
+//                AppLog.v("Authenticated " + phone + " " + phones.size() + "/" + allPhones.size());
+//            }
         }
     }
 
