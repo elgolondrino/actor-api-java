@@ -23,12 +23,13 @@ public class Main {
         system().setTraceInterface(new ActorTrace());
         ActorRef actorRef = system().actorOf(StressActor.class, "stress");
 
-        long baseOffset = (long) (new Random().nextFloat() * 1000000L);
+        //long baseOffset = (long) (new Random().nextFloat() * 1000000L);
+        long baseOffset = 0; //(long) (new Random().nextFloat() * 1000000L);
 
-        actorRef.send(new StressActor.LoginStress(1000, 80000000L + baseOffset));
+        actorRef.send(new StressActor.LoginStress(50, 80000000L + baseOffset));
 
         while (true) {
-            Thread.sleep(10000);
+            Thread.sleep(1000);
         }
     }
 }

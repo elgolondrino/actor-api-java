@@ -15,22 +15,27 @@ import im.actor.proto.api._internal.TypedRequestInt;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.droidkit.actors.ActorSystem.system;
 
 public class ActorApi {
 
+    private static AtomicInteger NEXT_ID = new AtomicInteger(0);
+
     private ActorRef broker;
     private TypedRequestInt requestInt;
+    private int id;
 
     public ActorApi(ActorApiConfig reactiveConfig) {
-        this.broker = system().actorOf(ApiBrokerActor.broker("0", reactiveConfig));
+        this.id = NEXT_ID.getAndIncrement();
+        this.broker = system().actorOf(ApiBrokerActor.broker("" + id, reactiveConfig));
         this.requestInt = TypedCreator.typed(system().actorOf(Props.create(TypedRequestActor.class, new ActorCreator<TypedRequestActor>() {
             @Override
             public TypedRequestActor create() {
                 return new TypedRequestActor(broker);
             }
-        }), "/actor-api/0/rpc"), TypedRequestInt.class);
+        }), "/actor-api/" + id + "/rpc"), TypedRequestInt.class);
     }
 
     public void notifyNetworkChanged() {
