@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * Created by ex3ndr on 02.09.14.
  */
-public class CreateTcpConnectionActor extends TaskActor<TcpConnection> {
+public class CreateTcpConnectionActor extends TaskActor<RawTcpConnection> {
 
     public static Props props(final MTProtoEndpoint endpoint, final MTProtoParams params, final ActorRef reciever) {
         return Props.create(CreateTcpConnectionActor.class, new ActorCreator<CreateTcpConnectionActor>() {

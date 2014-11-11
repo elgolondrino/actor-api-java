@@ -1,9 +1,6 @@
 package im.actor.stress;
 
-import com.droidkit.actors.Actor;
 import com.droidkit.actors.ActorRef;
-import com.droidkit.actors.debug.TraceInterface;
-import com.droidkit.actors.mailbox.Envelope;
 import im.actor.stress.tools.ActorTrace;
 import im.actor.stress.tools.AppLog;
 
@@ -23,10 +20,10 @@ public class Main {
         system().setTraceInterface(new ActorTrace());
         ActorRef actorRef = system().actorOf(StressActor.class, "stress");
 
-        //long baseOffset = (long) (new Random().nextFloat() * 1000000L);
-        long baseOffset = 0; //(long) (new Random().nextFloat() * 1000000L);
+        long baseOffset = (long) (new Random().nextFloat() * 1000000L);
+        long baseNumber = 80000000L + baseOffset;
 
-        actorRef.send(new StressActor.LoginStress(50, 80000000L + baseOffset));
+        actorRef.send(new StressActor.StartStress(new Scenario(Scenario.Type.MESSAGES, baseNumber, 50, 0)));
 
         while (true) {
             Thread.sleep(1000);

@@ -42,6 +42,10 @@ public class ActorApi {
         broker.send(new ApiBrokerActor.NetworkChanged());
     }
 
+    public void dispose() {
+        broker.send(new ApiBrokerActor.Destroy());
+    }
+
     public <T extends Message> Future<T> rpc(Message message, FutureCallback<T> callback) {
         Future<T> res = (Future<T>) requestInt.request(message);
         if (callback != null) {

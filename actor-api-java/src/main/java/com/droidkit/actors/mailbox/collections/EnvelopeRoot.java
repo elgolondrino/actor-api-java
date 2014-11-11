@@ -16,8 +16,8 @@ public class EnvelopeRoot {
 
     private final HashSet<Long> usedSlot = new HashSet<Long>();
 
-    private final SparseArray<EnvelopeCollection> collections = new SparseArray<EnvelopeCollection>();
-    private final SparseArray<Long> lastTopKey = new SparseArray<Long>();
+    private final HashMap<Integer, EnvelopeCollection> collections = new HashMap<Integer, EnvelopeCollection>();
+    private final HashMap<Integer, Long> lastTopKey = new HashMap<Integer, Long>();
     private final TreeMap<Long, EnvelopeCollection> sortedCollection = new TreeMap<Long, EnvelopeCollection>();
 
     private MailboxesQueue queue;

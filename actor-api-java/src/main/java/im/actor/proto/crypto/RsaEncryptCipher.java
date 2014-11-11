@@ -20,6 +20,19 @@ public class RsaEncryptCipher {
 
     private ArrayList<Destination> destinations = new ArrayList<Destination>();
 
+    private byte[] aesKey;
+    private byte[] aesIv;
+
+    public RsaEncryptCipher(byte[] aesKey, byte[] aesIv) {
+        this.aesKey = aesKey;
+        this.aesIv = aesIv;
+    }
+
+    public RsaEncryptCipher() {
+        aesKey = Crypto.generateSeed(32);
+        aesIv = Crypto.generateSeed(16);
+    }
+
     public void addDestination(int uid, long keyHash, byte[] key) {
         destinations.add(new Destination(uid, keyHash, key));
     }
@@ -27,8 +40,6 @@ public class RsaEncryptCipher {
     public EncryptedMessage encrypt(byte[] message) {
         byte[] srcData = Utils.align(Utils.concat(StreamingUtils.intToBytes(message.length), message), 16);
 
-        byte[] aesKey = Crypto.generateSeed(32);
-        byte[] aesIv = Crypto.generateSeed(16);
         byte[] key = Utils.concat(aesKey, aesIv);
 
         Cipher aes = Crypto.createAESCipher();

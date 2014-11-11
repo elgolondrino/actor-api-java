@@ -252,6 +252,14 @@ public class ApiBrokerActor extends Actor {
                 }
                 e.printStackTrace();
             }
+        } else if (message instanceof Destroy) {
+            if (LOG != null && DEBUG) {
+                LOG.d(TAG, "Destroying of API");
+            }
+            if (protocol != null) {
+                protocol.close();
+            }
+            context().stopSelf();
         }
     }
 
@@ -316,6 +324,9 @@ public class ApiBrokerActor extends Actor {
         public long getKey() {
             return key;
         }
+    }
+
+    public static final class Destroy {
     }
 
     private class RequestHolder {

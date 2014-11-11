@@ -7,6 +7,7 @@ import im.actor.proto.mtp.MTProto;
 import im.actor.proto.mtp._internal.EndpointProvider;
 import im.actor.proto.mtp._internal.entity.ProtoPackage;
 import im.actor.proto.mtp._internal.tcp.CreateTcpConnectionActor;
+import im.actor.proto.mtp._internal.tcp.RawTcpConnection;
 import im.actor.proto.mtp._internal.tcp.TcpConnection;
 import im.actor.proto.util.ExponentialBackoff;
 
@@ -34,7 +35,7 @@ public class ManagerActor extends Actor {
 
     private static final AtomicInteger NEXT_CONNECTION = new AtomicInteger(1);
 
-    private final ArrayList<TcpConnection> connections = new ArrayList<TcpConnection>();
+    private final ArrayList<RawTcpConnection> connections = new ArrayList<RawTcpConnection>();
     private final LogInterface LOG;
     private final boolean DEBUG;
     private int desiredConnections;
@@ -95,9 +96,9 @@ public class ManagerActor extends Actor {
                 }
                 ask(new ActorSelection(CreateTcpConnectionActor.props(endpointProvider.fetchEndpoint(), proto.getParams(), self()),
                                 getPath() + "/connect/" + NEXT_CONNECTION.getAndIncrement()),
-                        new AskCallback<TcpConnection>() {
+                        new AskCallback<RawTcpConnection>() {
                             @Override
-                            public void onResult(TcpConnection result) {
+                            public void onResult(RawTcpConnection result) {
                                 if (LOG != null && DEBUG) {
                                     LOG.d(TAG, "Connection created");
                                 }
@@ -156,7 +157,7 @@ public class ManagerActor extends Actor {
         }
         for (int i = 0; i < connections.size(); i++) {
             int index = (roundRobin++) % connections.size();
-            TcpConnection connection = connections.get(index);
+            RawTcpConnection connection = connections.get(index);
             if (!connection.isClosed()) {
                 connection.postMessage(sendMessage.getMessage());
                 if (LOG != null && DEBUG) {
@@ -172,9 +173,9 @@ public class ManagerActor extends Actor {
         if (LOG != null && DEBUG) {
             LOG.d(TAG, "Connection dies #" + connectionDie.getContextId());
         }
-        Iterator<TcpConnection> iterator = connections.iterator();
+        Iterator<RawTcpConnection> iterator = connections.iterator();
         while (iterator.hasNext()) {
-            TcpConnection connection = iterator.next();
+            RawTcpConnection connection = iterator.next();
             if (connection.getConnectionId() == connectionDie.getContextId()) {
                 iterator.remove();
             }
@@ -185,7 +186,7 @@ public class ManagerActor extends Actor {
 
     @Override
     public void postStop() {
-        for (TcpConnection connection : connections) {
+        for (RawTcpConnection connection : connections) {
             connection.close();
         }
         connections.clear();

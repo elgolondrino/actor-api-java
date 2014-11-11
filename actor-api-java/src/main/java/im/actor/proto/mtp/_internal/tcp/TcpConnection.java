@@ -19,7 +19,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import static im.actor.proto.util.StreamingUtils.*;
 
-public class TcpConnection {
+public class TcpConnection implements RawTcpConnection {
 
     private static final AtomicInteger NEXT_ID = new AtomicInteger(1);
     private static final int CONNECTION_TIMEOUT = 5 * 1000;
