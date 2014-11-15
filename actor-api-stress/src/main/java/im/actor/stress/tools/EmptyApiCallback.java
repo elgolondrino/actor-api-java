@@ -1,7 +1,7 @@
 package im.actor.stress.tools;
 
 import com.google.protobuf.Message;
-import im.actor.proto.api.ActorApiCallback;
+import im.actor.api.ActorApiCallback;
 import im.actor.proto.api.ActorApiScheme;
 
 import java.util.List;

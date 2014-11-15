@@ -1,6 +1,6 @@
 package im.actor.stress.tools;
 
-import im.actor.proto.api.ActorApiStorage;
+import im.actor.api.ActorApiStorage;
 
 /**
  * Created by ex3ndr on 10.11.14.

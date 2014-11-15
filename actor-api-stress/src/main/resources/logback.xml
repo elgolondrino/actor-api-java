@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashSocketAppender">
         <remoteHost>ip-172-31-5-217.eu-west-1.compute.internal</remoteHost>
-        <port>4560</port>
-
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdc>true</includeMdc>
-        </encoder>
     </appender>
 
     <root level="debug">
