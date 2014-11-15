@@ -2,7 +2,7 @@ package im.actor.stress;
 
 import com.droidkit.actors.Actor;
 import com.droidkit.actors.ActorRef;
-import im.actor.proto.crypto.KeyTools;
+import im.actor.api.crypto.KeyTools;
 import im.actor.stress.tools.AppLog;
 
 import java.security.KeyPair;

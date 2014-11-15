@@ -8,35 +8,29 @@ import im.actor.api.parser.*;
 import java.util.List;
 import im.actor.api.scheme.*;
 
-public class RequestRequestAuthCodeCall extends Request<ResponseVoid> {
+public class RequestAuthCode extends Request<ResponseAuthCode> {
 
-    public static final int HEADER = 0x5a;
-    public static RequestRequestAuthCodeCall fromBytes(byte[] data) throws IOException {
-        return Bser.parse(RequestRequestAuthCodeCall.class, data);
+    public static final int HEADER = 0x1;
+    public static RequestAuthCode fromBytes(byte[] data) throws IOException {
+        return Bser.parse(RequestAuthCode.class, data);
     }
 
     private long phoneNumber;
-    private String smsHash;
     private int appId;
     private String apiKey;
 
-    public RequestRequestAuthCodeCall(long phoneNumber, String smsHash, int appId, String apiKey) {
+    public RequestAuthCode(long phoneNumber, int appId, String apiKey) {
         this.phoneNumber = phoneNumber;
-        this.smsHash = smsHash;
         this.appId = appId;
         this.apiKey = apiKey;
     }
 
-    public RequestRequestAuthCodeCall() {
+    public RequestAuthCode() {
 
     }
 
     public long getPhoneNumber() {
         return this.phoneNumber;
-    }
-
-    public String getSmsHash() {
-        return this.smsHash;
     }
 
     public int getAppId() {
@@ -50,23 +44,18 @@ public class RequestRequestAuthCodeCall extends Request<ResponseVoid> {
     @Override
     public void parse(BserValues values) throws IOException {
         this.phoneNumber = values.getLong(1);
-        this.smsHash = values.getString(2);
-        this.appId = values.getInt(3);
-        this.apiKey = values.getString(4);
+        this.appId = values.getInt(2);
+        this.apiKey = values.getString(3);
     }
 
     @Override
     public void serialize(BserWriter writer) throws IOException {
         writer.writeLong(1, this.phoneNumber);
-        if (this.smsHash == null) {
-            throw new IOException();
-        }
-        writer.writeString(2, this.smsHash);
-        writer.writeInt(3, this.appId);
+        writer.writeInt(2, this.appId);
         if (this.apiKey == null) {
             throw new IOException();
         }
-        writer.writeString(4, this.apiKey);
+        writer.writeString(3, this.apiKey);
     }
 
     @Override

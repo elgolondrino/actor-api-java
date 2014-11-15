@@ -13,6 +13,7 @@ import im.actor.api._internal.TypedRequestActor;
 import im.actor.api._internal.TypedRequestInt;
 import im.actor.api.parser.Request;
 import im.actor.api.parser.Response;
+import im.actor.api.scheme.ApiRequests;
 
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +27,7 @@ public class ActorApi {
     private ActorRef broker;
     private TypedRequestInt requestInt;
     private int id;
+    private ApiRequests requests;
 
     public ActorApi(ActorApiConfig reactiveConfig) {
         this.id = NEXT_ID.getAndIncrement();
@@ -36,6 +38,11 @@ public class ActorApi {
                 return new TypedRequestActor(broker);
             }
         }), "/actor-api/" + id + "/rpc"), TypedRequestInt.class);
+        this.requests = new ApiRequests(this);
+    }
+
+    public ApiRequests getRequests() {
+        return requests;
     }
 
     public <T extends Response> Future<T> rpc(Request<T> message, FutureCallback<T> callback) {

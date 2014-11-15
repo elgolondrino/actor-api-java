@@ -1,4 +1,4 @@
-package im.actor.api.api;
+package im.actor.api;
 
 import im.actor.api.ActorApiCallback;
 import im.actor.api.parser.Update;

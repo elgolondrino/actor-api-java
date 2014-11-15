@@ -13,8 +13,8 @@ public class RpcParser extends BaseParser<RpcScope> {
     @Override
     public RpcScope read(int type, byte[] payload) throws IOException {
         switch(type) {
-            case 1: return RequestRequestAuthCode.fromBytes(payload);
-            case 90: return RequestRequestAuthCodeCall.fromBytes(payload);
+            case 1: return RequestAuthCode.fromBytes(payload);
+            case 90: return RequestAuthCodeCall.fromBytes(payload);
             case 3: return RequestSignIn.fromBytes(payload);
             case 4: return RequestSignUp.fromBytes(payload);
             case 80: return RequestGetAuth.fromBytes(payload);
@@ -65,7 +65,7 @@ public class RpcParser extends BaseParser<RpcScope> {
             case 33: return RequestSubscribeFromOnline.fromBytes(payload);
             case 74: return RequestSubscribeToGrouOnline.fromBytes(payload);
             case 75: return RequestSubscribeFromGroupOnline.fromBytes(payload);
-            case 2: return ResponseRequestAuthCode.fromBytes(payload);
+            case 2: return ResponseAuthCode.fromBytes(payload);
             case 5: return ResponseAuth.fromBytes(payload);
             case 81: return ResponseGetAuth.fromBytes(payload);
             case 8: return ResponseImportContacts.fromBytes(payload);

@@ -2,26 +2,24 @@ package im.actor.stress;
 
 import com.droidkit.actors.*;
 import com.droidkit.actors.concurrency.FutureCallback;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import im.actor.api.ActorApi;
 import im.actor.api.ActorApiConfig;
-import im.actor.proto.api.ActorApiScheme;
 import im.actor.api.ApiRequestException;
-import im.actor.proto.crypto.Crypto;
-import im.actor.proto.crypto.KeyTools;
-import im.actor.proto.crypto.PlainMessageHelper;
-import im.actor.proto.crypto.RsaEncryptCipher;
-import im.actor.proto.mtp.MTProtoEndpoint;
+import im.actor.api.crypto.Crypto;
+import im.actor.api.crypto.KeyTools;
+import im.actor.api.EncryptedMessageHelper;
+import im.actor.api.crypto.RsaEncryptCipher;
+import im.actor.api.mtp.MTProtoEndpoint;
+import im.actor.api.scheme.*;
+import im.actor.api.scheme.rpc.*;
 import im.actor.stress.tools.AppLog;
 import im.actor.stress.tools.EmptyApiCallback;
 import im.actor.stress.tools.MemoryApiStorage;
 import im.actor.stress.tools.StashLog;
+import net.logstash.logback.encoder.org.apache.commons.lang.math.RandomUtils;
 
 import java.security.KeyPair;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by ex3ndr on 11.11.14.
@@ -50,7 +48,7 @@ public class AccountActor extends Actor {
 
     private ActorApi actorApi;
 
-    private ActorApiScheme.User myUser;
+    private User myUser;
     private UserHolder myHolder;
     private long myKey;
 
@@ -102,16 +100,11 @@ public class AccountActor extends Actor {
 
         startTime = System.currentTimeMillis();
 
-        ask(actorApi.rpc(ActorApiScheme.RequestAuthCode.newBuilder()
-                                .setAppId(APP_ID)
-                                .setApiKey(APP_KEY)
-                                .setPhoneNumber(phoneNumber)
-                                .build(),
-                        ActorApiScheme.ResponseAuthCode.class),
-                new FutureCallback<ActorApiScheme.ResponseAuthCode>() {
+        ask(actorApi.rpc(new RequestRequestAuthCode(phoneNumber, APP_ID, APP_KEY)),
+                new FutureCallback<ResponseRequestAuthCode>() {
 
                     @Override
-                    public void onResult(ActorApiScheme.ResponseAuthCode result) {
+                    public void onResult(ResponseRequestAuthCode result) {
                         onAuthCodeRequested(result);
                     }
 
@@ -125,26 +118,17 @@ public class AccountActor extends Actor {
                 });
     }
 
-    private void onAuthCodeRequested(ActorApiScheme.ResponseAuthCode authCode) {
+    private void onAuthCodeRequested(ResponseRequestAuthCode authCode) {
         // Create key
         byte[] publicKey = KeyTools.encodeRsaPublicKey(keyPair.getPublic());
 
-        ask(actorApi.rpc(ActorApiScheme.RequestSignUp.newBuilder()
-                                .setAppId(APP_ID)
-                                .setAppKey(APP_KEY)
-                                .setPhoneNumber(phoneNumber)
-                                .setSmsHash(authCode.getSmsHash())
-                                .setSmsCode(smsCode)
-                                .setName(ACCOUNT_NAME)
-                                .setDeviceTitle(DEVICE_TITLE)
-                                .setPublicKey(ByteString.copyFrom(publicKey))
-                                .setDeviceHash(ByteString.copyFrom(DEVICE_HASH))
-                                .build(),
-                        ActorApiScheme.ResponseAuth.class),
-                new FutureCallback<ActorApiScheme.ResponseAuth>() {
+        ask(actorApi.rpc(new RequestSignUp(phoneNumber, authCode.getSmsHash(), smsCode,
+                        ACCOUNT_NAME, publicKey, DEVICE_HASH, DEVICE_TITLE, APP_ID
+                        , APP_KEY, false)),
+                new FutureCallback<ResponseAuth>() {
 
                     @Override
-                    public void onResult(ActorApiScheme.ResponseAuth result) {
+                    public void onResult(ResponseAuth result) {
                         onAuthenticated(result);
                     }
 
@@ -158,7 +142,8 @@ public class AccountActor extends Actor {
                 });
     }
 
-    private void onAuthenticated(ActorApiScheme.ResponseAuth auth) {
+    private void onAuthenticated(
+            ResponseAuth auth) {
         myUser = auth.getUser();
         myKey = auth.getPublicKeyHash();
         myHolder = new UserHolder(myUser);
@@ -174,18 +159,16 @@ public class AccountActor extends Actor {
         for (int i = 0; i < destPhones.length; i++) {
             final int finalI = i;
             final long start = System.currentTimeMillis();
-            ask(actorApi.rpc(ActorApiScheme.RequestFindContacts.newBuilder()
-                            .setRequest("+" + destPhones[finalI])
-                            .build(), ActorApiScheme.ResponseFindContacts.class),
-                    new FutureCallback<ActorApiScheme.ResponseFindContacts>() {
+            ask(actorApi.rpc(new RequestSearchContacts("+" + destPhones[finalI])),
+                    new FutureCallback<ResponseSearchContacts>() {
                         @Override
-                        public void onResult(ActorApiScheme.ResponseFindContacts result) {
+                        public void onResult(ResponseSearchContacts result) {
 
-                            StashLog.v("userSearch", "phone", phoneNumber + "", "search", "+" + destPhones[finalI], "count", result.getUsersCount() + "",
+                            StashLog.v("userSearch", "phone", phoneNumber + "", "search", "+" + destPhones[finalI], "count", result.getUsers().size() + "",
                                     "duration", (System.currentTimeMillis() - start) + "");
 
-                            if (result.getUsersCount() == 1) {
-                                users.put(result.getUsers(0).getId(), new UserHolder(result.getUsers(0)));
+                            if (result.getUsers().size() == 1) {
+                                users.put(result.getUsers().get(0).getId(), new UserHolder(result.getUsers().get(0)));
                             }
 
                             requestingUsers--;
@@ -223,90 +206,84 @@ public class AccountActor extends Actor {
     }
 
     private void performSend(final UserHolder holder) {
-        boolean needKeys = false;
-        ActorApiScheme.RequestPublicKeys.Builder builder = ActorApiScheme.RequestPublicKeys.newBuilder();
-        for (long k : holder.keyHashes) {
-            if (holder.fullKeys.containsKey(k)) {
-                continue;
-            }
-            needKeys = true;
-            builder.addKeys(ActorApiScheme.PublicKeyRequest.newBuilder()
-                    .setUid(holder.uid)
-                    .setAccessHash(holder.accessHash)
-                    .setKeyHash(k)
-                    .build());
-        }
+//        boolean needKeys = false;
+//
+//        List<PublicKeyRequest> keyRequests = new ArrayList<PublicKeyRequest>();
+//
+//        for (long k : holder.keyHashes) {
+//            if (holder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            needKeys = true;
+//            keyRequests.add(new PublicKeyRequest(holder.uid, holder.accessHash, k));
+//        }
+//
+//        for (long k : myHolder.keyHashes) {
+//            if (k == myKey) {
+//                continue;
+//            }
+//            if (myHolder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            needKeys = true;
+//            keyRequests.add(new PublicKeyRequest(myUser.getId(), myUser.getAccessHash(), k));
+//        }
+//
+//        if (needKeys) {
+//            final long requestStart = System.currentTimeMillis();
+//            ask(actorApi.rpc(new RequestGetPublicKeys(keyRequests)),
+//                    new FutureCallback<ResponseGetPublicKeys>() {
+//                        @Override
+//                        public void onResult(ResponseGetPublicKeys result) {
+//                            StashLog.v("KeyRequested", "phone", phoneNumber + "", "count", "" + result.getKeys().size(),
+//                                    "duration", "" + (System.currentTimeMillis() - requestStart));
+//                            for (PublicKey key : result.getKeys()) {
+//                                if (key.getUid() == myUser.getId()) {
+//                                    myHolder.fullKeys.put(key.getKeyHash(), key.getKey());
+//                                } else {
+//                                    users.get(key.getUid()).fullKeys.put(key.getKeyHash(), key.getKey());
+//                                }
+//                            }
+//
+//                            performSend(holder);
+//                        }
+//
+//                        @Override
+//                        public void onError(Throwable throwable) {
+//                            throwable.printStackTrace();
+//                            StashLog.w("KeyRequestError", "message", throwable.getMessage(), "phone", phoneNumber + "",
+//                                    "duration", "" + (System.currentTimeMillis() - requestStart));
+//                            performSend(holder);
+//                        }
+//                    });
+//            return;
+//        }
+//
+//
+//        long rid = rnd.nextLong();
+//        byte[] textMessage = EncryptedMessageHelper.createTextMessage(rid, "jUnit test");
+//
+//        RsaEncryptCipher encryptCipher = new RsaEncryptCipher();
+//
+//        for (long k : holder.keyHashes) {
+//            if (!holder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            encryptCipher.addDestination(holder.uid, k, holder.fullKeys.get(k));
+//        }
+//
+//        for (long k : myHolder.keyHashes) {
+//            if (!myHolder.fullKeys.containsKey(k)) {
+//                continue;
+//            }
+//            encryptCipher.addDestination(holder.uid, k, holder.fullKeys.get(k));
+//        }
 
-        for (long k : myHolder.keyHashes) {
-            if (k == myKey) {
-                continue;
-            }
-            if (myHolder.fullKeys.containsKey(k)) {
-                continue;
-            }
-            needKeys = true;
-            builder.addKeys(ActorApiScheme.PublicKeyRequest.newBuilder()
-                    .setUid(myUser.getId())
-                    .setAccessHash(myUser.getAccessHash())
-                    .setKeyHash(k)
-                    .build());
-        }
-
-        if (needKeys) {
-            final long requestStart = System.currentTimeMillis();
-            ask(actorApi.rpc(builder.build(), ActorApiScheme.ResponsePublicKeys.class),
-                    new FutureCallback<ActorApiScheme.ResponsePublicKeys>() {
-                        @Override
-                        public void onResult(ActorApiScheme.ResponsePublicKeys result) {
-                            StashLog.v("KeyRequested", "phone", phoneNumber + "", "count", "" + result.getKeysCount(),
-                                    "duration", "" + (System.currentTimeMillis() - requestStart));
-                            for (ActorApiScheme.PublicKey key : result.getKeysList()) {
-                                if (key.getUid() == myUser.getId()) {
-                                    myHolder.fullKeys.put(key.getKeyHash(), key.getKey().toByteArray());
-                                } else {
-                                    users.get(key.getUid()).fullKeys.put(key.getKeyHash(), key.getKey().toByteArray());
-                                }
-                            }
-
-                            performSend(holder);
-                        }
-
-                        @Override
-                        public void onError(Throwable throwable) {
-                            throwable.printStackTrace();
-                            StashLog.w("KeyRequestError", "message", throwable.getMessage(), "phone", phoneNumber + "",
-                                    "duration", "" + (System.currentTimeMillis() - requestStart));
-                            performSend(holder);
-                        }
-                    });
-            return;
-        }
-
-
-        long rid = rnd.nextLong();
-        byte[] textMessage = PlainMessageHelper.createTextMessage(rid, "jUnit test");
-
-        RsaEncryptCipher encryptCipher = new RsaEncryptCipher();
-
-        for (long k : holder.keyHashes) {
-            if (!holder.fullKeys.containsKey(k)) {
-                continue;
-            }
-            encryptCipher.addDestination(holder.uid, k, holder.fullKeys.get(k));
-        }
-
-        for (long k : myHolder.keyHashes) {
-            if (!myHolder.fullKeys.containsKey(k)) {
-                continue;
-            }
-            encryptCipher.addDestination(holder.uid, k, holder.fullKeys.get(k));
-        }
-
-        RsaEncryptCipher.EncryptedMessage encryptedMessage = encryptCipher.encrypt(textMessage);
+//        RsaEncryptCipher.EncryptedMessage encryptedMessage = encryptCipher.encrypt(textMessage);
 
         // Sending message
 
-        ActorApiScheme.EncryptedRSAMessage.Builder encryptedBuilder = ActorApiScheme.EncryptedRSAMessage.newBuilder();
+//        ActorApiScheme.EncryptedRSAMessage.Builder encryptedBuilder = ActorApiScheme.EncryptedRSAMessage.newBuilder();
 //        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(textMessage));
 //        for (long k : holder.keyHashes) {
 //            if (!holder.fullKeys.containsKey(k)) {
@@ -327,31 +304,87 @@ public class AccountActor extends Actor {
 //        }
 
 
-        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(encryptedMessage.getEncryptedMessage()));
-        if (encryptedMessage.getResult().containsKey(myUser.getId())) {
-            for (RsaEncryptCipher.EncryptedPart part : encryptedMessage.getResult().get(myUser.getId())) {
-                encryptedBuilder.addOwnKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
-                        .setKeyHash(part.getKeyHash())
-                        .setAesEncryptedKey(ByteString.copyFrom(part.getEncrypted())));
-            }
-        }
-
-        for (RsaEncryptCipher.EncryptedPart part : encryptedMessage.getResult().get(holder.uid)) {
-            encryptedBuilder.addKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
-                    .setKeyHash(part.getKeyHash())
-                    .setAesEncryptedKey(ByteString.copyFrom(part.getEncrypted())));
-        }
-
+//        encryptedBuilder.setEncryptedMessage(ByteString.copyFrom(encryptedMessage.getEncryptedMessage()));
+//        if (encryptedMessage.getResult().containsKey(myUser.getId())) {
+//            for (RsaEncryptCipher.EncryptedPart part : encryptedMessage.getResult().get(myUser.getId())) {
+//                encryptedBuilder.addOwnKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
+//                        .setKeyHash(part.getKeyHash())
+//                        .setAesEncryptedKey(ByteString.copyFrom(part.getEncrypted())));
+//            }
+//        }
+//
+//        for (RsaEncryptCipher.EncryptedPart part : encryptedMessage.getResult().get(holder.uid)) {
+//            encryptedBuilder.addKeys(ActorApiScheme.EncryptedAESKey.newBuilder()
+//                    .setKeyHash(part.getKeyHash())
+//                    .setAesEncryptedKey(ByteString.copyFrom(part.getEncrypted())));
+//        }
+//
+//        final long requestStart = System.currentTimeMillis();
+//        ask(actorApi.rpc(ActorApiScheme.RequestSendMessage.newBuilder()
+//                .setUid(holder.uid)
+//                .setAccessHash(holder.accessHash)
+//                .setRandomId(rid)
+//                .setMessage(encryptedBuilder.build())
+//                .build(), ActorApiScheme.ResponseSeq.class), new FutureCallback<ActorApiScheme.ResponseSeq>() {
+//
+//            @Override
+//            public void onResult(ActorApiScheme.ResponseSeq result) {
+//                StashLog.v("MessageSent", "phone", phoneNumber + "",
+//                        "duration", "" + (System.currentTimeMillis() - requestStart));
+//                mainActor.send(new StressActor.OnMessageSent(phoneNumber));
+//            }
+//
+//            @Override
+//            public void onError(Throwable throwable) {
+//                throwable.printStackTrace();
+//                StashLog.w("MessageSendError", "message", throwable.getMessage(), "phone", phoneNumber + "",
+//                        "duration", "" + (System.currentTimeMillis() - requestStart));
+//
+//                if (throwable instanceof ApiRequestException) {
+//                    ApiRequestException requestException = (ApiRequestException) throwable;
+//                    if (requestException.getErrorTag().equals("WRONG_KEYS")) {
+//                        try {
+//                            ActorApiScheme.WrongReceiversErrorData wrongKeys = ActorApiScheme.WrongReceiversErrorData.parseFrom(requestException.getRelatedData());
+//                            for (ActorApiScheme.UserKey key : wrongKeys.getNewKeysList()) {
+//                                if (key.getUid() == myUser.getId()) {
+//                                    myHolder.keyHashes.add(key.getKeyHash());
+//                                } else {
+//                                    users.get(key.getUid()).keyHashes.add(key.getKeyHash());
+//                                }
+//                            }
+//
+//                            for (ActorApiScheme.UserKey key : wrongKeys.getInvalidKeysList()) {
+//                                if (key.getUid() == myUser.getId()) {
+//                                    myHolder.keyHashes.remove(key.getKeyHash());
+//                                } else {
+//                                    users.get(key.getUid()).keyHashes.remove(key.getKeyHash());
+//                                }
+//                            }
+//
+//                            for (ActorApiScheme.UserKey key : wrongKeys.getRemovedKeysList()) {
+//                                if (key.getUid() == myUser.getId()) {
+//                                    myHolder.keyHashes.remove(key.getKeyHash());
+//                                } else {
+//                                    users.get(key.getUid()).keyHashes.remove(key.getKeyHash());
+//                                }
+//                            }
+//                            performSend(holder);
+//                            return;
+//                        } catch (InvalidProtocolBufferException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//
+//                performSend(holder);
+//            }
+//        });
         final long requestStart = System.currentTimeMillis();
-        ask(actorApi.rpc(ActorApiScheme.RequestSendMessage.newBuilder()
-                .setUid(holder.uid)
-                .setAccessHash(holder.accessHash)
-                .setRandomId(rid)
-                .setMessage(encryptedBuilder.build())
-                .build(), ActorApiScheme.ResponseSeq.class), new FutureCallback<ActorApiScheme.ResponseSeq>() {
-
+        ask(actorApi.rpc(new RequestSendMessage(new OutPeer(PeerType.PRIVATE, holder.uid, holder.accessHash),
+                RandomUtils.nextLong(), new MessageContent(1,
+                new TextMessage("jUnit Test", 0, null).toByteArray()))), new FutureCallback<ResponseMessageSent>() {
             @Override
-            public void onResult(ActorApiScheme.ResponseSeq result) {
+            public void onResult(ResponseMessageSent result) {
                 StashLog.v("MessageSent", "phone", phoneNumber + "",
                         "duration", "" + (System.currentTimeMillis() - requestStart));
                 mainActor.send(new StressActor.OnMessageSent(phoneNumber));
@@ -362,44 +395,6 @@ public class AccountActor extends Actor {
                 throwable.printStackTrace();
                 StashLog.w("MessageSendError", "message", throwable.getMessage(), "phone", phoneNumber + "",
                         "duration", "" + (System.currentTimeMillis() - requestStart));
-
-                if (throwable instanceof ApiRequestException) {
-                    ApiRequestException requestException = (ApiRequestException) throwable;
-                    if (requestException.getErrorTag().equals("WRONG_KEYS")) {
-                        try {
-                            ActorApiScheme.WrongReceiversErrorData wrongKeys = ActorApiScheme.WrongReceiversErrorData.parseFrom(requestException.getRelatedData());
-                            for (ActorApiScheme.UserKey key : wrongKeys.getNewKeysList()) {
-                                if (key.getUid() == myUser.getId()) {
-                                    myHolder.keyHashes.add(key.getKeyHash());
-                                } else {
-                                    users.get(key.getUid()).keyHashes.add(key.getKeyHash());
-                                }
-                            }
-
-                            for (ActorApiScheme.UserKey key : wrongKeys.getInvalidKeysList()) {
-                                if (key.getUid() == myUser.getId()) {
-                                    myHolder.keyHashes.remove(key.getKeyHash());
-                                } else {
-                                    users.get(key.getUid()).keyHashes.remove(key.getKeyHash());
-                                }
-                            }
-
-                            for (ActorApiScheme.UserKey key : wrongKeys.getRemovedKeysList()) {
-                                if (key.getUid() == myUser.getId()) {
-                                    myHolder.keyHashes.remove(key.getKeyHash());
-                                } else {
-                                    users.get(key.getUid()).keyHashes.remove(key.getKeyHash());
-                                }
-                            }
-                            performSend(holder);
-                            return;
-                        } catch (InvalidProtocolBufferException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                performSend(holder);
             }
         });
     }
@@ -423,10 +418,10 @@ public class AccountActor extends Actor {
         private HashMap<Long, byte[]> fullKeys;
         private HashMap<Long, byte[]> encryptedMessageKeys;
 
-        public UserHolder(ActorApiScheme.User user) {
+        public UserHolder(User user) {
             this.uid = user.getId();
             this.accessHash = user.getAccessHash();
-            this.keyHashes = new HashSet<Long>(user.getKeyHashesList());
+            this.keyHashes = new HashSet<Long>(user.getKeyHashes());
             this.fullKeys = new HashMap<Long, byte[]>();
             this.encryptedMessageKeys = new HashMap<Long, byte[]>();
         }
