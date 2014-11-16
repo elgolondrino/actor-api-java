@@ -15,14 +15,16 @@ public class Group extends BserObject {
     private Avatar avatar;
     private boolean isMember;
     private int adminUid;
+    private List<Integer> members;
 
-    public Group(int id, long accessHash, String title, Avatar avatar, boolean isMember, int adminUid) {
+    public Group(int id, long accessHash, String title, Avatar avatar, boolean isMember, int adminUid, List<Integer> members) {
         this.id = id;
         this.accessHash = accessHash;
         this.title = title;
         this.avatar = avatar;
         this.isMember = isMember;
         this.adminUid = adminUid;
+        this.members = members;
     }
 
     public Group() {
@@ -53,6 +55,10 @@ public class Group extends BserObject {
         return this.adminUid;
     }
 
+    public List<Integer> getMembers() {
+        return this.members;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.id = values.getInt(1);
@@ -61,6 +67,7 @@ public class Group extends BserObject {
         this.avatar = values.optObj(4, Avatar.class);
         this.isMember = values.getBool(6);
         this.adminUid = values.getInt(8);
+        this.members = values.getRepeatedInt(9);
     }
 
     @Override
@@ -76,6 +83,7 @@ public class Group extends BserObject {
         }
         writer.writeBool(6, this.isMember);
         writer.writeInt(8, this.adminUid);
+        writer.writeRepeatedInt(9, this.members);
     }
 
 }

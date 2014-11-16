@@ -16,9 +16,11 @@ public class RequestRegisterGooglePush extends Request<ResponseVoid> {
     }
 
     private long projectId;
+    private String token;
 
-    public RequestRegisterGooglePush(long projectId) {
+    public RequestRegisterGooglePush(long projectId, String token) {
         this.projectId = projectId;
+        this.token = token;
     }
 
     public RequestRegisterGooglePush() {
@@ -29,14 +31,23 @@ public class RequestRegisterGooglePush extends Request<ResponseVoid> {
         return this.projectId;
     }
 
+    public String getToken() {
+        return this.token;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.projectId = values.getLong(1);
+        this.token = values.getString(2);
     }
 
     @Override
     public void serialize(BserWriter writer) throws IOException {
         writer.writeLong(1, this.projectId);
+        if (this.token == null) {
+            throw new IOException();
+        }
+        writer.writeString(2, this.token);
     }
 
     @Override

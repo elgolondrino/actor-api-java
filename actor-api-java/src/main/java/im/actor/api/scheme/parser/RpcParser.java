@@ -37,7 +37,7 @@ public class RpcParser extends BaseParser<RpcScope> {
             case 55: return RequestMessageReceived.fromBytes(payload);
             case 57: return RequestMessageRead.fromBytes(payload);
             case 98: return RequestDeleteMessage.fromBytes(payload);
-            case 99: return RequestclearChat.fromBytes(payload);
+            case 99: return RequestClearChat.fromBytes(payload);
             case 100: return RequestDeleteChat.fromBytes(payload);
             case 65: return RequestCreateGroup.fromBytes(payload);
             case 85: return RequestEditGroupTitle.fromBytes(payload);

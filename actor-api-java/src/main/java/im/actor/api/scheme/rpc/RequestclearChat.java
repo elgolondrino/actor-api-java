@@ -8,20 +8,20 @@ import im.actor.api.parser.*;
 import java.util.List;
 import im.actor.api.scheme.*;
 
-public class RequestclearChat extends Request<ResponseSeq> {
+public class RequestClearChat extends Request<ResponseSeq> {
 
     public static final int HEADER = 0x63;
-    public static RequestclearChat fromBytes(byte[] data) throws IOException {
-        return Bser.parse(RequestclearChat.class, data);
+    public static RequestClearChat fromBytes(byte[] data) throws IOException {
+        return Bser.parse(RequestClearChat.class, data);
     }
 
     private OutPeer peer;
 
-    public RequestclearChat(OutPeer peer) {
+    public RequestClearChat(OutPeer peer) {
         this.peer = peer;
     }
 
-    public RequestclearChat() {
+    public RequestClearChat() {
 
     }
 

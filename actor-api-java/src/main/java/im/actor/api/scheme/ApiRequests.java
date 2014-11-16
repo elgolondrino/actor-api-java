@@ -596,27 +596,27 @@ public class ApiRequests {
     }
 
     public Future<ResponseSeq> clearChat(OutPeer peer) {
-        return this.api.rpc(new RequestclearChat(peer));
+        return this.api.rpc(new RequestClearChat(peer));
     }
 
     public Future<ResponseSeq> clearChat(OutPeer peer, long requestTimeout) {
-        return this.api.rpc(new RequestclearChat(peer), requestTimeout);
+        return this.api.rpc(new RequestClearChat(peer), requestTimeout);
     }
 
     public Future<ResponseSeq> clearChat(OutPeer peer, FutureCallback<ResponseSeq> callback) {
-        return this.api.rpc(new RequestclearChat(peer), callback);
+        return this.api.rpc(new RequestClearChat(peer), callback);
     }
 
     public Future<ResponseSeq> clearChat(OutPeer peer, long requestTimeout, FutureCallback<ResponseSeq> callback) {
-        return this.api.rpc(new RequestclearChat(peer), requestTimeout, callback);
+        return this.api.rpc(new RequestClearChat(peer), requestTimeout, callback);
     }
 
     public ResponseSeq clearChatSync (OutPeer peer) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestclearChat(peer));
+        return this.api.rpcSync(new RequestClearChat(peer));
     }
 
     public ResponseSeq clearChatSync (OutPeer peer, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestclearChat(peer), requestTimeout);
+        return this.api.rpcSync(new RequestClearChat(peer), requestTimeout);
     }
 
     public Future<ResponseSeq> deleteChat(OutPeer peer) {
@@ -1051,28 +1051,28 @@ public class ApiRequests {
         return this.api.rpcSync(new RequestCompleteUpload(config, blocksCount, crc32), requestTimeout);
     }
 
-    public Future<ResponseVoid> registerGooglePush(long projectId) {
-        return this.api.rpc(new RequestRegisterGooglePush(projectId));
+    public Future<ResponseVoid> registerGooglePush(long projectId, String token) {
+        return this.api.rpc(new RequestRegisterGooglePush(projectId, token));
     }
 
-    public Future<ResponseVoid> registerGooglePush(long projectId, long requestTimeout) {
-        return this.api.rpc(new RequestRegisterGooglePush(projectId), requestTimeout);
+    public Future<ResponseVoid> registerGooglePush(long projectId, String token, long requestTimeout) {
+        return this.api.rpc(new RequestRegisterGooglePush(projectId, token), requestTimeout);
     }
 
-    public Future<ResponseVoid> registerGooglePush(long projectId, FutureCallback<ResponseVoid> callback) {
-        return this.api.rpc(new RequestRegisterGooglePush(projectId), callback);
+    public Future<ResponseVoid> registerGooglePush(long projectId, String token, FutureCallback<ResponseVoid> callback) {
+        return this.api.rpc(new RequestRegisterGooglePush(projectId, token), callback);
     }
 
-    public Future<ResponseVoid> registerGooglePush(long projectId, long requestTimeout, FutureCallback<ResponseVoid> callback) {
-        return this.api.rpc(new RequestRegisterGooglePush(projectId), requestTimeout, callback);
+    public Future<ResponseVoid> registerGooglePush(long projectId, String token, long requestTimeout, FutureCallback<ResponseVoid> callback) {
+        return this.api.rpc(new RequestRegisterGooglePush(projectId, token), requestTimeout, callback);
     }
 
-    public ResponseVoid registerGooglePushSync (long projectId) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRegisterGooglePush(projectId));
+    public ResponseVoid registerGooglePushSync (long projectId, String token) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestRegisterGooglePush(projectId, token));
     }
 
-    public ResponseVoid registerGooglePushSync (long projectId, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRegisterGooglePush(projectId), requestTimeout);
+    public ResponseVoid registerGooglePushSync (long projectId, String token, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestRegisterGooglePush(projectId, token), requestTimeout);
     }
 
     public Future<ResponseVoid> registerApplePush(int apnsKey, String token) {
