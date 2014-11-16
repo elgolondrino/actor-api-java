@@ -18,9 +18,9 @@ public class ResponseCreateGroup extends Response {
     private GroupOutPeer groupPeer;
     private int seq;
     private byte[] state;
-    private int users;
+    private List<Integer> users;
 
-    public ResponseCreateGroup(GroupOutPeer groupPeer, int seq, byte[] state, int users) {
+    public ResponseCreateGroup(GroupOutPeer groupPeer, int seq, byte[] state, List<Integer> users) {
         this.groupPeer = groupPeer;
         this.seq = seq;
         this.state = state;
@@ -43,7 +43,7 @@ public class ResponseCreateGroup extends Response {
         return this.state;
     }
 
-    public int getUsers() {
+    public List<Integer> getUsers() {
         return this.users;
     }
 
@@ -52,7 +52,7 @@ public class ResponseCreateGroup extends Response {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
         this.seq = values.getInt(3);
         this.state = values.getBytes(4);
-        this.users = values.getInt(5);
+        this.users = values.getRepeatedInt(5);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ResponseCreateGroup extends Response {
             throw new IOException();
         }
         writer.writeBytes(4, this.state);
-        writer.writeInt(5, this.users);
+        writer.writeRepeatedInt(5, this.users);
     }
 
     @Override
