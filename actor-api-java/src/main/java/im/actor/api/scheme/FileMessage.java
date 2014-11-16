@@ -9,7 +9,7 @@ import java.util.List;
 
 public class FileMessage extends BserObject {
 
-    private int fileId;
+    private long fileId;
     private long accessHash;
     private int fileSize;
     private String name;
@@ -18,7 +18,7 @@ public class FileMessage extends BserObject {
     private int extType;
     private byte[] ext;
 
-    public FileMessage(int fileId, long accessHash, int fileSize, String name, String mimeType, FastThumb thumb, int extType, byte[] ext) {
+    public FileMessage(long fileId, long accessHash, int fileSize, String name, String mimeType, FastThumb thumb, int extType, byte[] ext) {
         this.fileId = fileId;
         this.accessHash = accessHash;
         this.fileSize = fileSize;
@@ -33,7 +33,7 @@ public class FileMessage extends BserObject {
 
     }
 
-    public int getFileId() {
+    public long getFileId() {
         return this.fileId;
     }
 
@@ -67,7 +67,7 @@ public class FileMessage extends BserObject {
 
     @Override
     public void parse(BserValues values) throws IOException {
-        this.fileId = values.getInt(1);
+        this.fileId = values.getLong(1);
         this.accessHash = values.getLong(2);
         this.fileSize = values.getInt(3);
         this.name = values.getString(4);
@@ -79,7 +79,7 @@ public class FileMessage extends BserObject {
 
     @Override
     public void serialize(BserWriter writer) throws IOException {
-        writer.writeInt(1, this.fileId);
+        writer.writeLong(1, this.fileId);
         writer.writeLong(2, this.accessHash);
         writer.writeInt(3, this.fileSize);
         if (this.name == null) {
