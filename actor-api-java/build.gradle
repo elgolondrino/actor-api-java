@@ -8,7 +8,7 @@ compileJava {
 }
 
 group = 'im.actor'
-version = '1.5'
+version = '1.6'
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compile 'com.droidkit:actors:0.6.1'
-    compile 'com.droidkit:bser:1.1'
+    compile 'com.droidkit:bser:1.2'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
