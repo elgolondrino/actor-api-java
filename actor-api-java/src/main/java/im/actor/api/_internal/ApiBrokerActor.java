@@ -185,7 +185,7 @@ public class ApiBrokerActor extends Actor {
                         requests.remove(pubId);
                         idMap.remove(rpcMessage.getMessageId());
                         holder.receiver.send(new RawRequestActor.RpcResult(result));
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         // Just ignore message
                     }
@@ -208,7 +208,7 @@ public class ApiBrokerActor extends Actor {
                         apiCallback.onSeqUpdate(commonUpdate.getSeq(),
                                 commonUpdate.getState(),
                                 upd);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         if (LOG != null) {
                             LOG.w(TAG, "Unable to load update");
                             LOG.e(TAG, e);
@@ -224,7 +224,7 @@ public class ApiBrokerActor extends Actor {
                                 upd,
                                 seqUpdate.getUsers(),
                                 seqUpdate.getGroups());
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         if (LOG != null) {
                             LOG.w(TAG, "Unable to load update");
                             LOG.e(TAG, e);
@@ -244,7 +244,7 @@ public class ApiBrokerActor extends Actor {
                     im.actor.api.parser.Update weakMessage = updatesParser.read(weakUpdate.getUpdateId(), weakUpdate.getUpdate());
                     apiCallback.onWeakUpdate(weakUpdate.getDate(), weakMessage);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 if (LOG != null) {
                     LOG.w(TAG, "Unable to parse update");
                 }
