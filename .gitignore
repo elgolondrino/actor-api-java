@@ -1,0 +1,12 @@
+
+actor-api-java/build
+.idea
+actor-api-java/.gradle
+actor-api-java/*.iml
+
+
+actor-api-stress/build
+actor-api-stress/.gradle
+actor-api-stress/*.iml
+
+*.iml

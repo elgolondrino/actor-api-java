@@ -100,11 +100,11 @@ public class AccountActor extends Actor {
 
         startTime = System.currentTimeMillis();
 
-        ask(actorApi.rpc(new RequestRequestAuthCode(phoneNumber, APP_ID, APP_KEY)),
-                new FutureCallback<ResponseRequestAuthCode>() {
+        ask(actorApi.rpc(new RequestAuthCode(phoneNumber, APP_ID, APP_KEY)),
+                new FutureCallback<ResponseAuthCode>() {
 
                     @Override
-                    public void onResult(ResponseRequestAuthCode result) {
+                    public void onResult(ResponseAuthCode result) {
                         onAuthCodeRequested(result);
                     }
 
@@ -118,7 +118,7 @@ public class AccountActor extends Actor {
                 });
     }
 
-    private void onAuthCodeRequested(ResponseRequestAuthCode authCode) {
+    private void onAuthCodeRequested(ResponseAuthCode authCode) {
         // Create key
         byte[] publicKey = KeyTools.encodeRsaPublicKey(keyPair.getPublic());
 

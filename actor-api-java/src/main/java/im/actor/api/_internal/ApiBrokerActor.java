@@ -241,7 +241,7 @@ public class ApiBrokerActor extends Actor {
                         LOG.d(TAG, "Received update: weak update");
                     }
                     WeakUpdate weakUpdate = (WeakUpdate) msg;
-                    im.actor.api.parser.Update weakMessage = updatesParser.read(weakUpdate.getUpdateId(), weakUpdate.getUpdate());
+                    im.actor.api.parser.Update weakMessage = updatesParser.read(weakUpdate.getUpdateHeader(), weakUpdate.getUpdate());
                     apiCallback.onWeakUpdate(weakUpdate.getDate(), weakMessage);
                 }
             } catch (Exception e) {

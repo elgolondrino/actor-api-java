@@ -1,8 +1,9 @@
 package im.actor.stress.tools;
 
-import com.google.protobuf.Message;
 import im.actor.api.ActorApiCallback;
-import im.actor.proto.api.ActorApiScheme;
+import im.actor.api.parser.Update;
+import im.actor.api.scheme.Group;
+import im.actor.api.scheme.User;
 
 import java.util.List;
 
@@ -21,12 +22,12 @@ public class EmptyApiCallback implements ActorApiCallback {
     }
 
     @Override
-    public void onSeqFatUpdate(int seq, byte[] state, Message update, List<ActorApiScheme.User> users) {
+    public void onSeqFatUpdate(int seq, byte[] state, Update update, List<User> users, List<Group> groups) {
 
     }
 
     @Override
-    public void onSeqUpdate(int seq, byte[] state, Message update) {
+    public void onSeqUpdate(int seq, byte[] state, Update update) {
 
     }
 
@@ -36,7 +37,7 @@ public class EmptyApiCallback implements ActorApiCallback {
     }
 
     @Override
-    public void onWeakUpdate(long date, Message update) {
+    public void onWeakUpdate(long date, Update update) {
 
     }
 }

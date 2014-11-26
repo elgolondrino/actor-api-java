@@ -16,8 +16,8 @@ import java.util.Random;
 
 public class ActorApiTest extends TestCase {
 
-    //private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.TLS_TCP, "mtproto-api.actor.im", 443);
-    private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.PLAIN_TCP, "54.171.79.89", 4080);
+    private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.TLS_TCP, "mtproto-api.actor.im", 443);
+    // private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.PLAIN_TCP, "54.171.79.89", 4080);
 
     private static final int APP_ID = 42;
     private static final String APP_KEY = "b815c437facc0f41157633d13221336b4d8484d9ff2289acc6bba4079e994d04";
@@ -43,7 +43,7 @@ public class ActorApiTest extends TestCase {
         ApiRequests requests = actorApi.getRequests();
 
         // Request code
-        ResponseAuthCode requestCode = requests.requestAuthCodeSync(PHONE_NUMBER, APP_ID, APP_KEY);
+        ResponseSendAuthCode requestCode = requests.sendAuthCodeSync(PHONE_NUMBER, APP_ID, APP_KEY);
 
         // Create key
         KeyPair keyPair = KeyTools.generateNewRsaKey();
@@ -125,7 +125,7 @@ public class ActorApiTest extends TestCase {
 //        }
 
         long rid = new Random().nextLong();
-        ResponseMessageSent messageSent = actorApi.getRequests().sendMessageSync(new OutPeer(PeerType.PRIVATE, destUser.getId(),
+        ResponseSeqDate messageSent = actorApi.getRequests().sendMessageSync(new OutPeer(PeerType.PRIVATE, destUser.getId(),
                 destUser.getAccessHash()), rid, new MessageContent(1,
                 new TextMessage("jUnit test", 0, null).toByteArray()));
         messageSent.toByteArray();

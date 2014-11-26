@@ -8,7 +8,7 @@ compileJava {
 }
 
 group = 'im.actor'
-version = '1.6.4'
+version = '2.0.0'
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
