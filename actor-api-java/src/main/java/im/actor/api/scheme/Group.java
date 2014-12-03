@@ -15,10 +15,10 @@ public class Group extends BserObject {
     private Avatar avatar;
     private boolean isMember;
     private int adminUid;
-    private List<Integer> members;
+    private List<Member> members;
     private long createDate;
 
-    public Group(int id, long accessHash, String title, Avatar avatar, boolean isMember, int adminUid, List<Integer> members, long createDate) {
+    public Group(int id, long accessHash, String title, Avatar avatar, boolean isMember, int adminUid, List<Member> members, long createDate) {
         this.id = id;
         this.accessHash = accessHash;
         this.title = title;
@@ -57,7 +57,7 @@ public class Group extends BserObject {
         return this.adminUid;
     }
 
-    public List<Integer> getMembers() {
+    public List<Member> getMembers() {
         return this.members;
     }
 
@@ -73,7 +73,7 @@ public class Group extends BserObject {
         this.avatar = values.optObj(4, Avatar.class);
         this.isMember = values.getBool(6);
         this.adminUid = values.getInt(8);
-        this.members = values.getRepeatedInt(9);
+        this.members = values.getRepeatedObj(9, Member.class);
         this.createDate = values.getLong(10);
     }
 
@@ -90,7 +90,7 @@ public class Group extends BserObject {
         }
         writer.writeBool(6, this.isMember);
         writer.writeInt(8, this.adminUid);
-        writer.writeRepeatedInt(9, this.members);
+        writer.writeRepeatedObj(9, this.members);
         writer.writeLong(10, this.createDate);
     }
 

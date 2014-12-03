@@ -16,10 +16,12 @@ public class RequestEditGroupTitle extends Request<ResponseSeqDate> {
     }
 
     private GroupOutPeer groupPeer;
+    private long rid;
     private String title;
 
-    public RequestEditGroupTitle(GroupOutPeer groupPeer, String title) {
+    public RequestEditGroupTitle(GroupOutPeer groupPeer, long rid, String title) {
         this.groupPeer = groupPeer;
+        this.rid = rid;
         this.title = title;
     }
 
@@ -31,6 +33,10 @@ public class RequestEditGroupTitle extends Request<ResponseSeqDate> {
         return this.groupPeer;
     }
 
+    public long getRid() {
+        return this.rid;
+    }
+
     public String getTitle() {
         return this.title;
     }
@@ -38,6 +44,7 @@ public class RequestEditGroupTitle extends Request<ResponseSeqDate> {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
+        this.rid = values.getLong(4);
         this.title = values.getString(3);
     }
 
@@ -47,6 +54,7 @@ public class RequestEditGroupTitle extends Request<ResponseSeqDate> {
             throw new IOException();
         }
         writer.writeObject(1, this.groupPeer);
+        writer.writeLong(4, this.rid);
         if (this.title == null) {
             throw new IOException();
         }

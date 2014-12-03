@@ -16,12 +16,14 @@ public class UpdateGroupTitleChanged extends Update {
     }
 
     private int groupId;
+    private long rid;
     private int uid;
     private String title;
     private long date;
 
-    public UpdateGroupTitleChanged(int groupId, int uid, String title, long date) {
+    public UpdateGroupTitleChanged(int groupId, long rid, int uid, String title, long date) {
         this.groupId = groupId;
+        this.rid = rid;
         this.uid = uid;
         this.title = title;
         this.date = date;
@@ -33,6 +35,10 @@ public class UpdateGroupTitleChanged extends Update {
 
     public int getGroupId() {
         return this.groupId;
+    }
+
+    public long getRid() {
+        return this.rid;
     }
 
     public int getUid() {
@@ -50,6 +56,7 @@ public class UpdateGroupTitleChanged extends Update {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupId = values.getInt(1);
+        this.rid = values.getLong(5);
         this.uid = values.getInt(2);
         this.title = values.getString(3);
         this.date = values.getLong(4);
@@ -58,6 +65,7 @@ public class UpdateGroupTitleChanged extends Update {
     @Override
     public void serialize(BserWriter writer) throws IOException {
         writer.writeInt(1, this.groupId);
+        writer.writeLong(5, this.rid);
         writer.writeInt(2, this.uid);
         if (this.title == null) {
             throw new IOException();

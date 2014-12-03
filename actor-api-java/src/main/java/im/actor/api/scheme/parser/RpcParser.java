@@ -45,8 +45,7 @@ public class RpcParser extends BaseParser<RpcScope> {
             case 101: return RequestRemoveGroupAvatar.fromBytes(payload);
             case 69: return RequestInviteUser.fromBytes(payload);
             case 70: return RequestLeaveGroup.fromBytes(payload);
-            case 97: return RequestDeleteGroup.fromBytes(payload);
-            case 71: return RequestRemoveUser.fromBytes(payload);
+            case 71: return RequestKickUser.fromBytes(payload);
             case 118: return RequestLoadHistory.fromBytes(payload);
             case 104: return RequestLoadDialogs.fromBytes(payload);
             case 6: return RequestGetPublicKeys.fromBytes(payload);

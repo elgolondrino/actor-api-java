@@ -16,9 +16,11 @@ public class RequestLeaveGroup extends Request<ResponseSeqDate> {
     }
 
     private GroupOutPeer groupPeer;
+    private long rid;
 
-    public RequestLeaveGroup(GroupOutPeer groupPeer) {
+    public RequestLeaveGroup(GroupOutPeer groupPeer, long rid) {
         this.groupPeer = groupPeer;
+        this.rid = rid;
     }
 
     public RequestLeaveGroup() {
@@ -29,9 +31,14 @@ public class RequestLeaveGroup extends Request<ResponseSeqDate> {
         return this.groupPeer;
     }
 
+    public long getRid() {
+        return this.rid;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
+        this.rid = values.getLong(2);
     }
 
     @Override
@@ -40,6 +47,7 @@ public class RequestLeaveGroup extends Request<ResponseSeqDate> {
             throw new IOException();
         }
         writer.writeObject(1, this.groupPeer);
+        writer.writeLong(2, this.rid);
     }
 
     @Override

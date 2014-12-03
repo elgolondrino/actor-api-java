@@ -16,8 +16,9 @@ public class Dialog extends BserObject {
     private long rid;
     private long date;
     private MessageContent message;
+    private MessageState state;
 
-    public Dialog(Peer peer, int unreadCount, long sortDate, int senderUid, long rid, long date, MessageContent message) {
+    public Dialog(Peer peer, int unreadCount, long sortDate, int senderUid, long rid, long date, MessageContent message, MessageState state) {
         this.peer = peer;
         this.unreadCount = unreadCount;
         this.sortDate = sortDate;
@@ -25,6 +26,7 @@ public class Dialog extends BserObject {
         this.rid = rid;
         this.date = date;
         this.message = message;
+        this.state = state;
     }
 
     public Dialog() {
@@ -59,6 +61,10 @@ public class Dialog extends BserObject {
         return this.message;
     }
 
+    public MessageState getState() {
+        return this.state;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.peer = values.getObj(1, Peer.class);
@@ -68,6 +74,7 @@ public class Dialog extends BserObject {
         this.rid = values.getLong(6);
         this.date = values.getLong(7);
         this.message = values.getObj(8, MessageContent.class);
+        this.state = MessageState.parse(values.getInt(9));
     }
 
     @Override
@@ -85,6 +92,10 @@ public class Dialog extends BserObject {
             throw new IOException();
         }
         writer.writeObject(8, this.message);
+        if (this.state == null) {
+            throw new IOException();
+        }
+        writer.writeInt(9, this.state.getValue());
     }
 
 }

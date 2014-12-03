@@ -13,12 +13,14 @@ public class HistoryMessage extends BserObject {
     private long rid;
     private long date;
     private MessageContent message;
+    private MessageState state;
 
-    public HistoryMessage(int senderUid, long rid, long date, MessageContent message) {
+    public HistoryMessage(int senderUid, long rid, long date, MessageContent message, MessageState state) {
         this.senderUid = senderUid;
         this.rid = rid;
         this.date = date;
         this.message = message;
+        this.state = state;
     }
 
     public HistoryMessage() {
@@ -41,12 +43,17 @@ public class HistoryMessage extends BserObject {
         return this.message;
     }
 
+    public MessageState getState() {
+        return this.state;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.senderUid = values.getInt(1);
         this.rid = values.getLong(2);
         this.date = values.getLong(3);
         this.message = values.getObj(5, MessageContent.class);
+        this.state = MessageState.parse(values.getInt(6));
     }
 
     @Override
@@ -58,6 +65,10 @@ public class HistoryMessage extends BserObject {
             throw new IOException();
         }
         writer.writeObject(5, this.message);
+        if (this.state == null) {
+            throw new IOException();
+        }
+        writer.writeInt(6, this.state.getValue());
     }
 
 }

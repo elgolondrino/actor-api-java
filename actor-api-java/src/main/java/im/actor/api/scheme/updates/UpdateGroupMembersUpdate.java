@@ -16,9 +16,9 @@ public class UpdateGroupMembersUpdate extends Update {
     }
 
     private int groupId;
-    private List<Integer> members;
+    private List<Member> members;
 
-    public UpdateGroupMembersUpdate(int groupId, List<Integer> members) {
+    public UpdateGroupMembersUpdate(int groupId, List<Member> members) {
         this.groupId = groupId;
         this.members = members;
     }
@@ -31,20 +31,20 @@ public class UpdateGroupMembersUpdate extends Update {
         return this.groupId;
     }
 
-    public List<Integer> getMembers() {
+    public List<Member> getMembers() {
         return this.members;
     }
 
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupId = values.getInt(1);
-        this.members = values.getRepeatedInt(2);
+        this.members = values.getRepeatedObj(2, Member.class);
     }
 
     @Override
     public void serialize(BserWriter writer) throws IOException {
         writer.writeInt(1, this.groupId);
-        writer.writeRepeatedInt(2, this.members);
+        writer.writeRepeatedObj(2, this.members);
     }
 
     @Override

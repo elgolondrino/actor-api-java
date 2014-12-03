@@ -16,10 +16,12 @@ public class RequestEditGroupAvatar extends Request<ResponseEditGroupAvatar> {
     }
 
     private GroupOutPeer groupPeer;
+    private long rid;
     private FileLocation fileLocation;
 
-    public RequestEditGroupAvatar(GroupOutPeer groupPeer, FileLocation fileLocation) {
+    public RequestEditGroupAvatar(GroupOutPeer groupPeer, long rid, FileLocation fileLocation) {
         this.groupPeer = groupPeer;
+        this.rid = rid;
         this.fileLocation = fileLocation;
     }
 
@@ -31,6 +33,10 @@ public class RequestEditGroupAvatar extends Request<ResponseEditGroupAvatar> {
         return this.groupPeer;
     }
 
+    public long getRid() {
+        return this.rid;
+    }
+
     public FileLocation getFileLocation() {
         return this.fileLocation;
     }
@@ -38,6 +44,7 @@ public class RequestEditGroupAvatar extends Request<ResponseEditGroupAvatar> {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
+        this.rid = values.getLong(4);
         this.fileLocation = values.getObj(3, FileLocation.class);
     }
 
@@ -47,6 +54,7 @@ public class RequestEditGroupAvatar extends Request<ResponseEditGroupAvatar> {
             throw new IOException();
         }
         writer.writeObject(1, this.groupPeer);
+        writer.writeLong(4, this.rid);
         if (this.fileLocation == null) {
             throw new IOException();
         }

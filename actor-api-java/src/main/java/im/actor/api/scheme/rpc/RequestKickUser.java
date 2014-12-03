@@ -8,27 +8,33 @@ import im.actor.api.parser.*;
 import java.util.List;
 import im.actor.api.scheme.*;
 
-public class RequestRemoveUser extends Request<ResponseSeqDate> {
+public class RequestKickUser extends Request<ResponseSeqDate> {
 
     public static final int HEADER = 0x47;
-    public static RequestRemoveUser fromBytes(byte[] data) throws IOException {
-        return Bser.parse(RequestRemoveUser.class, data);
+    public static RequestKickUser fromBytes(byte[] data) throws IOException {
+        return Bser.parse(RequestKickUser.class, data);
     }
 
     private GroupOutPeer groupPeer;
+    private long rid;
     private UserOutPeer user;
 
-    public RequestRemoveUser(GroupOutPeer groupPeer, UserOutPeer user) {
+    public RequestKickUser(GroupOutPeer groupPeer, long rid, UserOutPeer user) {
         this.groupPeer = groupPeer;
+        this.rid = rid;
         this.user = user;
     }
 
-    public RequestRemoveUser() {
+    public RequestKickUser() {
 
     }
 
     public GroupOutPeer getGroupPeer() {
         return this.groupPeer;
+    }
+
+    public long getRid() {
+        return this.rid;
     }
 
     public UserOutPeer getUser() {
@@ -38,6 +44,7 @@ public class RequestRemoveUser extends Request<ResponseSeqDate> {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
+        this.rid = values.getLong(4);
         this.user = values.getObj(3, UserOutPeer.class);
     }
 
@@ -47,6 +54,7 @@ public class RequestRemoveUser extends Request<ResponseSeqDate> {
             throw new IOException();
         }
         writer.writeObject(1, this.groupPeer);
+        writer.writeLong(4, this.rid);
         if (this.user == null) {
             throw new IOException();
         }

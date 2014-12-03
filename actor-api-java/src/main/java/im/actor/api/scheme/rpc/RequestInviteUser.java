@@ -16,10 +16,12 @@ public class RequestInviteUser extends Request<ResponseSeqDate> {
     }
 
     private GroupOutPeer groupPeer;
+    private long rid;
     private UserOutPeer user;
 
-    public RequestInviteUser(GroupOutPeer groupPeer, UserOutPeer user) {
+    public RequestInviteUser(GroupOutPeer groupPeer, long rid, UserOutPeer user) {
         this.groupPeer = groupPeer;
+        this.rid = rid;
         this.user = user;
     }
 
@@ -31,6 +33,10 @@ public class RequestInviteUser extends Request<ResponseSeqDate> {
         return this.groupPeer;
     }
 
+    public long getRid() {
+        return this.rid;
+    }
+
     public UserOutPeer getUser() {
         return this.user;
     }
@@ -38,6 +44,7 @@ public class RequestInviteUser extends Request<ResponseSeqDate> {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupPeer = values.getObj(1, GroupOutPeer.class);
+        this.rid = values.getLong(4);
         this.user = values.getObj(3, UserOutPeer.class);
     }
 
@@ -47,6 +54,7 @@ public class RequestInviteUser extends Request<ResponseSeqDate> {
             throw new IOException();
         }
         writer.writeObject(1, this.groupPeer);
+        writer.writeLong(4, this.rid);
         if (this.user == null) {
             throw new IOException();
         }

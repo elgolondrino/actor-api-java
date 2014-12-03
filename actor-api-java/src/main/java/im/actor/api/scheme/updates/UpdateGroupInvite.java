@@ -16,11 +16,13 @@ public class UpdateGroupInvite extends Update {
     }
 
     private int groupId;
+    private long rid;
     private int inviteUid;
     private long date;
 
-    public UpdateGroupInvite(int groupId, int inviteUid, long date) {
+    public UpdateGroupInvite(int groupId, long rid, int inviteUid, long date) {
         this.groupId = groupId;
+        this.rid = rid;
         this.inviteUid = inviteUid;
         this.date = date;
     }
@@ -31,6 +33,10 @@ public class UpdateGroupInvite extends Update {
 
     public int getGroupId() {
         return this.groupId;
+    }
+
+    public long getRid() {
+        return this.rid;
     }
 
     public int getInviteUid() {
@@ -44,6 +50,7 @@ public class UpdateGroupInvite extends Update {
     @Override
     public void parse(BserValues values) throws IOException {
         this.groupId = values.getInt(1);
+        this.rid = values.getLong(9);
         this.inviteUid = values.getInt(5);
         this.date = values.getLong(8);
     }
@@ -51,6 +58,7 @@ public class UpdateGroupInvite extends Update {
     @Override
     public void serialize(BserWriter writer) throws IOException {
         writer.writeInt(1, this.groupId);
+        writer.writeLong(9, this.rid);
         writer.writeInt(5, this.inviteUid);
         writer.writeLong(8, this.date);
     }

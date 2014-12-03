@@ -667,172 +667,148 @@ public class ApiRequests {
         return this.api.rpcSync(new RequestCreateGroup(rid, title, users), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, String title) {
-        return this.api.rpc(new RequestEditGroupTitle(groupPeer, title));
+    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, long rid, String title) {
+        return this.api.rpc(new RequestEditGroupTitle(groupPeer, rid, title));
     }
 
-    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, String title, long requestTimeout) {
-        return this.api.rpc(new RequestEditGroupTitle(groupPeer, title), requestTimeout);
+    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, long rid, String title, long requestTimeout) {
+        return this.api.rpc(new RequestEditGroupTitle(groupPeer, rid, title), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, String title, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestEditGroupTitle(groupPeer, title), callback);
+    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, long rid, String title, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestEditGroupTitle(groupPeer, rid, title), callback);
     }
 
-    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, String title, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestEditGroupTitle(groupPeer, title), requestTimeout, callback);
+    public Future<ResponseSeqDate> editGroupTitle(GroupOutPeer groupPeer, long rid, String title, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestEditGroupTitle(groupPeer, rid, title), requestTimeout, callback);
     }
 
-    public ResponseSeqDate editGroupTitleSync (GroupOutPeer groupPeer, String title) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestEditGroupTitle(groupPeer, title));
+    public ResponseSeqDate editGroupTitleSync (GroupOutPeer groupPeer, long rid, String title) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestEditGroupTitle(groupPeer, rid, title));
     }
 
-    public ResponseSeqDate editGroupTitleSync (GroupOutPeer groupPeer, String title, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestEditGroupTitle(groupPeer, title), requestTimeout);
+    public ResponseSeqDate editGroupTitleSync (GroupOutPeer groupPeer, long rid, String title, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestEditGroupTitle(groupPeer, rid, title), requestTimeout);
     }
 
-    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, FileLocation fileLocation) {
-        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, fileLocation));
+    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, long rid, FileLocation fileLocation) {
+        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, rid, fileLocation));
     }
 
-    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, FileLocation fileLocation, long requestTimeout) {
-        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, fileLocation), requestTimeout);
+    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, long rid, FileLocation fileLocation, long requestTimeout) {
+        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, rid, fileLocation), requestTimeout);
     }
 
-    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, FileLocation fileLocation, FutureCallback<ResponseEditGroupAvatar> callback) {
-        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, fileLocation), callback);
+    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, long rid, FileLocation fileLocation, FutureCallback<ResponseEditGroupAvatar> callback) {
+        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, rid, fileLocation), callback);
     }
 
-    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, FileLocation fileLocation, long requestTimeout, FutureCallback<ResponseEditGroupAvatar> callback) {
-        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, fileLocation), requestTimeout, callback);
+    public Future<ResponseEditGroupAvatar> editGroupAvatar(GroupOutPeer groupPeer, long rid, FileLocation fileLocation, long requestTimeout, FutureCallback<ResponseEditGroupAvatar> callback) {
+        return this.api.rpc(new RequestEditGroupAvatar(groupPeer, rid, fileLocation), requestTimeout, callback);
     }
 
-    public ResponseEditGroupAvatar editGroupAvatarSync (GroupOutPeer groupPeer, FileLocation fileLocation) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestEditGroupAvatar(groupPeer, fileLocation));
+    public ResponseEditGroupAvatar editGroupAvatarSync (GroupOutPeer groupPeer, long rid, FileLocation fileLocation) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestEditGroupAvatar(groupPeer, rid, fileLocation));
     }
 
-    public ResponseEditGroupAvatar editGroupAvatarSync (GroupOutPeer groupPeer, FileLocation fileLocation, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestEditGroupAvatar(groupPeer, fileLocation), requestTimeout);
+    public ResponseEditGroupAvatar editGroupAvatarSync (GroupOutPeer groupPeer, long rid, FileLocation fileLocation, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestEditGroupAvatar(groupPeer, rid, fileLocation), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer) {
-        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer));
+    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long rid) {
+        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer, rid));
     }
 
-    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long requestTimeout) {
-        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer), requestTimeout);
+    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long rid, long requestTimeout) {
+        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer, rid), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer), callback);
+    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long rid, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer, rid), callback);
     }
 
-    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer), requestTimeout, callback);
+    public Future<ResponseSeqDate> removeGroupAvatar(GroupOutPeer groupPeer, long rid, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestRemoveGroupAvatar(groupPeer, rid), requestTimeout, callback);
     }
 
-    public ResponseSeqDate removeGroupAvatarSync (GroupOutPeer groupPeer) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRemoveGroupAvatar(groupPeer));
+    public ResponseSeqDate removeGroupAvatarSync (GroupOutPeer groupPeer, long rid) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestRemoveGroupAvatar(groupPeer, rid));
     }
 
-    public ResponseSeqDate removeGroupAvatarSync (GroupOutPeer groupPeer, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRemoveGroupAvatar(groupPeer), requestTimeout);
+    public ResponseSeqDate removeGroupAvatarSync (GroupOutPeer groupPeer, long rid, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestRemoveGroupAvatar(groupPeer, rid), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, UserOutPeer user) {
-        return this.api.rpc(new RequestInviteUser(groupPeer, user));
+    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, long rid, UserOutPeer user) {
+        return this.api.rpc(new RequestInviteUser(groupPeer, rid, user));
     }
 
-    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout) {
-        return this.api.rpc(new RequestInviteUser(groupPeer, user), requestTimeout);
+    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout) {
+        return this.api.rpc(new RequestInviteUser(groupPeer, rid, user), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, UserOutPeer user, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestInviteUser(groupPeer, user), callback);
+    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestInviteUser(groupPeer, rid, user), callback);
     }
 
-    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestInviteUser(groupPeer, user), requestTimeout, callback);
+    public Future<ResponseSeqDate> inviteUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestInviteUser(groupPeer, rid, user), requestTimeout, callback);
     }
 
-    public ResponseSeqDate inviteUserSync (GroupOutPeer groupPeer, UserOutPeer user) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestInviteUser(groupPeer, user));
+    public ResponseSeqDate inviteUserSync (GroupOutPeer groupPeer, long rid, UserOutPeer user) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestInviteUser(groupPeer, rid, user));
     }
 
-    public ResponseSeqDate inviteUserSync (GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestInviteUser(groupPeer, user), requestTimeout);
+    public ResponseSeqDate inviteUserSync (GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestInviteUser(groupPeer, rid, user), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer) {
-        return this.api.rpc(new RequestLeaveGroup(groupPeer));
+    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long rid) {
+        return this.api.rpc(new RequestLeaveGroup(groupPeer, rid));
     }
 
-    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long requestTimeout) {
-        return this.api.rpc(new RequestLeaveGroup(groupPeer), requestTimeout);
+    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long rid, long requestTimeout) {
+        return this.api.rpc(new RequestLeaveGroup(groupPeer, rid), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestLeaveGroup(groupPeer), callback);
+    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long rid, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestLeaveGroup(groupPeer, rid), callback);
     }
 
-    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestLeaveGroup(groupPeer), requestTimeout, callback);
+    public Future<ResponseSeqDate> leaveGroup(GroupOutPeer groupPeer, long rid, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestLeaveGroup(groupPeer, rid), requestTimeout, callback);
     }
 
-    public ResponseSeqDate leaveGroupSync (GroupOutPeer groupPeer) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestLeaveGroup(groupPeer));
+    public ResponseSeqDate leaveGroupSync (GroupOutPeer groupPeer, long rid) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestLeaveGroup(groupPeer, rid));
     }
 
-    public ResponseSeqDate leaveGroupSync (GroupOutPeer groupPeer, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestLeaveGroup(groupPeer), requestTimeout);
+    public ResponseSeqDate leaveGroupSync (GroupOutPeer groupPeer, long rid, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestLeaveGroup(groupPeer, rid), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> deleteGroup(GroupOutPeer groupPeer) {
-        return this.api.rpc(new RequestDeleteGroup(groupPeer));
+    public Future<ResponseSeqDate> kickUser(GroupOutPeer groupPeer, long rid, UserOutPeer user) {
+        return this.api.rpc(new RequestKickUser(groupPeer, rid, user));
     }
 
-    public Future<ResponseSeqDate> deleteGroup(GroupOutPeer groupPeer, long requestTimeout) {
-        return this.api.rpc(new RequestDeleteGroup(groupPeer), requestTimeout);
+    public Future<ResponseSeqDate> kickUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout) {
+        return this.api.rpc(new RequestKickUser(groupPeer, rid, user), requestTimeout);
     }
 
-    public Future<ResponseSeqDate> deleteGroup(GroupOutPeer groupPeer, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestDeleteGroup(groupPeer), callback);
+    public Future<ResponseSeqDate> kickUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestKickUser(groupPeer, rid, user), callback);
     }
 
-    public Future<ResponseSeqDate> deleteGroup(GroupOutPeer groupPeer, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestDeleteGroup(groupPeer), requestTimeout, callback);
+    public Future<ResponseSeqDate> kickUser(GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
+        return this.api.rpc(new RequestKickUser(groupPeer, rid, user), requestTimeout, callback);
     }
 
-    public ResponseSeqDate deleteGroupSync (GroupOutPeer groupPeer) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestDeleteGroup(groupPeer));
+    public ResponseSeqDate kickUserSync (GroupOutPeer groupPeer, long rid, UserOutPeer user) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestKickUser(groupPeer, rid, user));
     }
 
-    public ResponseSeqDate deleteGroupSync (GroupOutPeer groupPeer, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestDeleteGroup(groupPeer), requestTimeout);
-    }
-
-    public Future<ResponseSeqDate> removeUser(GroupOutPeer groupPeer, UserOutPeer user) {
-        return this.api.rpc(new RequestRemoveUser(groupPeer, user));
-    }
-
-    public Future<ResponseSeqDate> removeUser(GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout) {
-        return this.api.rpc(new RequestRemoveUser(groupPeer, user), requestTimeout);
-    }
-
-    public Future<ResponseSeqDate> removeUser(GroupOutPeer groupPeer, UserOutPeer user, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestRemoveUser(groupPeer, user), callback);
-    }
-
-    public Future<ResponseSeqDate> removeUser(GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout, FutureCallback<ResponseSeqDate> callback) {
-        return this.api.rpc(new RequestRemoveUser(groupPeer, user), requestTimeout, callback);
-    }
-
-    public ResponseSeqDate removeUserSync (GroupOutPeer groupPeer, UserOutPeer user) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRemoveUser(groupPeer, user));
-    }
-
-    public ResponseSeqDate removeUserSync (GroupOutPeer groupPeer, UserOutPeer user, long requestTimeout) throws TimeoutException, ApiRequestException {
-        return this.api.rpcSync(new RequestRemoveUser(groupPeer, user), requestTimeout);
+    public ResponseSeqDate kickUserSync (GroupOutPeer groupPeer, long rid, UserOutPeer user, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestKickUser(groupPeer, rid, user), requestTimeout);
     }
 
     public Future<ResponseLoadHistory> loadHistory(OutPeer peer, long startDate, int limit) {
