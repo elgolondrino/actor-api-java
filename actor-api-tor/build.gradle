@@ -1,0 +1,19 @@
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'application'
+
+version = '1.0'
+
+compileJava {
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+}
+
+mainClassName = "im.actor.tor.Main"
+
+dependencies {
+    // compile project(":actor-api-java")
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
