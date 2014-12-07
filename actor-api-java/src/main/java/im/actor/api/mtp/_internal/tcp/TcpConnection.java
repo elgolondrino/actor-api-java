@@ -51,11 +51,27 @@ public class TcpConnection implements RawTcpConnection {
             this.LOG = params.getConfig().getLogInterface();
             this.DEBUG = params.getConfig().isDebugTcp();
             if (endpoint.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
-                this.socket = new Socket();
+                if (params.getConfig().getProxy() != null) {
+                    this.socket = new Socket(params.getConfig().getProxy());
+                } else {
+                    this.socket = new Socket();
+                }
+                this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
             } else {
-                this.socket = SSLSocketFactory.getDefault().createSocket();
+                if (params.getConfig().getProxy() != null) {
+                    Socket underlying = new Socket(params.getConfig().getProxy());
+                    underlying.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
+                    InetSocketAddress address = (InetSocketAddress) params.getConfig().getProxy().address();
+                    socket = ((SSLSocketFactory) SSLSocketFactory.getDefault())
+                            .createSocket(underlying,
+                                    address.getHostName(),
+                                    address.getPort(),
+                                    true);
+                } else {
+                    this.socket = SSLSocketFactory.getDefault().createSocket();
+                    this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
+                }
             }
-            this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
             this.socket.getInputStream();
             if (!params.getConfig().isChromeEnabled()) {
                 this.socket.setKeepAlive(true);

@@ -2,6 +2,7 @@ package im.actor.api;
 
 import im.actor.api.mtp.MTProtoEndpoint;
 
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -17,6 +18,7 @@ public class ActorApiConfig {
     private final boolean isDebugLog;
     private final boolean isDebugProto;
     private final boolean isDebugTcp;
+    private final Proxy proxy;
 
     public ActorApiConfig(ActorApiStorage apiStorage,
                           MTProtoEndpoint[] endpoints,
@@ -25,7 +27,8 @@ public class ActorApiConfig {
                           boolean isDebugLog,
                           boolean isDebugProto,
                           boolean isDebugTcp,
-                          boolean isChromeEnabled) {
+                          boolean isChromeEnabled,
+                          Proxy proxy) {
         this.endpoints = endpoints;
         this.apiCallback = apiCallback;
         this.logInterface = logInterface;
@@ -34,6 +37,7 @@ public class ActorApiConfig {
         this.isDebugProto = isDebugProto;
         this.isDebugTcp = isDebugTcp;
         this.isChromeEnabled = isChromeEnabled;
+        this.proxy = proxy;
     }
 
     public boolean isDebugProto() {
@@ -68,6 +72,10 @@ public class ActorApiConfig {
         return apiCallback;
     }
 
+    public Proxy getProxy() {
+        return proxy;
+    }
+
     public static class Builder {
         private ActorApiStorage storage;
         private ArrayList<MTProtoEndpoint> endpoints = new ArrayList<MTProtoEndpoint>();
@@ -77,6 +85,12 @@ public class ActorApiConfig {
         private boolean isDebugLogEnabled = false;
         private boolean isDebugProtoEnabled = false;
         private boolean isDebugTcpEnabled = false;
+        private Proxy proxy = null;
+
+        public Builder setProxy(Proxy proxy) {
+            this.proxy = proxy;
+            return this;
+        }
 
         public Builder setApiCallback(ActorApiCallback apiCallback) {
             this.apiCallback = apiCallback;
@@ -140,7 +154,7 @@ public class ActorApiConfig {
                 throw new RuntimeException("apiCallback not set");
             }
             return new ActorApiConfig(storage, endpoints.toArray(new MTProtoEndpoint[endpoints.size()]), apiCallback,
-                    logInterface, isDebugLogEnabled, isDebugProtoEnabled, isDebugTcpEnabled, chromeSupport);
+                    logInterface, isDebugLogEnabled, isDebugProtoEnabled, isDebugTcpEnabled, chromeSupport,proxy);
         }
     }
 }
