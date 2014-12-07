@@ -86,9 +86,7 @@ public class Tor {
 	
 	/**
 	 * Create and return a new <code>TorConfig</code> instance.
-	 * 
-	 * @param logManager This is a required dependency.  You must create a <code>LogManager</code>
-	 *                   before calling this method to create a <code>TorConfig</code>
+	 *
 	 * @return A new <code>TorConfig</code> instance.
 	 * @see TorConfig
 	 */
@@ -108,8 +106,6 @@ public class Tor {
 	/**
 	 * Create and return a new <code>Directory</code> instance.
 	 * 
-	 * @param logManager This is a required dependency.  You must create a <code>LogManager</code> 
-	 *                   before creating a <code>Directory</code>. 
 	 * @param config This is a required dependency. You must create a <code>TorConfig</code> before
 	 *               calling this method to create a <code>Directory</code>
 	 * @return A new <code>Directory</code> instance.
@@ -135,8 +131,6 @@ public class Tor {
 	/**
 	 * Create and return a new <code>SocksPortListener</code> instance.
 	 * 
-	 * @param logManager This is a required dependency.  You must create a <code>LogManager</code>
-	 *                   before calling this method to create a <code>SocksPortListener</code>.
 	 * @param circuitManager This is a required dependency.  You must create a <code>CircuitManager</code>
 	 *                       before calling this method to create a <code>SocksPortListener</code>.
 	 * @return A new <code>SocksPortListener</code> instance.
@@ -149,15 +143,6 @@ public class Tor {
 	/**
 	 * Create and return a new <code>DirectoryDownloader</code> instance.
 	 *
-	 * @param logManager This is a required dependency.  You must create a <code>LogManager</code>
-	 *                   before calling this method to create a <code>DirectoryDownloader</code>.
-
-	 * @param directory This is a required dependency.  You must create a <code>Directory</code>
-	 *                  before calling this method to create a <code>DirectoryDownloader</code>
-	 *                  
-	 * @param circuitManager This is a required dependency.  You must create a <code>CircuitManager</code>
-	 *                       before calling this method to create a <code>DirectoryDownloader</code>.
-	 *                       
 	 * @return A new <code>DirectoryDownloader</code> instance.
 	 * @see DirectoryDownloaderImpl
 	 */
