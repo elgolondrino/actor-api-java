@@ -32,7 +32,7 @@ public class TorConfigProxy implements InvocationHandler {
 			invokeSetMethod(method, args);
 			return null;
 		} else if(method.getName().startsWith("get")) {
-			if(args == null) {
+			if(args == null || args.length == 0) {
 				return invokeGetMethod(method);
 			} else {
 				return invokeGetMethodWithArgs(method, args);
