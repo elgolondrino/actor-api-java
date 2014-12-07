@@ -5,6 +5,6 @@ package im.actor.tor;
  */
 public class Main {
     public static void main(String[] args) {
-        ActorTorHelper helper = new ActorTorHelper();
+        ActorTorHelper helper = new ActorTorHelper("../tor");
     }
 }
