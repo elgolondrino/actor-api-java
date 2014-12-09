@@ -18,7 +18,7 @@ public class ActorApiConfig {
     private final boolean isDebugLog;
     private final boolean isDebugProto;
     private final boolean isDebugTcp;
-    private final Proxy proxy;
+    private final ActorApiProxy proxy;
 
     public ActorApiConfig(ActorApiStorage apiStorage,
                           MTProtoEndpoint[] endpoints,
@@ -28,7 +28,7 @@ public class ActorApiConfig {
                           boolean isDebugProto,
                           boolean isDebugTcp,
                           boolean isChromeEnabled,
-                          Proxy proxy) {
+                          ActorApiProxy proxy) {
         this.endpoints = endpoints;
         this.apiCallback = apiCallback;
         this.logInterface = logInterface;
@@ -72,7 +72,7 @@ public class ActorApiConfig {
         return apiCallback;
     }
 
-    public Proxy getProxy() {
+    public ActorApiProxy getProxy() {
         return proxy;
     }
 
@@ -85,9 +85,9 @@ public class ActorApiConfig {
         private boolean isDebugLogEnabled = false;
         private boolean isDebugProtoEnabled = false;
         private boolean isDebugTcpEnabled = false;
-        private Proxy proxy = null;
+        private ActorApiProxy proxy = null;
 
-        public Builder setProxy(Proxy proxy) {
+        public Builder setProxy(ActorApiProxy proxy) {
             this.proxy = proxy;
             return this;
         }
@@ -154,7 +154,7 @@ public class ActorApiConfig {
                 throw new RuntimeException("apiCallback not set");
             }
             return new ActorApiConfig(storage, endpoints.toArray(new MTProtoEndpoint[endpoints.size()]), apiCallback,
-                    logInterface, isDebugLogEnabled, isDebugProtoEnabled, isDebugTcpEnabled, chromeSupport,proxy);
+                    logInterface, isDebugLogEnabled, isDebugProtoEnabled, isDebugTcpEnabled, chromeSupport, proxy);
         }
     }
 }

@@ -50,28 +50,30 @@ public class TcpConnection implements RawTcpConnection {
             this.TAG = "TcpConnection#" + connectionId;
             this.LOG = params.getConfig().getLogInterface();
             this.DEBUG = params.getConfig().isDebugTcp();
-            if (endpoint.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
-                if (params.getConfig().getProxy() != null) {
-                    this.socket = new Socket(params.getConfig().getProxy());
+            if (params.getConfig().getProxy() != null) {
+                if (endpoint.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                    this.socket = SocksProxy.createProxiedSocket(params.getConfig().getProxy().getHost(),
+                            params.getConfig().getProxy().getPort(),
+                            endpoint.getHost(), endpoint.getPort());
                 } else {
-                    this.socket = new Socket();
-                }
-                this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
-            } else {
-                if (params.getConfig().getProxy() != null) {
-                    Socket underlying = new Socket(params.getConfig().getProxy());
-                    underlying.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
-                    InetSocketAddress address = (InetSocketAddress) params.getConfig().getProxy().address();
+                    Socket underlying = SocksProxy.createProxiedSocket(params.getConfig().getProxy().getHost(),
+                            params.getConfig().getProxy().getPort(),
+                            endpoint.getHost(), endpoint.getPort());
                     socket = ((SSLSocketFactory) SSLSocketFactory.getDefault())
                             .createSocket(underlying,
-                                    address.getHostName(),
-                                    address.getPort(),
+                                    endpoint.getHost(),
+                                    endpoint.getPort(),
                                     true);
+                }
+            } else {
+                if (endpoint.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                    this.socket = new Socket();
                 } else {
                     this.socket = SSLSocketFactory.getDefault().createSocket();
-                    this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
                 }
+                this.socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()), CONNECTION_TIMEOUT);
             }
+
             this.socket.getInputStream();
             if (!params.getConfig().isChromeEnabled()) {
                 this.socket.setKeepAlive(true);

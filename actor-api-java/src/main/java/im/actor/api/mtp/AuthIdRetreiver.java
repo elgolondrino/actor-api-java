@@ -8,6 +8,7 @@ import im.actor.api.mtp._internal.entity.ProtoSerializer;
 import im.actor.api.mtp._internal.entity.ProtoStruct;
 import im.actor.api.mtp._internal.entity.message.RequestAuthId;
 import im.actor.api.mtp._internal.entity.message.ResponseAuthId;
+import im.actor.api.mtp._internal.tcp.SocksProxy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,13 +34,31 @@ public class AuthIdRetreiver {
             public void run() {
                 try {
                     final MTProtoEndpoint connectionInfo = new EndpointProvider(config.getEndpoints()).fetchEndpoint();
+
                     Socket socket;
-                    if (connectionInfo.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
-                        socket = new Socket();
+                    if (config.getProxy() != null) {
+                        if (connectionInfo.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                            socket = SocksProxy.createProxiedSocket(config.getProxy().getHost(),
+                                    config.getProxy().getPort(),
+                                    connectionInfo.getHost(), connectionInfo.getPort());
+                        } else {
+                            Socket underlying = SocksProxy.createProxiedSocket(config.getProxy().getHost(),
+                                    config.getProxy().getPort(),
+                                    connectionInfo.getHost(), connectionInfo.getPort());
+                            socket = ((SSLSocketFactory) SSLSocketFactory.getDefault())
+                                    .createSocket(underlying,
+                                            connectionInfo.getHost(),
+                                            connectionInfo.getPort(),
+                                            true);
+                        }
                     } else {
-                        socket = SSLSocketFactory.getDefault().createSocket();
+                        if (connectionInfo.getEndpointType() == MTProtoEndpoint.EndpointType.PLAIN_TCP) {
+                            socket = new Socket();
+                        } else {
+                            socket = SSLSocketFactory.getDefault().createSocket();
+                        }
+                        socket.connect(new InetSocketAddress(connectionInfo.getHost(), connectionInfo.getPort()), 15000);
                     }
-                    socket.connect(new InetSocketAddress(connectionInfo.getHost(), connectionInfo.getPort()), 15000);
 
                     if (!config.isChromeEnabled()) {
                         // This methods crash VM on chrome

@@ -17,11 +17,14 @@ public class ActorTorHelper {
         File file = new File(path);
         file.mkdirs();
         this.torClient.getConfig().setDataDirectory(file);
-        this.torClient.start();
-        this.torClient.enableSocksListener(9150);
     }
 
-    public Proxy getProxy() {
-        return new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9150));
+    public TorClient getTorClient() {
+        return torClient;
+    }
+
+    public void start() {
+        this.torClient.start();
+        this.torClient.enableSocksListener(9151);
     }
 }
