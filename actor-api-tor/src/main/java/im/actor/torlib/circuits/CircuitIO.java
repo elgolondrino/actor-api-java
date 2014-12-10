@@ -19,15 +19,11 @@ import im.actor.torlib.Connection;
 import im.actor.torlib.ConnectionIOException;
 import im.actor.torlib.RelayCell;
 import im.actor.torlib.Stream;
-import im.actor.torlib.Threading;
+import im.actor.utils.Threading;
 import im.actor.torlib.TorException;
 import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
-import im.actor.torlib.*;
-import im.actor.torlib.circuits.cells.CellImpl;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.dashboard.DashboardRenderer;
 
 public class CircuitIO implements DashboardRenderable {

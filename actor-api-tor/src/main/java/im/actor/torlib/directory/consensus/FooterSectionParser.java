@@ -3,6 +3,7 @@ package im.actor.torlib.directory.consensus;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.consensus.ConsensusDocumentParser.DocumentSection;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.NameIntegerParameter;
@@ -11,7 +12,7 @@ public class FooterSectionParser extends ConsensusDocumentSectionParser {
 
 	private boolean seenFirstSignature = false;
 	
-	FooterSectionParser(DocumentFieldParser parser, ConsensusDocumentImpl document) {
+	FooterSectionParser(DocumentFieldParser parser, ConsensusDocument document) {
 		super(parser, document);
 	}
 

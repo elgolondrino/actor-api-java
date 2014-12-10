@@ -7,143 +7,154 @@ import java.util.List;
 import im.actor.torlib.KeyCertificate;
 import im.actor.torlib.RouterStatus;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.RouterImpl;
 
 /**
  * Represents a directory authority server or a directory cache.
  */
 public class DirectoryServer extends RouterImpl {
-	private List<KeyCertificate> certificates = new ArrayList<KeyCertificate>();
+    private List<KeyCertificate> certificates = new ArrayList<KeyCertificate>();
 
-	private boolean isHiddenServiceAuthority = false;
-	private boolean isBridgeAuthority = false;
-	private boolean isExtraInfoCache = false;
-	private int port;
-	private HexDigest v3Ident;
+    private boolean isHiddenServiceAuthority = false;
+    private boolean isBridgeAuthority = false;
+    private boolean isExtraInfoCache = false;
+    private int port;
+    private HexDigest v3Ident;
 
-	public DirectoryServer(RouterStatus status) {
-		super(null, status);
-	}
+    public DirectoryServer(RouterStatus status) {
+        super(null, status);
+    }
 
-	public void setHiddenServiceAuthority() { isHiddenServiceAuthority = true; }
-	public void unsetHiddenServiceAuthority() { isHiddenServiceAuthority = false; }
-	public void setBridgeAuthority() { isBridgeAuthority = true; }
-	public void setExtraInfoCache() { isExtraInfoCache = true; }
-	public void setPort(int port) { this.port = port; }
-	public void setV3Ident(HexDigest fingerprint) { this.v3Ident = fingerprint; }
+    public void setHiddenServiceAuthority() {
+        isHiddenServiceAuthority = true;
+    }
 
-	public boolean isTrustedAuthority() {
-		return true;
-	}
+    public void unsetHiddenServiceAuthority() {
+        isHiddenServiceAuthority = false;
+    }
 
-	/**
-	 * Return true if this DirectoryServer entry has
-	 * complete and valid information.
-	 * @return
-	 */
-	public boolean isValid() {
-		return true;
-	}
+    public void setBridgeAuthority() {
+        isBridgeAuthority = true;
+    }
 
-	public boolean isV2Authority() {
-		return hasFlag("Authority") && hasFlag("V2Dir");
-	}
+    public void setExtraInfoCache() {
+        isExtraInfoCache = true;
+    }
 
-	public boolean isV3Authority() {
-		return hasFlag("Authority") && v3Ident != null;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public boolean isHiddenServiceAuthority() {
-		return isHiddenServiceAuthority;
-	}
+    public void setV3Ident(HexDigest fingerprint) {
+        this.v3Ident = fingerprint;
+    }
 
-	public boolean isBridgeAuthority() {
-		return isBridgeAuthority;
-	}
+    public boolean isTrustedAuthority() {
+        return true;
+    }
 
-	public boolean isExtraInfoCache() {
-		return isExtraInfoCache;
-	}
+    public boolean isValid() {
+        return true;
+    }
 
-	public HexDigest getV3Identity() {
-		return v3Ident;
-	}
+    public boolean isV2Authority() {
+        return hasFlag("Authority") && hasFlag("V2Dir");
+    }
 
-	public KeyCertificate getCertificateByFingerprint(HexDigest fingerprint) {
-		for(KeyCertificate kc: getCertificates()) {
-			if(kc.getAuthoritySigningKey().getFingerprint().equals(fingerprint)) {
-				return kc;
-			}
-		}
-		return null;
-	}
+    public boolean isV3Authority() {
+        return hasFlag("Authority") && v3Ident != null;
+    }
 
-	public List<KeyCertificate> getCertificates() {
-		synchronized(certificates) {
-			purgeExpiredCertificates();
-			purgeOldCertificates();
-			return new ArrayList<KeyCertificate>(certificates);
-		}
-	}
+    public boolean isHiddenServiceAuthority() {
+        return isHiddenServiceAuthority;
+    }
 
-	private void purgeExpiredCertificates() {
-		Iterator<KeyCertificate> it = certificates.iterator();
-		while(it.hasNext()) {
-			KeyCertificate elem = it.next();
-			if(elem.isExpired()) {
-				it.remove();
-			}
-		}
-	}
+    public boolean isBridgeAuthority() {
+        return isBridgeAuthority;
+    }
 
-	private void purgeOldCertificates() {
-		if(certificates.size() < 2) {
-			return;
-		}
-		final KeyCertificate newest = getNewestCertificate();
-		final Iterator<KeyCertificate> it = certificates.iterator();
-		while(it.hasNext()) {
-			KeyCertificate elem = it.next();
-			if(elem != newest && isMoreThan48HoursOlder(newest, elem)) {
-				it.remove();
-			}
-		}
-	}
+    public boolean isExtraInfoCache() {
+        return isExtraInfoCache;
+    }
 
-	private KeyCertificate getNewestCertificate() {
-		KeyCertificate newest = null;
-		for(KeyCertificate kc : certificates) {
-			if(newest == null || getPublishedMilliseconds(newest) > getPublishedMilliseconds(kc)) {
-				newest = kc;
-			}
-		}
-		return newest;
-	}
+    public HexDigest getV3Identity() {
+        return v3Ident;
+    }
 
-	private boolean isMoreThan48HoursOlder(KeyCertificate newer, KeyCertificate older) {
-		final long milliseconds = 48 * 60 * 60 * 1000;
-		return (getPublishedMilliseconds(newer) - getPublishedMilliseconds(older)) > milliseconds;
-	}
+    public KeyCertificate getCertificateByFingerprint(HexDigest fingerprint) {
+        for (KeyCertificate kc : getCertificates()) {
+            if (kc.getAuthoritySigningKey().getFingerprint().equals(fingerprint)) {
+                return kc;
+            }
+        }
+        return null;
+    }
 
-	private long getPublishedMilliseconds(KeyCertificate certificate) {
-		return certificate.getKeyPublishedTime().getDate().getTime();
-	}
+    public List<KeyCertificate> getCertificates() {
+        synchronized (certificates) {
+            purgeExpiredCertificates();
+            purgeOldCertificates();
+            return new ArrayList<KeyCertificate>(certificates);
+        }
+    }
 
-	public void addCertificate(KeyCertificate certificate) {
-		if(!certificate.getAuthorityFingerprint().equals(v3Ident)) {
-			throw new IllegalArgumentException("This certificate does not appear to belong to this directory authority");
-		}
-		synchronized(certificates) {
-			certificates.add(certificate);
-		}
-	}
+    private void purgeExpiredCertificates() {
+        Iterator<KeyCertificate> it = certificates.iterator();
+        while (it.hasNext()) {
+            KeyCertificate elem = it.next();
+            if (elem.isExpired()) {
+                it.remove();
+            }
+        }
+    }
 
-	public String toString() {
-		if(v3Ident != null)
-			return "(Directory: "+ getNickname() +" "+ getAddress() +":"+ port +" fingerprint="+ getIdentityHash() +" v3ident="+
-					v3Ident +")";
-		else
-			return "(Directory: "+ getNickname() +" "+ getAddress() +":"+ port +" fingerprint="+ getIdentityHash() +")";
+    private void purgeOldCertificates() {
+        if (certificates.size() < 2) {
+            return;
+        }
+        final KeyCertificate newest = getNewestCertificate();
+        final Iterator<KeyCertificate> it = certificates.iterator();
+        while (it.hasNext()) {
+            KeyCertificate elem = it.next();
+            if (elem != newest && isMoreThan48HoursOlder(newest, elem)) {
+                it.remove();
+            }
+        }
+    }
 
-	}
+    private KeyCertificate getNewestCertificate() {
+        KeyCertificate newest = null;
+        for (KeyCertificate kc : certificates) {
+            if (newest == null || getPublishedMilliseconds(newest) > getPublishedMilliseconds(kc)) {
+                newest = kc;
+            }
+        }
+        return newest;
+    }
+
+    private boolean isMoreThan48HoursOlder(KeyCertificate newer, KeyCertificate older) {
+        final long milliseconds = 48 * 60 * 60 * 1000;
+        return (getPublishedMilliseconds(newer) - getPublishedMilliseconds(older)) > milliseconds;
+    }
+
+    private long getPublishedMilliseconds(KeyCertificate certificate) {
+        return certificate.getKeyPublishedTime().getDate().getTime();
+    }
+
+    public void addCertificate(KeyCertificate certificate) {
+        if (!certificate.getAuthorityFingerprint().equals(v3Ident)) {
+            throw new IllegalArgumentException("This certificate does not appear to belong to this directory authority");
+        }
+        synchronized (certificates) {
+            certificates.add(certificate);
+        }
+    }
+
+    public String toString() {
+        if (v3Ident != null)
+            return "(Directory: " + getNickname() + " " + getAddress() + ":" + port + " fingerprint=" + getIdentityHash() + " v3ident=" +
+                    v3Ident + ")";
+        else
+            return "(Directory: " + getNickname() + " " + getAddress() + ":" + port + " fingerprint=" + getIdentityHash() + ")";
+
+    }
 }

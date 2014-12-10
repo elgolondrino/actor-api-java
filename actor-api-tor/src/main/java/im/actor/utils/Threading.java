@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.utils;
 
 
 import java.util.concurrent.ExecutorService;

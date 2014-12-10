@@ -1,12 +1,13 @@
 package im.actor.torlib.directory.consensus;
 
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 public class AuthoritySectionParser extends ConsensusDocumentSectionParser {
 
 	private VoteAuthorityEntryImpl currentEntry = null;
 	
-	AuthoritySectionParser(DocumentFieldParser parser , ConsensusDocumentImpl document) {
+	AuthoritySectionParser(DocumentFieldParser parser , ConsensusDocument document) {
 		super(parser, document);
 		startEntry();
 	}

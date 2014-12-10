@@ -2,7 +2,7 @@ package im.actor.torlib.directory.consensus;
 
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.downloader.DocumentFetcher;
 import im.actor.torlib.directory.parsing.DocumentParser;
 

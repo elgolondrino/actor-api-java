@@ -14,7 +14,7 @@ import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
-import im.actor.torlib.Threading;
+import im.actor.utils.Threading;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.path.CircuitNodeChooser;
 import im.actor.torlib.circuits.path.CircuitNodeChooser.WeightRule;

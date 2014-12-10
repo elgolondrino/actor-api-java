@@ -5,10 +5,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import im.actor.torlib.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.Router;
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.HexDigest;
 
 public class DescriptorProcessor {

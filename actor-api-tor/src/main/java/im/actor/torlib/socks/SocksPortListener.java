@@ -12,12 +12,11 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import im.actor.torlib.CircuitManager;
-import im.actor.torlib.SocksPortListener;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.TorException;
 
-public class SocksPortListenerImpl implements SocksPortListener {
-	private final static Logger logger = Logger.getLogger(SocksPortListenerImpl.class.getName());
+public class SocksPortListener {
+	private final static Logger logger = Logger.getLogger(SocksPortListener.class.getName());
 	private final Set<Integer> listeningPorts = new HashSet<Integer>();
 	private final Map<Integer, AcceptTask> acceptThreads = new HashMap<Integer, AcceptTask>();
 	private final TorConfig config;
@@ -25,7 +24,7 @@ public class SocksPortListenerImpl implements SocksPortListener {
 	private final ExecutorService executor;
 	private boolean isStopped;
 	
-	public SocksPortListenerImpl(TorConfig config, CircuitManager circuitManager) {
+	public SocksPortListener(TorConfig config, CircuitManager circuitManager) {
 		this.config = config;
 		this.circuitManager = circuitManager;
 		executor = Executors.newCachedThreadPool();

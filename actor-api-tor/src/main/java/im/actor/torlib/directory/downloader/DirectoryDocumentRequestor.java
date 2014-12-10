@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 import im.actor.torlib.*;
 import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.consensus.ConsensusFetcher;
 
 /**

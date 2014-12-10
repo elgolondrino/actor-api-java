@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import im.actor.torlib.Descriptor;
-import im.actor.torlib.directory.DirectoryStore;
-import im.actor.torlib.directory.DirectoryStore.CacheFile;
-import im.actor.torlib.Threading;
+import im.actor.torlib.directory.storage.DirectoryStorage;
+import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
+import im.actor.utils.Threading;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
@@ -22,7 +22,7 @@ public abstract class DescriptorCache <T extends Descriptor> {
 	
 	private final DescriptorCacheData<T> data;
 
-	private final DirectoryStore store;
+	private final DirectoryStorage store;
 	private final ScheduledExecutorService rebuildExecutor =
 			Threading.newScheduledPool("DescriptorCache rebuild worker");
 
@@ -41,7 +41,7 @@ public abstract class DescriptorCache <T extends Descriptor> {
 	@GuardedBy("this")
 	private boolean initiallyLoaded;
 
-	public DescriptorCache(DirectoryStore store, CacheFile cacheFile, CacheFile journalFile) {
+	public DescriptorCache(DirectoryStorage store, CacheFile cacheFile, CacheFile journalFile) {
 		this.data = new DescriptorCacheData<T>();
 		this.store = store;
 		this.cacheFile = cacheFile;

@@ -28,7 +28,7 @@ import im.actor.torlib.ConnectionHandshakeException;
 import im.actor.torlib.ConnectionIOException;
 import im.actor.torlib.ConnectionTimeoutException;
 import im.actor.torlib.Router;
-import im.actor.torlib.Threading;
+import im.actor.utils.Threading;
 import im.actor.torlib.Tor;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.TorException;

@@ -5,6 +5,7 @@ import java.util.Date;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.storage.StateFile;
 
 public class GuardEntryImpl implements GuardEntry {
 	private final static String NL = System.getProperty("line.separator");
@@ -22,32 +23,32 @@ public class GuardEntryImpl implements GuardEntry {
 	private Date downSince;
 	private Date lastConnect;
 	
-	GuardEntryImpl(Directory directory, StateFile stateFile, String nickname, String identity) {
+	public GuardEntryImpl(Directory directory, StateFile stateFile, String nickname, String identity) {
 		this.directory = directory;
 		this.stateFile = stateFile;
 		this.nickname = nickname;
 		this.identity = identity;
 	}
 
-	void setAddedFlag() {
+	public void setAddedFlag() {
 		isAdded = true;
 	}
-	
-	void setVersion(String version) {
+
+	public void setVersion(String version) {
 		this.version = version;
 	}
-	
-	void setCreatedTime(Date date) {
+
+	public void setCreatedTime(Date date) {
 		this.createdTime = date;
 	}
 
-	void setUnlistedSince(Date date) {
+	public void setUnlistedSince(Date date) {
 		synchronized(lock) {
 			unlistedSince = date;
 		}
 	}
-	
-	void setDownSince(Date downSince, Date lastTried) {
+
+	public void setDownSince(Date downSince, Date lastTried) {
 		synchronized (lock) {
 			this.downSince = downSince;
 			this.lastConnect = lastTried;

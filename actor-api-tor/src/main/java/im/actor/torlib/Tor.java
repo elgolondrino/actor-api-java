@@ -4,10 +4,7 @@ import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.config.TorConfigProxy;
-import im.actor.torlib.connections.ConnectionCacheImpl;
-import im.actor.torlib.socks.SocksPortListenerImpl;
 
 /**
  * The <code>Tor</code> class is a collection of static methods for instantiating
@@ -86,25 +83,5 @@ public class Tor {
             config.setHandshakeV2Enabled(false);
         }
         return config;
-    }
-
-    static public TorInitializationTracker createInitalizationTracker() {
-        return new TorInitializationTracker();
-    }
-
-    static public ConnectionCache createConnectionCache(TorConfig config, TorInitializationTracker tracker) {
-        return new ConnectionCacheImpl(config, tracker);
-    }
-
-    /**
-     * Create and return a new <code>SocksPortListener</code> instance.
-     *
-     * @param circuitManager This is a required dependency.  You must create a <code>CircuitManager</code>
-     *                       before calling this method to create a <code>SocksPortListener</code>.
-     * @return A new <code>SocksPortListener</code> instance.
-     * @see SocksPortListener
-     */
-    static public SocksPortListener createSocksPortListener(TorConfig config, CircuitManager circuitManager) {
-        return new SocksPortListenerImpl(config, circuitManager);
     }
 }

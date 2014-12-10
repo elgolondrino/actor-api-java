@@ -1,6 +1,6 @@
 package im.actor.torlib.directory.consensus;
 
-import im.actor.torlib.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
@@ -23,7 +23,7 @@ public class ConsensusDocumentParser implements DocumentParser<ConsensusDocument
 	private final FooterSectionParser footerParser;
 	private final DocumentFieldParser fieldParser;
 	private DocumentSection currentSection = DocumentSection.PREAMBLE;
-	private final ConsensusDocumentImpl document;
+	private final ConsensusDocument document;
 	
 	private DocumentParsingResultHandler<ConsensusDocument> resultHandler;
 	
@@ -31,7 +31,7 @@ public class ConsensusDocumentParser implements DocumentParser<ConsensusDocument
 		this.fieldParser = fieldParser;
 		initializeParser();
 		
-		document = new ConsensusDocumentImpl();
+		document = new ConsensusDocument();
 		preambleParser = new PreambleSectionParser(fieldParser, document);
 		authorityParser = new AuthoritySectionParser(fieldParser, document);
 		routerStatusParser = new RouterStatusSectionParser(fieldParser, document);

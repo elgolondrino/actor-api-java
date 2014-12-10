@@ -2,11 +2,7 @@ package im.actor.torlib.sockets;
 
 import im.actor.torlib.OpenFailedException;
 import im.actor.torlib.Stream;
-import im.actor.torlib.Threading;
-import im.actor.torlib.TorClient;
-import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
-import im.actor.torlib.Threading;
+import im.actor.utils.Threading;
 import im.actor.torlib.TorClient;
 
 import java.io.FileDescriptor;

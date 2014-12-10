@@ -13,6 +13,7 @@ import im.actor.torlib.*;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.utils.Threading;
 
 public class CircuitCreationTask implements Runnable {
 	private final static Logger logger = Logger.getLogger(CircuitCreationTask.class.getName());

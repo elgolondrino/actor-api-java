@@ -3,7 +3,8 @@ package im.actor.torlib.directory.consensus;
 import java.util.Arrays;
 import java.util.List;
 
-import im.actor.torlib.ConsensusDocument.ConsensusFlavor;
+import im.actor.torlib.directory.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument.ConsensusFlavor;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.NameIntegerParameter;
@@ -12,7 +13,7 @@ public class PreambleSectionParser extends ConsensusDocumentSectionParser {
 	private final static int CURRENT_DOCUMENT_VERSION = 3;
 	private boolean isFirstLine = true;
 	
-	PreambleSectionParser(DocumentFieldParser parser, ConsensusDocumentImpl document) {
+	PreambleSectionParser(DocumentFieldParser parser, ConsensusDocument document) {
 		super(parser, document);
 	}
 	

@@ -1,8 +1,7 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.storage;
 
 import im.actor.torlib.Document;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.directory.DirectoryStoreFile;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -10,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DirectoryStore {
+public class DirectoryStorage {
     public enum CacheFile {
         CERTIFICATES("certificates"),
         CONSENSUS("consensus"),
@@ -33,11 +32,11 @@ public class DirectoryStore {
     }
 
     private final TorConfig config;
-    private Map<CacheFile, DirectoryStoreFile> fileMap;
+    private Map<CacheFile, DirectoryStorageFile> fileMap;
 
-    public DirectoryStore(TorConfig config) {
+    public DirectoryStorage(TorConfig config) {
         this.config = config;
-        this.fileMap = new HashMap<CacheFile, DirectoryStoreFile>();
+        this.fileMap = new HashMap<CacheFile, DirectoryStorageFile>();
     }
 
     public synchronized ByteBuffer loadCacheFile(CacheFile cacheFile) {
@@ -70,9 +69,9 @@ public class DirectoryStore {
         }
     }
 
-    private DirectoryStoreFile getStoreFile(CacheFile cacheFile) {
+    private DirectoryStorageFile getStoreFile(CacheFile cacheFile) {
         if (!fileMap.containsKey(cacheFile)) {
-            fileMap.put(cacheFile, new DirectoryStoreFile(config, cacheFile.getFilename()));
+            fileMap.put(cacheFile, new DirectoryStorageFile(config, cacheFile.getFilename()));
         }
         return fileMap.get(cacheFile);
     }

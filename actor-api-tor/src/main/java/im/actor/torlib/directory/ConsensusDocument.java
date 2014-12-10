@@ -1,48 +1,49 @@
-package im.actor.torlib.directory.consensus;
+package im.actor.torlib.directory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
-import im.actor.torlib.ConsensusDocument;
-import im.actor.torlib.directory.DirectoryServer;
-import im.actor.torlib.KeyCertificate;
-import im.actor.torlib.RouterStatus;
-import im.actor.torlib.Tor;
-import im.actor.torlib.VoteAuthorityEntry;
+import im.actor.torlib.*;
 import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.crypto.TorSignature.DigestAlgorithm;
+import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.Timestamp;
-import im.actor.torlib.directory.TrustedAuthorities;
+import im.actor.torlib.directory.consensus.DirectorySignature;
+import im.actor.torlib.directory.consensus.RequiredCertificateImpl;
 
-public class ConsensusDocumentImpl implements ConsensusDocument {
-	
+public class ConsensusDocument implements Document {
+
+	public enum ConsensusFlavor { NS, MICRODESC };
+	public enum SignatureStatus { STATUS_VERIFIED, STATUS_FAILED, STATUS_NEED_CERTS };
+
+	public interface RequiredCertificate {
+		int getDownloadFailureCount();
+		void incrementDownloadFailureCount();
+		HexDigest getAuthorityIdentity();
+		HexDigest getSigningKey();
+	}
+
+
 	enum SignatureVerifyStatus { STATUS_UNVERIFIED, STATUS_NEED_CERTS, STATUS_VERIFIED };
-	
-	private final static Logger logger = Logger.getLogger(ConsensusDocumentImpl.class.getName());
-	
+
+	private final static Logger logger = Logger.getLogger(ConsensusDocument.class.getName());
+
 	private final static String BW_WEIGHT_SCALE_PARAM = "bwweightscale";
 	private final static int BW_WEIGHT_SCALE_DEFAULT = 10000;
 	private final static int BW_WEIGHT_SCALE_MIN = 1;
 	private final static int BW_WEIGHT_SCALE_MAX = Integer.MAX_VALUE;
-	
+
 	private final static String CIRCWINDOW_PARAM = "circwindow";
 	private final static int CIRCWINDOW_DEFAULT = 1000;
 	private final static int CIRCWINDOW_MIN = 100;
 	private final static int CIRCWINDOW_MAX = 1000;
-	
+
 	private final static String USE_NTOR_HANDSHAKE_PARAM = "UseNTorHandshake";
-	
+
 	private Set<RequiredCertificate> requiredCertificates = new HashSet<RequiredCertificate>();
-	
-	
+
+
 	private int consensusMethod;
 	private ConsensusFlavor flavor;
 	private Timestamp validAfter;
@@ -62,29 +63,29 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 	private int signatureCount;
 	private boolean isFirstCallToVerifySignatures = true;
 	private String rawDocumentData;
-	
-	void setConsensusFlavor(ConsensusFlavor flavor) { this.flavor = flavor; }
-	void setConsensusMethod(int method) { consensusMethod = method; }
-	void setValidAfter(Timestamp ts) { validAfter = ts; }
-	void setFreshUntil(Timestamp ts) { freshUntil = ts; }
-	void setValidUntil(Timestamp ts) { validUntil = ts; }
-	void setDistDelaySeconds(int seconds) { distDelaySeconds = seconds; }
-	void setVoteDelaySeconds(int seconds) { voteDelaySeconds = seconds; }
-	void addClientVersion(String version) { clientVersions.add(version); }
-	void addServerVersion(String version) { serverVersions.add(version); }
-	void addParameter(String name, int value) { parameters.put(name, value); }
-	void addBandwidthWeight(String name, int value) { bandwidthWeights.put(name, value); }
-		
-	void addSignature(DirectorySignature signature) {
+
+	public void setConsensusFlavor(ConsensusFlavor flavor) { this.flavor = flavor; }
+	public void setConsensusMethod(int method) { consensusMethod = method; }
+	public void setValidAfter(Timestamp ts) { validAfter = ts; }
+	public void setFreshUntil(Timestamp ts) { freshUntil = ts; }
+	public void setValidUntil(Timestamp ts) { validUntil = ts; }
+	public void setDistDelaySeconds(int seconds) { distDelaySeconds = seconds; }
+	public void setVoteDelaySeconds(int seconds) { voteDelaySeconds = seconds; }
+	public void addClientVersion(String version) { clientVersions.add(version); }
+	public void addServerVersion(String version) { serverVersions.add(version); }
+	public void addParameter(String name, int value) { parameters.put(name, value); }
+	public void addBandwidthWeight(String name, int value) { bandwidthWeights.put(name, value); }
+
+	public void addSignature(DirectorySignature signature) {
 		final VoteAuthorityEntry voteAuthority = voteAuthorityEntries.get(signature.getIdentityDigest());
 		if(voteAuthority == null) {
 			logger.warning("Consensus contains signature for source not declared in authority section: "+ signature.getIdentityDigest());
 			return;
 		}
 		final List<DirectorySignature> signatures = voteAuthority.getSignatures();
-		final DigestAlgorithm newSignatureAlgorithm = signature.getSignature().getDigestAlgorithm();
+		final TorSignature.DigestAlgorithm newSignatureAlgorithm = signature.getSignature().getDigestAlgorithm();
 		for(DirectorySignature sig: signatures) {
-			DigestAlgorithm algo = sig.getSignature().getDigestAlgorithm();
+			TorSignature.DigestAlgorithm algo = sig.getSignature().getDigestAlgorithm();
 			if(algo.equals(newSignatureAlgorithm)) {
 				logger.warning("Consensus contains two or more signatures for same source with same algorithm");
 				return;
@@ -94,11 +95,11 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		signatures.add(signature);
 	}
 
-	void setSigningHash(HexDigest hash) { signingHash = hash; }
-	void setSigningHash256(HexDigest hash) { signingHash256 = hash; }
-	void setRawDocumentData(String rawData) { rawDocumentData = rawData; }
-	
-	ConsensusDocumentImpl() {
+	public void setSigningHash(HexDigest hash) { signingHash = hash; }
+	public void setSigningHash256(HexDigest hash) { signingHash256 = hash; }
+	public void setRawDocumentData(String rawData) { rawDocumentData = rawData; }
+
+	public ConsensusDocument() {
 		clientVersions = new HashSet<String>();
 		serverVersions = new HashSet<String>();
 		knownFlags = new HashSet<String>();
@@ -107,19 +108,19 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		bandwidthWeights = new HashMap<String, Integer>();
 		parameters = new HashMap<String, Integer>();
 	}
-	
-	void addKnownFlag(String flag) {
+
+	public void addKnownFlag(String flag) {
 		knownFlags.add(flag);
 	}
-	
-	void addVoteAuthorityEntry(VoteAuthorityEntry entry) {
+
+	public void addVoteAuthorityEntry(VoteAuthorityEntry entry) {
 		voteAuthorityEntries.put(entry.getIdentity(), entry);
 	}
-	
-	void addRouterStatusEntry(RouterStatus entry) {
+
+	public void addRouterStatusEntry(RouterStatus entry) {
 		routerStatusEntries.add(entry);
 	}
-	
+
 	public ConsensusFlavor getFlavor() {
 		return flavor;
 	}
@@ -127,51 +128,51 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 	public Timestamp getValidAfterTime() {
 		return validAfter;
 	}
-	
+
 	public Timestamp getFreshUntilTime() {
 		return freshUntil;
 	}
-	
+
 	public Timestamp getValidUntilTime() {
 		return validUntil;
 	}
-	
+
 	public int getConsensusMethod() {
 		return consensusMethod;
 	}
-	
+
 	public int getVoteSeconds() {
 		return voteDelaySeconds;
 	}
-	
+
 	public int getDistSeconds() {
 		return distDelaySeconds;
 	}
-	
+
 	public Set<String> getClientVersions() {
 		return clientVersions;
 	}
-	
+
 	public Set<String> getServerVersions() {
 		return serverVersions;
 	}
-	
+
 	public boolean isLive() {
 		if(validUntil == null) {
 			return false;
 		} else {
-			return !validUntil.hasPassed(); 
+			return !validUntil.hasPassed();
 		}
 	}
-	
+
 	public List<RouterStatus> getRouterStatusEntries() {
 		return Collections.unmodifiableList(routerStatusEntries);
 	}
-	
+
 	public String getRawDocumentData() {
 		return rawDocumentData;
 	}
-	
+
 	public ByteBuffer getRawDocumentBytes() {
 		if(getRawDocumentData() == null) {
 			return ByteBuffer.allocate(0);
@@ -182,18 +183,18 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 
 	public boolean isValidDocument() {
 		return (validAfter != null) && (freshUntil != null) && (validUntil != null) &&
-		(voteDelaySeconds > 0) && (distDelaySeconds > 0) && (signingHash != null) &&
-		(signatureCount > 0);
+				(voteDelaySeconds > 0) && (distDelaySeconds > 0) && (signingHash != null) &&
+				(signatureCount > 0);
 	}
-	
+
 	public HexDigest getSigningHash() {
 		return signingHash;
 	}
-	
+
 	public HexDigest getSigningHash256() {
 		return signingHash256;
 	}
-	
+
 	public synchronized SignatureStatus verifySignatures() {
 		boolean firstCall = isFirstCallToVerifySignatures;
 		isFirstCallToVerifySignatures = false;
@@ -202,20 +203,20 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		int certsNeededCount = 0;
 		final int v3Count = TrustedAuthorities.getInstance().getV3AuthorityServerCount();
 		final int required = (v3Count / 2) + 1;
-		
+
 		for(VoteAuthorityEntry entry: voteAuthorityEntries.values()) {
 			switch(verifySingleAuthority(entry)) {
-			case STATUS_FAILED:
-				break;
-			case STATUS_NEED_CERTS:
-				certsNeededCount += 1;
-				break;
-			case STATUS_VERIFIED:
-				verifiedCount += 1;
-				break;
+				case STATUS_FAILED:
+					break;
+				case STATUS_NEED_CERTS:
+					certsNeededCount += 1;
+					break;
+				case STATUS_VERIFIED:
+					verifiedCount += 1;
+					break;
 			}
 		}
-		
+
 		if(verifiedCount >= required) {
 			return SignatureStatus.STATUS_VERIFIED;
 		} else if(verifiedCount + certsNeededCount >= required) {
@@ -229,10 +230,10 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 	}
 
 	private SignatureStatus verifySingleAuthority(VoteAuthorityEntry authority) {
-		
+
 		boolean certsNeeded = false;
 		boolean validSignature = false;
-		
+
 		for(DirectorySignature s: authority.getSignatures()) {
 			DirectoryServer trusted = TrustedAuthorities.getInstance().getAuthorityServerByIdentity(s.getIdentityDigest());
 			if(trusted == null) {
@@ -240,18 +241,18 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 				return SignatureStatus.STATUS_FAILED;
 			} else {
 				switch(verifySignatureForTrustedAuthority(trusted, s)) {
-				case STATUS_NEED_CERTS:
-					certsNeeded = true;
-					break;
-				case STATUS_VERIFIED:
-					validSignature = true;
-					break;
-				default:
-					break;
+					case STATUS_NEED_CERTS:
+						certsNeeded = true;
+						break;
+					case STATUS_VERIFIED:
+						validSignature = true;
+						break;
+					default:
+						break;
 				}
 			}
 		}
-		
+
 		if(validSignature) {
 			return SignatureStatus.STATUS_VERIFIED;
 		} else if(certsNeeded) {
@@ -260,7 +261,7 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 			return SignatureStatus.STATUS_FAILED;
 		}
 	}
-	
+
 	private SignatureStatus verifySignatureForTrustedAuthority(DirectoryServer trustedAuthority, DirectorySignature signature) {
 		final KeyCertificate certificate = trustedAuthority.getCertificateByFingerprint(signature.getSigningKeyDigest());
 		if(certificate == null) {
@@ -271,7 +272,7 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		if(certificate.isExpired()) {
 			return SignatureStatus.STATUS_FAILED;
 		}
-		
+
 		final TorPublicKey signingKey = certificate.getAuthoritySigningKey();
 		final HexDigest d = (signature.useSha256()) ? signingHash256 : signingHash;
 		if(!signingKey.verifySignature(signature.getSignature(), d)) {
@@ -290,16 +291,16 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 	}
 
 	public boolean equals(Object o) {
-		if(!(o instanceof ConsensusDocumentImpl))
+		if(!(o instanceof ConsensusDocument))
 			return false;
-		final ConsensusDocumentImpl other = (ConsensusDocumentImpl) o;
+		final ConsensusDocument other = (ConsensusDocument) o;
 		return other.getSigningHash().equals(signingHash);
 	}
-	
+
 	public int hashCode() {
 		return (signingHash == null) ? 0 : signingHash.hashCode();
 	}
-	
+
 	private int getParameterValue(String name, int defaultValue, int minValue, int maxValue) {
 		if(!parameters.containsKey(name)) {
 			return defaultValue;
@@ -313,7 +314,7 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 			return value;
 		}
 	}
-	
+
 	private boolean getBooleanParameterValue(String name, boolean defaultValue) {
 		if(!parameters.containsKey(name)) {
 			return defaultValue;
@@ -321,15 +322,15 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		final int value = parameters.get(name);
 		return value != 0;
 	}
-	
+
 	public int getCircWindowParameter() {
 		return getParameterValue(CIRCWINDOW_PARAM, CIRCWINDOW_DEFAULT, CIRCWINDOW_MIN, CIRCWINDOW_MAX);
 	}
-	
+
 	public int getWeightScaleParameter() {
 		return getParameterValue(BW_WEIGHT_SCALE_PARAM, BW_WEIGHT_SCALE_DEFAULT, BW_WEIGHT_SCALE_MIN, BW_WEIGHT_SCALE_MAX);
 	}
-	
+
 	public int getBandwidthWeight(String tag) {
 		if(bandwidthWeights.containsKey(tag)) {
 			return bandwidthWeights.get(tag);
@@ -337,7 +338,7 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 			return -1;
 		}
 	}
-	
+
 	public boolean getUseNTorHandshake() {
 		return getBooleanParameterValue(USE_NTOR_HANDSHAKE_PARAM, false);
 	}

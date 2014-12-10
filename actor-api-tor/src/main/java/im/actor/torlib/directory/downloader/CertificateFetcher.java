@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 
 import im.actor.torlib.KeyCertificate;
-import im.actor.torlib.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class CertificateFetcher extends DocumentFetcher<KeyCertificate>{

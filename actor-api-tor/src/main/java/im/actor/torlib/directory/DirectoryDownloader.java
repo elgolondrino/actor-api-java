@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
-import im.actor.torlib.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.downloader.DirectoryDocumentRequestor;

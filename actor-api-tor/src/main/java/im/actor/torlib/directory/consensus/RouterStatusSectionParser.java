@@ -1,6 +1,7 @@
 package im.actor.torlib.directory.consensus;
 
-import im.actor.torlib.ConsensusDocument.ConsensusFlavor;
+import im.actor.torlib.directory.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument.ConsensusFlavor;
 import im.actor.torlib.RouterStatus;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
@@ -11,7 +12,7 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
 
 	private RouterStatus currentEntry = null;
 	
-	RouterStatusSectionParser(DocumentFieldParser parser, ConsensusDocumentImpl document) {
+	RouterStatusSectionParser(DocumentFieldParser parser, ConsensusDocument document) {
 		super(parser, document);
 	}
 	

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
-import im.actor.torlib.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.cache.DescriptorCache;
@@ -15,6 +15,8 @@ import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParserFactory;
 import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
+import im.actor.torlib.directory.storage.DirectoryStorage;
+import im.actor.torlib.directory.storage.StateFile;
 
 /**
  * Main interface for accessing directory information and interacting
@@ -32,7 +34,7 @@ public class Directory {
 
     private final int id;
 
-    private final DirectoryStore store;
+    private final DirectoryStorage store;
     private final TorConfig config;
     private final StateFile stateFile;
 
@@ -50,10 +52,10 @@ public class Directory {
 
     public Directory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
-        this.store = new DirectoryStore(config);
+        this.store = new DirectoryStorage(config);
         this.config = config;
         this.stateFile = new StateFile(store, this);
-        this.microdescriptorCache = new DescriptorCache<Descriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
+        this.microdescriptorCache = new DescriptorCache<Descriptor>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
             protected DocumentParser<Descriptor> createDocumentParser(ByteBuffer buffer) {
                 return PARSER_FACTORY.createRouterMicrodescriptorParser(buffer);
@@ -104,11 +106,11 @@ public class Directory {
             boolean useMicrodescriptors = config.getUseMicrodescriptors() != TorConfig.AutoBoolValue.FALSE;
             last = System.currentTimeMillis();
             LOG.info("Loading certificates");
-            loadCertificates(store.loadCacheFile(DirectoryStore.CacheFile.CERTIFICATES));
+            loadCertificates(store.loadCacheFile(DirectoryStorage.CacheFile.CERTIFICATES));
             logElapsed();
 
             LOG.info("Loading consensus");
-            loadConsensus(store.loadCacheFile(useMicrodescriptors ? DirectoryStore.CacheFile.CONSENSUS_MICRODESC : DirectoryStore.CacheFile.CONSENSUS));
+            loadConsensus(store.loadCacheFile(useMicrodescriptors ? DirectoryStorage.CacheFile.CONSENSUS_MICRODESC : DirectoryStorage.CacheFile.CONSENSUS));
             logElapsed();
 
             LOG.info("Loading microdescriptor cache");
@@ -117,7 +119,7 @@ public class Directory {
             logElapsed();
 
             LOG.info("loading state file");
-            stateFile.parseBuffer(store.loadCacheFile(DirectoryStore.CacheFile.STATE));
+            stateFile.parseBuffer(store.loadCacheFile(DirectoryStorage.CacheFile.STATE));
             logElapsed();
 
             isLoaded = true;
@@ -239,7 +241,7 @@ public class Directory {
             for (DirectoryServer ds : TrustedAuthorities.getInstance().getAuthorityServers()) {
                 certs.addAll(ds.getCertificates());
             }
-            store.writeDocumentList(DirectoryStore.CacheFile.CERTIFICATES, certs);
+            store.writeDocumentList(DirectoryStorage.CacheFile.CERTIFICATES, certs);
         }
     }
 
@@ -294,9 +296,9 @@ public class Directory {
     private void storeCurrentConsensus() {
         if (currentConsensus != null) {
             if (currentConsensus.getFlavor() == ConsensusDocument.ConsensusFlavor.MICRODESC) {
-                store.writeDocument(DirectoryStore.CacheFile.CONSENSUS_MICRODESC, currentConsensus);
+                store.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, currentConsensus);
             } else {
-                store.writeDocument(DirectoryStore.CacheFile.CONSENSUS, currentConsensus);
+                store.writeDocument(DirectoryStorage.CacheFile.CONSENSUS, currentConsensus);
             }
         }
     }

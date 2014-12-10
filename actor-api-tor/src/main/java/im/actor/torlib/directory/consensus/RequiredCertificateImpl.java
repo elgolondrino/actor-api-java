@@ -1,6 +1,6 @@
 package im.actor.torlib.directory.consensus;
 
-import im.actor.torlib.ConsensusDocument;
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.data.HexDigest;
 
 public class RequiredCertificateImpl implements ConsensusDocument.RequiredCertificate {

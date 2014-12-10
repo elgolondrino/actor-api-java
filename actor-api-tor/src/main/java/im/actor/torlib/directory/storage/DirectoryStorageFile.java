@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.storage;
 
 import java.io.Closeable;
 import java.io.File;
@@ -16,8 +16,8 @@ import im.actor.torlib.Document;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorRandom;
 
-public class DirectoryStoreFile {
-    private final static Logger logger = Logger.getLogger(DirectoryStoreFile.class.getName());
+public class DirectoryStorageFile {
+    private final static Logger logger = Logger.getLogger(DirectoryStorageFile.class.getName());
     private final static ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
     private final static TorRandom random = new TorRandom();
 
@@ -29,7 +29,7 @@ public class DirectoryStoreFile {
     private boolean openFileFailed;
     private boolean directoryCreationFailed;
 
-    public DirectoryStoreFile(TorConfig config, String cacheFilename) {
+    public DirectoryStorageFile(TorConfig config, String cacheFilename) {
         this.config = config;
         this.cacheFilename = cacheFilename;
     }

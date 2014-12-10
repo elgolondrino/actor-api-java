@@ -1,14 +1,15 @@
 package im.actor.torlib.directory.consensus;
 
+import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 public abstract class ConsensusDocumentSectionParser {
 	
-	protected final ConsensusDocumentImpl document;
+	protected final ConsensusDocument document;
 	protected final DocumentFieldParser fieldParser;
 	
 	
-	ConsensusDocumentSectionParser(DocumentFieldParser parser, ConsensusDocumentImpl document) {
+	ConsensusDocumentSectionParser(DocumentFieldParser parser, ConsensusDocument document) {
 		this.fieldParser = parser;
 		this.document = document;
 	}

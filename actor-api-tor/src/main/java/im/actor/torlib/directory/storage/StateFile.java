@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.storage;
 
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
@@ -12,18 +12,20 @@ import java.util.logging.Logger;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.Tor;
-import im.actor.torlib.directory.DirectoryStore.CacheFile;
+import im.actor.torlib.directory.Directory;
+import im.actor.torlib.directory.GuardEntryImpl;
+import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.torlib.crypto.TorRandom;
 
 public class StateFile {
 	private final static Logger logger = Logger.getLogger(StateFile.class.getName());
 	
 	private final static int DATE_LENGTH = 19;
-	
-	final static String KEYWORD_ENTRY_GUARD = "EntryGuard";
-	final static String KEYWORD_ENTRY_GUARD_ADDED_BY = "EntryGuardAddedBy";
-	final static String KEYWORD_ENTRY_GUARD_DOWN_SINCE = "EntryGuardDownSince";
-	final static String KEYWORD_ENTRY_GUARD_UNLISTED_SINCE = "EntryGuardUnlistedSince";
+
+	public final static String KEYWORD_ENTRY_GUARD = "EntryGuard";
+	public final static String KEYWORD_ENTRY_GUARD_ADDED_BY = "EntryGuardAddedBy";
+	public final static String KEYWORD_ENTRY_GUARD_DOWN_SINCE = "EntryGuardDownSince";
+	public final static String KEYWORD_ENTRY_GUARD_UNLISTED_SINCE = "EntryGuardUnlistedSince";
 	
 	private final List<GuardEntryImpl> guardEntries = new ArrayList<GuardEntryImpl>();
 	private final TorRandom random = new TorRandom();
@@ -88,14 +90,14 @@ public class StateFile {
 		}
 	}
 
-	String formatDate(Date date) {
+	public String formatDate(Date date) {
 		return dateFormat.format(date);
 	}
 
-	private final DirectoryStore directoryStore;
+	private final DirectoryStorage directoryStore;
 	private final Directory directory;
 	
-	public StateFile(DirectoryStore store, Directory directory) {
+	public StateFile(DirectoryStorage store, Directory directory) {
 		this.directoryStore = store;
 		this.directory = directory;
 	}
@@ -148,11 +150,11 @@ public class StateFile {
 		}
 	}
 
-	void writeFile() {
+	public void writeFile() {
 		directoryStore.writeData(CacheFile.STATE, getFileContents());
 	}
-	
-	ByteBuffer getFileContents() {
+
+	public ByteBuffer getFileContents() {
 		final StringBuilder sb = new StringBuilder();
 		synchronized (guardEntries) {
 			for(GuardEntryImpl entry: guardEntries) {
