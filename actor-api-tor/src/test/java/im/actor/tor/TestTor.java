@@ -19,7 +19,7 @@ public class TestTor extends TestCase {
     private static final long PHONE_NUMBER = 75552212121L;
 
     public void testTor() throws Exception {
-        ActorTorHelper helper = new ActorTorHelper("");
+        ActorTorHelper helper = new ActorTorHelper("/Users/ex3ndr/Develop/tor_junit/");
         helper.start();
 
         ActorApiConfig config = new ActorApiConfig.Builder()
@@ -27,7 +27,7 @@ public class TestTor extends TestCase {
                 .setStorage(new MemoryApiStorage())
                 .addEndpoint(ENDPOINT)
                 .setLog(new SysOutLog())
-                .setProxy(new ActorApiProxy("127.0.0.1", 9151))
+                .setProxy(new ActorApiProxy("127.0.0.1", 9152))
                 .build();
         ActorApi actorApi = new ActorApi(config);
         ApiRequests requests = actorApi.getRequests();

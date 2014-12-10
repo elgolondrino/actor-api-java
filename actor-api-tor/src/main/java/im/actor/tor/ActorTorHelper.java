@@ -1,10 +1,8 @@
 package im.actor.tor;
 
-import com.subgraph.orchid.TorClient;
+import im.actor.torlib.TorClient;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 
 /**
  * Created by ex3ndr on 08.12.14.
@@ -25,6 +23,6 @@ public class ActorTorHelper {
 
     public void start() {
         this.torClient.start();
-        this.torClient.enableSocksListener(9151);
+        this.torClient.enableSocksListener(9152);
     }
 }

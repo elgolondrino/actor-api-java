@@ -5,6 +5,7 @@ package im.actor.tor;
  */
 public class Main {
     public static void main(String[] args) {
-        ActorTorHelper helper = new ActorTorHelper("../tor");
+        ActorTorHelper helper = new ActorTorHelper("/Users/ex3ndr/Develop/tor");
+        helper.start();
     }
 }
