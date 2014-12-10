@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import im.actor.torlib.Descriptor;
-import im.actor.torlib.DirectoryStore;
-import im.actor.torlib.DirectoryStore.CacheFile;
+import im.actor.torlib.directory.DirectoryStore;
+import im.actor.torlib.directory.DirectoryStore.CacheFile;
 import im.actor.torlib.Threading;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;

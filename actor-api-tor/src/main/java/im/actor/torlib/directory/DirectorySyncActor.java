@@ -6,7 +6,6 @@ import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import im.actor.torlib.ConsensusDocument;
-import im.actor.torlib.DirectoryDownloader;
 import im.actor.torlib.KeyCertificate;
 import im.actor.torlib.Threading;
 import im.actor.torlib.crypto.TorRandom;

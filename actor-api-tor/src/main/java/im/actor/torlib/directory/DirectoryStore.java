@@ -1,5 +1,7 @@
-package im.actor.torlib;
+package im.actor.torlib.directory;
 
+import im.actor.torlib.Document;
+import im.actor.torlib.TorConfig;
 import im.actor.torlib.directory.DirectoryStoreFile;
 
 import java.nio.ByteBuffer;

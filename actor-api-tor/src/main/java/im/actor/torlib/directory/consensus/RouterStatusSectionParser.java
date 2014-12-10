@@ -1,6 +1,7 @@
 package im.actor.torlib.directory.consensus;
 
 import im.actor.torlib.ConsensusDocument.ConsensusFlavor;
+import im.actor.torlib.RouterStatus;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.data.HexDigest;
@@ -8,7 +9,7 @@ import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
 
-	private RouterStatusImpl currentEntry = null;
+	private RouterStatus currentEntry = null;
 	
 	RouterStatusSectionParser(DocumentFieldParser parser, ConsensusDocumentImpl document) {
 		super(parser, document);
@@ -56,7 +57,7 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
 	private void parseFirstLine() {
 		if(currentEntry != null)
 			throw new TorParsingException("Unterminated router status entry.");
-		currentEntry = new RouterStatusImpl();
+		currentEntry = new RouterStatus();
 		currentEntry.setNickname(fieldParser.parseNickname());
 		currentEntry.setIdentity(parseBase64Digest());
 		if(document.getFlavor() != ConsensusFlavor.MICRODESC) {

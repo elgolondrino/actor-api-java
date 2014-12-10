@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.ConnectionCache;
 import im.actor.torlib.directory.Directory;
-import im.actor.torlib.DirectoryDownloader;
+import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.Threading;

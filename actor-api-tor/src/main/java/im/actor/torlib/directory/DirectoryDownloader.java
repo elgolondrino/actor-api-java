@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.directory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import im.actor.torlib.*;
 import im.actor.torlib.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.Directory;
-import im.actor.torlib.directory.DirectorySyncActor;
-import im.actor.torlib.directory.DirectorySyncInt;
 import im.actor.torlib.directory.downloader.DirectoryDocumentRequestor;
 import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
 

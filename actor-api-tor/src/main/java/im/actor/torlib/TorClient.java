@@ -12,6 +12,7 @@ import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.Directory;
+import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.sockets.OrchidSocketFactory;
 
 /**

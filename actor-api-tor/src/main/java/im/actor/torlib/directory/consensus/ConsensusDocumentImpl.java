@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import im.actor.torlib.ConsensusDocument;
-import im.actor.torlib.DirectoryServer;
+import im.actor.torlib.directory.DirectoryServer;
 import im.actor.torlib.KeyCertificate;
 import im.actor.torlib.RouterStatus;
 import im.actor.torlib.Tor;
@@ -116,7 +116,7 @@ public class ConsensusDocumentImpl implements ConsensusDocument {
 		voteAuthorityEntries.put(entry.getIdentity(), entry);
 	}
 	
-	void addRouterStatusEntry(RouterStatusImpl entry) {
+	void addRouterStatusEntry(RouterStatus entry) {
 		routerStatusEntries.add(entry);
 	}
 	

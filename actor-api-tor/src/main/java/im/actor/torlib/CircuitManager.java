@@ -18,6 +18,7 @@ import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.Directory;
+import im.actor.torlib.directory.DirectoryDownloader;
 
 
 public class CircuitManager implements DashboardRenderable {

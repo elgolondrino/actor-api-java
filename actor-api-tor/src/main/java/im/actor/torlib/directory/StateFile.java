@@ -9,11 +9,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import im.actor.torlib.DirectoryStore;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.Tor;
-import im.actor.torlib.DirectoryStore.CacheFile;
+import im.actor.torlib.directory.DirectoryStore.CacheFile;
 import im.actor.torlib.crypto.TorRandom;
 
 public class StateFile {
