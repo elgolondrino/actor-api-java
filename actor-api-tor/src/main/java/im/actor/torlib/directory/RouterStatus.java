@@ -11,7 +11,6 @@ import java.util.Set;
 public class RouterStatus {
     private String nickname;
     private HexDigest identity;
-    private HexDigest digest;
     private HexDigest microdescriptorDigest;
     private Timestamp publicationTime;
     private IPv4Address address;
@@ -31,10 +30,6 @@ public class RouterStatus {
 
     public void setIdentity(HexDigest identity) {
         this.identity = identity;
-    }
-
-    public void setDigest(HexDigest digest) {
-        this.digest = digest;
     }
 
     public void setMicrodescriptorDigest(HexDigest digest) {
@@ -112,10 +107,6 @@ public class RouterStatus {
         return identity;
     }
 
-    public HexDigest getDescriptorDigest() {
-        return digest;
-    }
-
     public HexDigest getMicrodescriptorDigest() {
         return microdescriptorDigest;
     }
@@ -169,7 +160,7 @@ public class RouterStatus {
     }
 
     public String toString() {
-        return "Router: (" + nickname + " " + identity + " " + digest + " " + address + " " + routerPort + " " + directoryPort
+        return "Router: (" + nickname + " " + identity + " " + microdescriptorDigest + " " + address + " " + routerPort + " " + directoryPort
                 + " " + version + " " + exitPorts + ")";
     }
 

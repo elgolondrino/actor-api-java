@@ -1,4 +1,4 @@
-package im.actor.torlib.misc;
+package im.actor.utils.misc;
 
 public class Utils {
 	public static boolean constantTimeArrayEquals(byte[] a1, byte[] a2) {

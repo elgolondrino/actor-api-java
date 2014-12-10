@@ -28,16 +28,16 @@ public class CircuitBuildTask implements Runnable {
 
 	private Connection connection = null;
 	
-	public CircuitBuildTask(CircuitCreationRequest request, ConnectionCache connectionCache, boolean ntorEnabled) {
-		this(request, connectionCache, ntorEnabled, null);
+	public CircuitBuildTask(CircuitCreationRequest request, ConnectionCache connectionCache) {
+		this(request, connectionCache, null);
 	}
 
-	public CircuitBuildTask(CircuitCreationRequest request, ConnectionCache connectionCache, boolean ntorEnabled, TorInitializationTracker initializationTracker) {
+	public CircuitBuildTask(CircuitCreationRequest request, ConnectionCache connectionCache, TorInitializationTracker initializationTracker) {
 		this.creationRequest = request;
 		this.connectionCache = connectionCache;
 		this.initializationTracker = initializationTracker;
 		this.circuit = request.getCircuit();
-		this.extender = new CircuitExtender(request.getCircuit(), ntorEnabled);
+		this.extender = new CircuitExtender(request.getCircuit());
 	}
 
 	public void run() {

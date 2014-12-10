@@ -39,10 +39,7 @@ public class ConsensusDocument implements Document {
 	private final static int CIRCWINDOW_MIN = 100;
 	private final static int CIRCWINDOW_MAX = 1000;
 
-	private final static String USE_NTOR_HANDSHAKE_PARAM = "UseNTorHandshake";
-
 	private Set<RequiredCertificate> requiredCertificates = new HashSet<RequiredCertificate>();
-
 
 	private int consensusMethod;
 	private ConsensusFlavor flavor;
@@ -337,9 +334,5 @@ public class ConsensusDocument implements Document {
 		} else {
 			return -1;
 		}
-	}
-
-	public boolean getUseNTorHandshake() {
-		return getBooleanParameterValue(USE_NTOR_HANDSHAKE_PARAM, false);
 	}
 }

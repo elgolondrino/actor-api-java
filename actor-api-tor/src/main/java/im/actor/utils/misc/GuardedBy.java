@@ -1,4 +1,4 @@
-package im.actor.torlib.misc;
+package im.actor.utils.misc;
 
 
 import java.lang.annotation.ElementType;

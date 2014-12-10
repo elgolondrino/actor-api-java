@@ -15,7 +15,7 @@ import im.actor.utils.Threading;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
-import im.actor.torlib.misc.GuardedBy;
+import im.actor.utils.misc.GuardedBy;
 
 public abstract class DescriptorCache <T extends Descriptor> {
 	private final static Logger logger = Logger.getLogger(DescriptorCache.class.getName());

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.misc.GuardedBy;
+import im.actor.utils.misc.GuardedBy;
 
 
 

@@ -80,8 +80,7 @@ public class CircuitNodeChooser {
 		final List<Router> routers = new ArrayList<Router>();
 		for(Router r: directory.getAllRouters()) {
 			if(r.isRunning() && 
-					r.isValid() && 
-					!r.isHibernating() && 
+					r.isValid() &&
 					!(needDescriptor && r.getCurrentDescriptor() == null)) {
 				
 				routers.add(r);

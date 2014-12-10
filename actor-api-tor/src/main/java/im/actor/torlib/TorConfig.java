@@ -125,10 +125,6 @@ public interface TorConfig {
 	@ConfigVar(type=ConfigVarType.AUTOBOOL, defaultValue="auto")
 	AutoBoolValue getUseNTorHandshake();
 	void setUseNTorHandshake(AutoBoolValue value);
-	
-	@ConfigVar(type=ConfigVarType.AUTOBOOL, defaultValue="auto")
-	AutoBoolValue getUseMicrodescriptors();
-	void setUseMicrodescriptors(AutoBoolValue value);
 
 	@ConfigVar(type=ConfigVarType.BOOLEAN, defaultValue="false")
 	boolean getUseBridges();

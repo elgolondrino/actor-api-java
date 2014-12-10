@@ -9,12 +9,8 @@ import java.util.Queue;
 import im.actor.torlib.RelayCell;
 import im.actor.torlib.Stream;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
-import im.actor.torlib.misc.GuardedBy;
-import im.actor.torlib.misc.ThreadSafe;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Stream;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
-import im.actor.torlib.misc.GuardedBy;
+import im.actor.utils.misc.GuardedBy;
+import im.actor.utils.misc.ThreadSafe;
 
 @ThreadSafe
 public class TorInputStream extends InputStream {

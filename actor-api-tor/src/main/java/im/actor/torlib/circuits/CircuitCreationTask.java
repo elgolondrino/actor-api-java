@@ -16,273 +16,274 @@ import im.actor.torlib.data.exitpolicy.ExitTarget;
 import im.actor.utils.Threading;
 
 public class CircuitCreationTask implements Runnable {
-	private final static Logger logger = Logger.getLogger(CircuitCreationTask.class.getName());
-	private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
-	private final static int MAX_PENDING_CIRCUITS = 4;
+    private final static Logger logger = Logger.getLogger(CircuitCreationTask.class.getName());
+    private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
+    private final static int MAX_PENDING_CIRCUITS = 4;
 
-	private final TorConfig config;
-	private final Directory directory;
-	private final ConnectionCache connectionCache;
-	private final CircuitManager circuitManager;
-	private final TorInitializationTracker initializationTracker;
-	private final CircuitPathChooser pathChooser;
-	private final Executor executor;
-	private final CircuitBuildHandler buildHandler;
-	private final CircuitBuildHandler internalBuildHandler;
-	// To avoid obnoxiously printing a warning every second
-	private int notEnoughDirectoryInformationWarningCounter = 0;
-	
-	private final CircuitPredictor predictor;
-	
-	private final AtomicLong lastNewCircuit;
+    private final TorConfig config;
+    private final Directory directory;
+    private final ConnectionCache connectionCache;
+    private final CircuitManager circuitManager;
+    private final TorInitializationTracker initializationTracker;
+    private final CircuitPathChooser pathChooser;
+    private final Executor executor;
+    private final CircuitBuildHandler buildHandler;
+    private final CircuitBuildHandler internalBuildHandler;
+    // To avoid obnoxiously printing a warning every second
+    private int notEnoughDirectoryInformationWarningCounter = 0;
 
-	public CircuitCreationTask(TorConfig config, Directory directory, ConnectionCache connectionCache, CircuitPathChooser pathChooser, CircuitManager circuitManager, TorInitializationTracker initializationTracker) {
-		this.config = config;
-		this.directory = directory;
-		this.connectionCache = connectionCache;
-		this.circuitManager = circuitManager;
-		this.initializationTracker = initializationTracker;
-		this.pathChooser = pathChooser;
-		this.executor = Threading.newPool("CircuitCreationTask worker");
-		this.buildHandler = createCircuitBuildHandler();
-		this.internalBuildHandler = createInternalCircuitBuildHandler();
-		this.predictor = new CircuitPredictor();
-		this.lastNewCircuit = new AtomicLong();
-	}
+    private final CircuitPredictor predictor;
 
-	public CircuitPredictor getCircuitPredictor() {
-		return predictor;
-	}
+    private final AtomicLong lastNewCircuit;
 
-	public void run() {
-		expireOldCircuits();
-		assignPendingStreamsToActiveCircuits();
-		checkExpiredPendingCircuits();
-		checkCircuitsForCreation();		
-	}
+    public CircuitCreationTask(TorConfig config, Directory directory, ConnectionCache connectionCache, CircuitPathChooser pathChooser, CircuitManager circuitManager, TorInitializationTracker initializationTracker) {
+        this.config = config;
+        this.directory = directory;
+        this.connectionCache = connectionCache;
+        this.circuitManager = circuitManager;
+        this.initializationTracker = initializationTracker;
+        this.pathChooser = pathChooser;
+        this.executor = Threading.newPool("CircuitCreationTask worker");
+        this.buildHandler = createCircuitBuildHandler();
+        this.internalBuildHandler = createInternalCircuitBuildHandler();
+        this.predictor = new CircuitPredictor();
+        this.lastNewCircuit = new AtomicLong();
+    }
 
-	public void predictPort(int port) {
-		predictor.addExitPortRequest(port);
-	}
+    public CircuitPredictor getCircuitPredictor() {
+        return predictor;
+    }
 
-	private void assignPendingStreamsToActiveCircuits() {
-		final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
-		if(pendingExitStreams.isEmpty())
-			return;
+    public void run() {
+        expireOldCircuits();
+        assignPendingStreamsToActiveCircuits();
+        checkExpiredPendingCircuits();
+        checkCircuitsForCreation();
+    }
 
-		for(ExitCircuit c: circuitManager.getRandomlyOrderedListOfExitCircuits()) {
-			final Iterator<StreamExitRequest> it = pendingExitStreams.iterator();
-			while(it.hasNext()) {
-				if(attemptHandleStreamRequest(c, it.next()))
-					it.remove();
-			}
-		}
-	}
+    public void predictPort(int port) {
+        predictor.addExitPortRequest(port);
+    }
 
-	private boolean attemptHandleStreamRequest(ExitCircuit c, StreamExitRequest request) {
-		if(c.canHandleExitTo(request)) {
-			if(request.reserveRequest()) {
-				launchExitStreamTask(c, request);
-			}
-			// else request is reserved meaning another circuit is already trying to handle it
-			return true;
-		}
-		return false;
-	}
+    private void assignPendingStreamsToActiveCircuits() {
+        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
+        if (pendingExitStreams.isEmpty())
+            return;
 
-	private void launchExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
-		final OpenExitStreamTask task = new OpenExitStreamTask(circuit, exitRequest);
-		executor.execute(task);
-	}
+        for (ExitCircuit c : circuitManager.getRandomlyOrderedListOfExitCircuits()) {
+            final Iterator<StreamExitRequest> it = pendingExitStreams.iterator();
+            while (it.hasNext()) {
+                if (attemptHandleStreamRequest(c, it.next()))
+                    it.remove();
+            }
+        }
+    }
 
-	private void expireOldCircuits() {
-		final Set<Circuit> circuits = circuitManager.getCircuitsByFilter(new CircuitManager.CircuitFilter() {
+    private boolean attemptHandleStreamRequest(ExitCircuit c, StreamExitRequest request) {
+        if (c.canHandleExitTo(request)) {
+            if (request.reserveRequest()) {
+                launchExitStreamTask(c, request);
+            }
+            // else request is reserved meaning another circuit is already trying to handle it
+            return true;
+        }
+        return false;
+    }
 
-			public boolean filter(Circuit circuit) {
-				return !circuit.isMarkedForClose() && circuit.getSecondsDirty() > MAX_CIRCUIT_DIRTINESS;
-			}
-		});
-		for(Circuit c: circuits) {
-			logger.fine("Closing idle dirty circuit: "+ c);
-			((CircuitImpl)c).markForClose();
-		}
-	}
-	private void checkExpiredPendingCircuits() {
-		// TODO Auto-generated method stub
-	}
+    private void launchExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
+        final OpenExitStreamTask task = new OpenExitStreamTask(circuit, exitRequest);
+        executor.execute(task);
+    }
 
-	private void checkCircuitsForCreation() {
+    private void expireOldCircuits() {
+        final Set<Circuit> circuits = circuitManager.getCircuitsByFilter(new CircuitManager.CircuitFilter() {
 
-		if(!directory.haveMinimumRouterInfo()) {
-			if(notEnoughDirectoryInformationWarningCounter % 20 == 0)
-				logger.info("Cannot build circuits because we don't have enough directory information");
-			notEnoughDirectoryInformationWarningCounter++;
-			return;
-		}
+            public boolean filter(Circuit circuit) {
+                return !circuit.isMarkedForClose() && circuit.getSecondsDirty() > MAX_CIRCUIT_DIRTINESS;
+            }
+        });
+        for (Circuit c : circuits) {
+            logger.fine("Closing idle dirty circuit: " + c);
+            ((CircuitImpl) c).markForClose();
+        }
+    }
+
+    private void checkExpiredPendingCircuits() {
+        // TODO Auto-generated method stub
+    }
+
+    private void checkCircuitsForCreation() {
+
+        if (!directory.haveMinimumRouterInfo()) {
+            if (notEnoughDirectoryInformationWarningCounter % 20 == 0)
+                logger.info("Cannot build circuits because we don't have enough directory information");
+            notEnoughDirectoryInformationWarningCounter++;
+            return;
+        }
 
 
-		if(lastNewCircuit.get() != 0) {
-			final long now = System.currentTimeMillis();
-			if((now - lastNewCircuit.get()) < config.getNewCircuitPeriod()) {
-				// return;
-			}
-		}
-		
-		buildCircuitIfNeeded();
-		maybeBuildInternalCircuit();
-	}
+        if (lastNewCircuit.get() != 0) {
+            final long now = System.currentTimeMillis();
+            if ((now - lastNewCircuit.get()) < config.getNewCircuitPeriod()) {
+                // return;
+            }
+        }
 
-	private void buildCircuitIfNeeded() {
-		if (connectionCache.isClosed()) {
-			logger.warning("Not building circuits, because connection cache is closed");
-			return;
-		}
+        buildCircuitIfNeeded();
+        maybeBuildInternalCircuit();
+    }
 
-		final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
-		final List<PredictedPortTarget> predictedPorts = predictor.getPredictedPortTargets();
-		final List<ExitTarget> exitTargets = new ArrayList<ExitTarget>();
-		for(StreamExitRequest streamRequest: pendingExitStreams) {
-			if(!streamRequest.isReserved() && countCircuitsSupportingTarget(streamRequest, false) == 0) {
-				exitTargets.add(streamRequest);
-			}
-		}
-		for(PredictedPortTarget ppt: predictedPorts) {
-			if(countCircuitsSupportingTarget(ppt, true) < 2) {
-				exitTargets.add(ppt);
-			}
-		}
-		buildCircuitToHandleExitTargets(exitTargets);
-	}
+    private void buildCircuitIfNeeded() {
+        if (connectionCache.isClosed()) {
+            logger.warning("Not building circuits, because connection cache is closed");
+            return;
+        }
 
-	private void maybeBuildInternalCircuit() {
-		final int needed = circuitManager.getNeededCleanCircuitCount(predictor.isInternalPredicted());
-		
-		if(needed > 0) {
-			launchBuildTaskForInternalCircuit();
-		}
-	}
-	
-	private void launchBuildTaskForInternalCircuit() {
-		logger.fine("Launching new internal circuit");
-		final InternalCircuitImpl circuit = new InternalCircuitImpl(circuitManager);
-		final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, internalBuildHandler, false);
-		final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache, circuitManager.isNtorEnabled());
-		executor.execute(task);
-		circuitManager.incrementPendingInternalCircuitCount();
-	}
-	
-	private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
-		final CircuitManager.CircuitFilter filter = new CircuitManager.CircuitFilter() {
-			public boolean filter(Circuit circuit) {
-				if(!(circuit instanceof ExitCircuit)) {
-					return false;
-				}
-				final ExitCircuit ec = (ExitCircuit) circuit;
-				final boolean pendingOrConnected = circuit.isPending() || circuit.isConnected();
-				final boolean isCleanIfNeeded = !(needClean && !circuit.isClean());
-				return pendingOrConnected && isCleanIfNeeded && ec.canHandleExitTo(target);
-			}
-		};
-		return circuitManager.getCircuitsByFilter(filter).size();
-	}
+        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
+        final List<PredictedPortTarget> predictedPorts = predictor.getPredictedPortTargets();
+        final List<ExitTarget> exitTargets = new ArrayList<ExitTarget>();
+        for (StreamExitRequest streamRequest : pendingExitStreams) {
+            if (!streamRequest.isReserved() && countCircuitsSupportingTarget(streamRequest, false) == 0) {
+                exitTargets.add(streamRequest);
+            }
+        }
+        for (PredictedPortTarget ppt : predictedPorts) {
+            if (countCircuitsSupportingTarget(ppt, true) < 2) {
+                exitTargets.add(ppt);
+            }
+        }
+        buildCircuitToHandleExitTargets(exitTargets);
+    }
 
-	private void buildCircuitToHandleExitTargets(List<ExitTarget> exitTargets) {
-		if(exitTargets.isEmpty()) {
-			return;
-		}
-		if(!directory.haveMinimumRouterInfo()) 
-			return;
-		if(circuitManager.getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
-			return;
+    private void maybeBuildInternalCircuit() {
+        final int needed = circuitManager.getNeededCleanCircuitCount(predictor.isInternalPredicted());
 
-		if(logger.isLoggable(Level.FINE)) { 
-			logger.fine("Building new circuit to handle "+ exitTargets.size() +" pending streams and predicted ports");
-		}
+        if (needed > 0) {
+            launchBuildTaskForInternalCircuit();
+        }
+    }
 
-		launchBuildTaskForTargets(exitTargets);
-	}
+    private void launchBuildTaskForInternalCircuit() {
+        logger.fine("Launching new internal circuit");
+        final InternalCircuitImpl circuit = new InternalCircuitImpl(circuitManager);
+        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, internalBuildHandler, false);
+        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
+        executor.execute(task);
+        circuitManager.incrementPendingInternalCircuitCount();
+    }
 
-	private void launchBuildTaskForTargets(List<ExitTarget> exitTargets) {
-		final Router exitRouter = pathChooser.chooseExitNodeForTargets(exitTargets);
-		if(exitRouter == null) {
-			logger.warning("Failed to select suitable exit node for targets");
-			return;
-		}
-		
-		final Circuit circuit = circuitManager.createNewExitCircuit(exitRouter);
-		final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler, false);
-		final CircuitBuildTask task = new  CircuitBuildTask(request, connectionCache, circuitManager.isNtorEnabled(), initializationTracker);
-		executor.execute(task);
-	}
+    private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
+        final CircuitManager.CircuitFilter filter = new CircuitManager.CircuitFilter() {
+            public boolean filter(Circuit circuit) {
+                if (!(circuit instanceof ExitCircuit)) {
+                    return false;
+                }
+                final ExitCircuit ec = (ExitCircuit) circuit;
+                final boolean pendingOrConnected = circuit.isPending() || circuit.isConnected();
+                final boolean isCleanIfNeeded = !(needClean && !circuit.isClean());
+                return pendingOrConnected && isCleanIfNeeded && ec.canHandleExitTo(target);
+            }
+        };
+        return circuitManager.getCircuitsByFilter(filter).size();
+    }
 
-	private CircuitBuildHandler createCircuitBuildHandler() {
-		return new CircuitBuildHandler() {
+    private void buildCircuitToHandleExitTargets(List<ExitTarget> exitTargets) {
+        if (exitTargets.isEmpty()) {
+            return;
+        }
+        if (!directory.haveMinimumRouterInfo())
+            return;
+        if (circuitManager.getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
+            return;
 
-			public void circuitBuildCompleted(Circuit circuit) {
-				logger.fine("Circuit completed to: "+ circuit);
-				circuitOpenedHandler(circuit);
-				lastNewCircuit.set(System.currentTimeMillis());
-			}
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Building new circuit to handle " + exitTargets.size() + " pending streams and predicted ports");
+        }
 
-			public void circuitBuildFailed(String reason) {
-				logger.fine("Circuit build failed: "+ reason);
-				buildCircuitIfNeeded();
-			}
+        launchBuildTaskForTargets(exitTargets);
+    }
 
-			public void connectionCompleted(Connection connection) {
-				logger.finer("Circuit connection completed to "+ connection);
-			}
+    private void launchBuildTaskForTargets(List<ExitTarget> exitTargets) {
+        final Router exitRouter = pathChooser.chooseExitNodeForTargets(exitTargets);
+        if (exitRouter == null) {
+            logger.warning("Failed to select suitable exit node for targets");
+            return;
+        }
 
-			public void connectionFailed(String reason) {
-				logger.fine("Circuit connection failed: "+ reason);
-				buildCircuitIfNeeded();
-			}
+        final Circuit circuit = circuitManager.createNewExitCircuit(exitRouter);
+        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler, false);
+        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache, initializationTracker);
+        executor.execute(task);
+    }
 
-			public void nodeAdded(CircuitNode node) {
-				logger.finer("Node added to circuit: "+ node);
-			}	
-		};
-	}
+    private CircuitBuildHandler createCircuitBuildHandler() {
+        return new CircuitBuildHandler() {
 
-	private void circuitOpenedHandler(Circuit circuit) {
-		if(!(circuit instanceof ExitCircuit)) {
-			return;
-		}
-		final ExitCircuit ec = (ExitCircuit) circuit;
-		final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
-		for(StreamExitRequest req: pendingExitStreams) {
-			if(ec.canHandleExitTo(req) && req.reserveRequest()) {
-				launchExitStreamTask(ec, req);
-			}
-		}
-	}
-	
-	private CircuitBuildHandler createInternalCircuitBuildHandler() {
-		return new CircuitBuildHandler() {
-			
-			public void nodeAdded(CircuitNode node) {
-				logger.finer("Node added to internal circuit: "+ node);
-			}
-			
-			public void connectionFailed(String reason) {
-				logger.fine("Circuit connection failed: "+ reason);
-				circuitManager.decrementPendingInternalCircuitCount();
-			}
-			
-			public void connectionCompleted(Connection connection) {
-				logger.finer("Circuit connection completed to "+ connection);
-			}
-			
-			public void circuitBuildFailed(String reason) {
-				logger.fine("Circuit build failed: "+ reason);
-				circuitManager.decrementPendingInternalCircuitCount();
-			}
-			
-			public void circuitBuildCompleted(Circuit circuit) {
-				logger.fine("Internal circuit build completed: "+ circuit);
-				lastNewCircuit.set(System.currentTimeMillis());
-				circuitManager.addCleanInternalCircuit((InternalCircuit) circuit);
-			}
-		};
-	}
+            public void circuitBuildCompleted(Circuit circuit) {
+                logger.fine("Circuit completed to: " + circuit);
+                circuitOpenedHandler(circuit);
+                lastNewCircuit.set(System.currentTimeMillis());
+            }
+
+            public void circuitBuildFailed(String reason) {
+                logger.fine("Circuit build failed: " + reason);
+                buildCircuitIfNeeded();
+            }
+
+            public void connectionCompleted(Connection connection) {
+                logger.finer("Circuit connection completed to " + connection);
+            }
+
+            public void connectionFailed(String reason) {
+                logger.fine("Circuit connection failed: " + reason);
+                buildCircuitIfNeeded();
+            }
+
+            public void nodeAdded(CircuitNode node) {
+                logger.finer("Node added to circuit: " + node);
+            }
+        };
+    }
+
+    private void circuitOpenedHandler(Circuit circuit) {
+        if (!(circuit instanceof ExitCircuit)) {
+            return;
+        }
+        final ExitCircuit ec = (ExitCircuit) circuit;
+        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
+        for (StreamExitRequest req : pendingExitStreams) {
+            if (ec.canHandleExitTo(req) && req.reserveRequest()) {
+                launchExitStreamTask(ec, req);
+            }
+        }
+    }
+
+    private CircuitBuildHandler createInternalCircuitBuildHandler() {
+        return new CircuitBuildHandler() {
+
+            public void nodeAdded(CircuitNode node) {
+                logger.finer("Node added to internal circuit: " + node);
+            }
+
+            public void connectionFailed(String reason) {
+                logger.fine("Circuit connection failed: " + reason);
+                circuitManager.decrementPendingInternalCircuitCount();
+            }
+
+            public void connectionCompleted(Connection connection) {
+                logger.finer("Circuit connection completed to " + connection);
+            }
+
+            public void circuitBuildFailed(String reason) {
+                logger.fine("Circuit build failed: " + reason);
+                circuitManager.decrementPendingInternalCircuitCount();
+            }
+
+            public void circuitBuildCompleted(Circuit circuit) {
+                logger.fine("Internal circuit build completed: " + circuit);
+                lastNewCircuit.set(System.currentTimeMillis());
+                circuitManager.addCleanInternalCircuit((InternalCircuit) circuit);
+            }
+        };
+    }
 }

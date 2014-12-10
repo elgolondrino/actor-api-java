@@ -13,10 +13,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import im.actor.torlib.TorException;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.misc.Utils;
-import im.actor.torlib.TorException;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.misc.Utils;
+import im.actor.utils.misc.Utils;
 
 /**
  * This class wraps the RSA public keys used in the Tor protocol.

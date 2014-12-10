@@ -9,9 +9,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.misc.Utils;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.misc.Utils;
+import im.actor.utils.misc.Utils;
 
 public class TorNTorKeyAgreement implements TorKeyAgreement {
 	public final static int CURVE25519_PUBKEY_LEN = 32;

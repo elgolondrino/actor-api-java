@@ -103,14 +103,13 @@ public class Directory {
             if (isLoaded) {
                 return;
             }
-            boolean useMicrodescriptors = config.getUseMicrodescriptors() != TorConfig.AutoBoolValue.FALSE;
             last = System.currentTimeMillis();
             LOG.info("Loading certificates");
             loadCertificates(store.loadCacheFile(DirectoryStorage.CacheFile.CERTIFICATES));
             logElapsed();
 
             LOG.info("Loading consensus");
-            loadConsensus(store.loadCacheFile(useMicrodescriptors ? DirectoryStorage.CacheFile.CONSENSUS_MICRODESC : DirectoryStorage.CacheFile.CONSENSUS));
+            loadConsensus(store.loadCacheFile(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC));
             logElapsed();
 
             LOG.info("Loading microdescriptor cache");
@@ -228,7 +227,7 @@ public class Directory {
         while (it.hasNext()) {
             RequiredCertificate r = it.next();
             if (r.getSigningKey().equals(certificate.getAuthoritySigningKey().getFingerprint())) {
-                it.remove();
+                requiredCertificates.remove(r);
                 return true;
             }
         }
@@ -333,8 +332,8 @@ public class Directory {
         routersByNickname.clear();
     }
 
-    public synchronized void addRouterMicrodescriptors(List<Descriptor> microdescriptors) {
-        microdescriptorCache.addDescriptors(microdescriptors);
+    public synchronized void addRouterDescriptors(List<Descriptor> descriptors) {
+        microdescriptorCache.addDescriptors(descriptors);
         needRecalculateMinimumRouterInfo = true;
     }
 
@@ -417,7 +416,7 @@ public class Directory {
         stateFile.addGuardEntry(entry);
     }
 
-    public Descriptor getMicrodescriptorFromCache(HexDigest descriptorDigest) {
+    public Descriptor getDescriptorFromCache(HexDigest descriptorDigest) {
         return microdescriptorCache.getDescriptor(descriptorDigest);
     }
 }

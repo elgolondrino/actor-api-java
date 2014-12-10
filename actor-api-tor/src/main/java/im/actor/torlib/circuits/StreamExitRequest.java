@@ -7,10 +7,7 @@ import im.actor.torlib.Stream;
 import im.actor.torlib.StreamConnectFailedException;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
-import im.actor.torlib.misc.GuardedBy;
-import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
-import im.actor.torlib.misc.GuardedBy;
+import im.actor.utils.misc.GuardedBy;
 
 public class StreamExitRequest implements ExitTarget {
 	

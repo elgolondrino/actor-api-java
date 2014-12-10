@@ -95,10 +95,6 @@ public class BridgeRouterImpl implements BridgeRouter {
 		return 0;
 	}
 
-	public TorPublicKey getIdentityKey() {
-		return null;
-	}
-
 	public HexDigest getIdentityHash() {
 		return identity;
 	}
@@ -113,10 +109,6 @@ public class BridgeRouterImpl implements BridgeRouter {
 
 	public Descriptor getCurrentDescriptor() {
 		return descriptor;
-	}
-
-	public HexDigest getDescriptorDigest() {
-		return null;
 	}
 
 	public HexDigest getMicrodescriptorDigest() {
@@ -147,32 +139,12 @@ public class BridgeRouterImpl implements BridgeRouter {
 		return 0;
 	}
 
-	public int getMeasuredBandwidth() {
-		return 0;
-	}
-
 	public Set<String> getFamilyMembers() {
 		if(descriptor != null) {
 			return descriptor.getFamilyMembers();
 		} else {
 			return Collections.emptySet();
 		}
-	}
-
-	public int getAverageBandwidth() {
-		return 0;
-	}
-
-	public int getBurstBandwidth() {
-		return 0;
-	}
-
-	public int getObservedBandwidth() {
-		return 0;
-	}
-
-	public boolean isHibernating() {
-		return false;
 	}
 
 	public boolean isRunning() {

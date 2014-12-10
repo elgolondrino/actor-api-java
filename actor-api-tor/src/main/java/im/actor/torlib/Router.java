@@ -9,40 +9,53 @@ import im.actor.torlib.directory.Descriptor;
 
 public interface Router {
 
-	String getNickname();
-	String getCountryCode();
-	IPv4Address getAddress();
-	int getOnionPort();
-	int getDirectoryPort();
-	TorPublicKey getIdentityKey();
-	HexDigest getIdentityHash();
-	boolean isDescriptorDownloadable();
+    String getNickname();
 
-	String getVersion();
-	Descriptor getCurrentDescriptor();
-	HexDigest getDescriptorDigest();
-	HexDigest getMicrodescriptorDigest();
+    String getCountryCode();
 
-	TorPublicKey getOnionKey();
-	byte[] getNTorOnionKey();
-	
-	boolean hasBandwidth();
-	int getEstimatedBandwidth();
-	int getMeasuredBandwidth();
+    IPv4Address getAddress();
 
-	Set<String> getFamilyMembers();
-	int getAverageBandwidth();
-	int getBurstBandwidth();
-	int getObservedBandwidth();
-	boolean isHibernating();
-	boolean isRunning();
-	boolean isValid();
-	boolean isBadExit();
-	boolean isPossibleGuard();
-	boolean isExit();
-	boolean isFast();
-	boolean isStable();
-	boolean isHSDirectory();
-	boolean exitPolicyAccepts(IPv4Address address, int port);
-	boolean exitPolicyAccepts(int port);
+    int getOnionPort();
+
+    int getDirectoryPort();
+
+    HexDigest getIdentityHash();
+
+    boolean isDescriptorDownloadable();
+
+    String getVersion();
+
+    Descriptor getCurrentDescriptor();
+
+    HexDigest getMicrodescriptorDigest();
+
+    TorPublicKey getOnionKey();
+
+    byte[] getNTorOnionKey();
+
+    boolean hasBandwidth();
+
+    int getEstimatedBandwidth();
+
+    Set<String> getFamilyMembers();
+
+    boolean isRunning();
+
+    boolean isValid();
+
+    boolean isBadExit();
+
+    boolean isPossibleGuard();
+
+    boolean isExit();
+
+    boolean isFast();
+
+    boolean isStable();
+
+    boolean isHSDirectory();
+
+    boolean exitPolicyAccepts(IPv4Address address, int port);
+
+    boolean exitPolicyAccepts(int port);
 }

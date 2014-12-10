@@ -53,10 +53,6 @@ public class RouterImpl implements Router {
         return status.getVersion();
     }
 
-    public HexDigest getDescriptorDigest() {
-        return status.getDescriptorDigest();
-    }
-
     public IPv4Address getAddress() {
         return status.getAddress();
     }
@@ -71,7 +67,7 @@ public class RouterImpl implements Router {
             return;
         }
         if (status.getMicrodescriptorDigest() != null) {
-            descriptor = directory.getMicrodescriptorFromCache(status.getMicrodescriptorDigest());
+            descriptor = directory.getDescriptorFromCache(status.getMicrodescriptorDigest());
         }
     }
 
@@ -81,16 +77,6 @@ public class RouterImpl implements Router {
 
     public boolean hasFlag(String flag) {
         return status.hasFlag(flag);
-    }
-
-    public boolean isHibernating() {
-//        final Descriptor rd = downcastDescriptor();
-//        if (rd == null) {
-//            return false;
-//        } else {
-//            return rd.Descriptor();
-//        }
-        return false;
     }
 
     public boolean isRunning() {
@@ -133,16 +119,6 @@ public class RouterImpl implements Router {
         return identityHash;
     }
 
-    public TorPublicKey getIdentityKey() {
-//        final Descriptor rd = downcastDescriptor();
-//        if (rd != null) {
-//            return rd.getIdentityKey();
-//        } else {
-//            return null;
-//        }
-        return null;
-    }
-
     public String getNickname() {
         return status.getNickname();
     }
@@ -177,10 +153,6 @@ public class RouterImpl implements Router {
         return status.getEstimatedBandwidth();
     }
 
-    public int getMeasuredBandwidth() {
-        return status.getMeasuredBandwidth();
-    }
-
     public Set<String> getFamilyMembers() {
         refreshDescriptor();
         if (descriptor != null) {
@@ -188,18 +160,6 @@ public class RouterImpl implements Router {
         } else {
             return Collections.emptySet();
         }
-    }
-
-    public int getAverageBandwidth() {
-        return 0;
-    }
-
-    public int getBurstBandwidth() {
-        return 0;
-    }
-
-    public int getObservedBandwidth() {
-        return 0;
     }
 
     public boolean exitPolicyAccepts(IPv4Address address, int port) {
@@ -228,10 +188,5 @@ public class RouterImpl implements Router {
             cachedCountryCode = cc;
         }
         return cc;
-    }
-
-    private Descriptor downcastDescriptor() {
-        refreshDescriptor();
-        return descriptor;
     }
 }

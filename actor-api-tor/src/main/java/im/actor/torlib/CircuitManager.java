@@ -382,24 +382,6 @@ public class CircuitManager implements DashboardRenderable {
         }
     }
 
-    public boolean isNtorEnabled() {
-        switch (config.getUseNTorHandshake()) {
-            case AUTO:
-                return isNtorEnabledInConsensus();
-            case FALSE:
-                return false;
-            case TRUE:
-                return true;
-            default:
-                throw new IllegalArgumentException("getUseNTorHandshake() returned " + config.getUseNTorHandshake());
-        }
-    }
-
-    boolean isNtorEnabledInConsensus() {
-        ConsensusDocument consensus = directory.getCurrentConsensusDocument();
-        return (consensus != null) && (consensus.getUseNTorHandshake());
-    }
-
     public DirectoryCircuit openDirectoryCircuitTo(List<Router> path) throws OpenFailedException {
         final DirectoryCircuit circuit = CircuitImpl.createDirectoryCircuitTo(this, path);
         if (!tryOpenCircuit(circuit, true, false)) {
@@ -427,7 +409,7 @@ public class CircuitManager implements DashboardRenderable {
     private boolean tryOpenCircuit(Circuit circuit, boolean isDirectory, boolean trackInitialization) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
         final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result, isDirectory);
-        final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache, isNtorEnabled(), (trackInitialization) ? (initializationTracker) : (null));
+        final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache, (trackInitialization) ? (initializationTracker) : (null));
         task.run();
         return result.isSuccessful();
     }
