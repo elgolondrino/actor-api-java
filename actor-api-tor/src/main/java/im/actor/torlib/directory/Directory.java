@@ -3,13 +3,13 @@ package im.actor.torlib.directory;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
 import im.actor.torlib.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.RandomSet;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParserFactory;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
@@ -19,44 +19,52 @@ import im.actor.torlib.directory.parsing.DocumentParsingResult;
  * with directory authorities and caches.
  */
 public class Directory {
-    private final static Logger logger = Logger.getLogger(Directory.class.getName());
+    private final static Logger LOG = Logger.getLogger(Directory.class.getName());
+    private final static DocumentParserFactory PARSER_FACTORY = new DocumentParserFactoryImpl();
+    private final static AtomicInteger NEXT_ID = new AtomicInteger(1);
 
     private final Object loadLock = new Object();
     private boolean isLoaded = false;
 
+    private final TorRandom random = new TorRandom();
+
+    private final int id;
+
     private final DirectoryStore store;
     private final TorConfig config;
     private final StateFile stateFile;
-    private final DescriptorCache<RouterMicrodescriptor> microdescriptorCache;
-    private final DescriptorCache<RouterDescriptor> basicDescriptorCache;
 
+    private final DescriptorCache<RouterMicrodescriptor> microdescriptorCache;
     private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
     private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
+
     private final Set<RequiredCertificate> requiredCertificates = new CopyOnWriteArraySet<RequiredCertificate>();
+
     private boolean haveMinimumRouterInfo;
     private boolean needRecalculateMinimumRouterInfo;
-    private final TorRandom random = new TorRandom();
-    private final static DocumentParserFactory parserFactory = new DocumentParserFactoryImpl();
 
     private ConsensusDocument currentConsensus;
     private ConsensusDocument consensusWaitingForCertificates;
 
     public Directory(TorConfig config, DirectoryStore customDirectoryStore) {
+        this.id = NEXT_ID.getAndIncrement();
         this.store = (customDirectoryStore == null) ? (new DirectoryStoreImpl(config)) : (customDirectoryStore);
         this.config = config;
         this.stateFile = new StateFile(store, this);
         this.microdescriptorCache = new DescriptorCache<RouterMicrodescriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
             protected DocumentParser<RouterMicrodescriptor> createDocumentParser(ByteBuffer buffer) {
-                return parserFactory.createRouterMicrodescriptorParser(buffer);
+                return PARSER_FACTORY.createRouterMicrodescriptorParser(buffer);
             }
         };
-        this.basicDescriptorCache = new DescriptorCache<RouterDescriptor>(store, DirectoryStore.CacheFile.DESCRIPTOR_CACHE, DirectoryStore.CacheFile.DESCRIPTOR_JOURNAL) {
-            @Override
-            protected DocumentParser<RouterDescriptor> createDocumentParser(ByteBuffer buffer) {
-                return parserFactory.createRouterDescriptorParser(buffer, false);
-            }
-        };
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public TorConfig getConfig() {
+        return config;
     }
 
     public synchronized boolean haveMinimumRouterInfo() {
@@ -85,7 +93,7 @@ public class Directory {
     }
 
     public void loadFromStore() {
-        logger.info("Loading cached network information from disk");
+        LOG.info("Loading cached network information from disk");
 
         synchronized (loadLock) {
             if (isLoaded) {
@@ -93,25 +101,20 @@ public class Directory {
             }
             boolean useMicrodescriptors = config.getUseMicrodescriptors() != TorConfig.AutoBoolValue.FALSE;
             last = System.currentTimeMillis();
-            logger.info("Loading certificates");
+            LOG.info("Loading certificates");
             loadCertificates(store.loadCacheFile(DirectoryStore.CacheFile.CERTIFICATES));
             logElapsed();
 
-            logger.info("Loading consensus");
+            LOG.info("Loading consensus");
             loadConsensus(store.loadCacheFile(useMicrodescriptors ? DirectoryStore.CacheFile.CONSENSUS_MICRODESC : DirectoryStore.CacheFile.CONSENSUS));
             logElapsed();
 
-            if (!useMicrodescriptors) {
-                logger.info("Loading descriptors");
-                basicDescriptorCache.initialLoad();
-            } else {
-                logger.info("Loading microdescriptor cache");
-                microdescriptorCache.initialLoad();
-            }
+            LOG.info("Loading microdescriptor cache");
+            microdescriptorCache.initialLoad();
             needRecalculateMinimumRouterInfo = true;
             logElapsed();
 
-            logger.info("loading state file");
+            LOG.info("loading state file");
             stateFile.parseBuffer(store.loadCacheFile(DirectoryStore.CacheFile.STATE));
             logElapsed();
 
@@ -121,7 +124,6 @@ public class Directory {
     }
 
     public void close() {
-        basicDescriptorCache.shutdown();
         microdescriptorCache.shutdown();
     }
 
@@ -131,11 +133,11 @@ public class Directory {
         final long now = System.currentTimeMillis();
         final long elapsed = now - last;
         last = now;
-        logger.fine("Loaded in " + elapsed + " ms.");
+        LOG.fine("Loaded in " + elapsed + " ms.");
     }
 
     private void loadCertificates(ByteBuffer buffer) {
-        final DocumentParser<KeyCertificate> parser = parserFactory.createKeyCertificateParser(buffer);
+        final DocumentParser<KeyCertificate> parser = PARSER_FACTORY.createKeyCertificateParser(buffer);
         final DocumentParsingResult<KeyCertificate> result = parser.parse();
         if (testResult(result, "certificates")) {
             for (KeyCertificate cert : result.getParsedDocuments()) {
@@ -145,7 +147,7 @@ public class Directory {
     }
 
     private void loadConsensus(ByteBuffer buffer) {
-        final DocumentParser<ConsensusDocument> parser = parserFactory.createConsensusDocumentParser(buffer);
+        final DocumentParser<ConsensusDocument> parser = PARSER_FACTORY.createConsensusDocumentParser(buffer);
         final DocumentParsingResult<ConsensusDocument> result = parser.parse();
         if (testResult(result, "consensus")) {
             addConsensusDocument(result.getDocument(), true);
@@ -156,11 +158,11 @@ public class Directory {
         if (result.isOkay()) {
             return true;
         } else if (result.isError()) {
-            logger.warning("Parsing error loading " + type + " : " + result.getMessage());
+            LOG.warning("Parsing error loading " + type + " : " + result.getMessage());
         } else if (result.isInvalid()) {
-            logger.warning("Problem loading " + type + " : " + result.getMessage());
+            LOG.warning("Problem loading " + type + " : " + result.getMessage());
         } else {
-            logger.warning("Unknown problem loading " + type);
+            LOG.warning("Unknown problem loading " + type);
         }
         return false;
     }
@@ -171,7 +173,7 @@ public class Directory {
                 try {
                     loadLock.wait();
                 } catch (InterruptedException e) {
-                    logger.warning("Thread interrupted while waiting for directory to load from disk");
+                    LOG.warning("Thread interrupted while waiting for directory to load from disk");
                 }
             }
         }
@@ -192,7 +194,7 @@ public class Directory {
             final boolean wasRequired = removeRequiredCertificate(certificate);
             final DirectoryServer as = TrustedAuthorities.getInstance().getAuthorityServerByIdentity(certificate.getAuthorityFingerprint());
             if (as == null) {
-                logger.warning("Certificate read for unknown directory authority with identity: " + certificate.getAuthorityFingerprint());
+                LOG.warning("Certificate read for unknown directory authority with identity: " + certificate.getAuthorityFingerprint());
                 return;
             }
             as.addCertificate(certificate);
@@ -239,24 +241,19 @@ public class Directory {
         }
     }
 
-    public void addRouterDescriptors(List<RouterDescriptor> descriptors) {
-        basicDescriptorCache.addDescriptors(descriptors);
-        needRecalculateMinimumRouterInfo = true;
-    }
-
     public synchronized void addConsensusDocument(ConsensusDocument consensus, boolean fromCache) {
         if (consensus.equals(currentConsensus))
             return;
 
         if (currentConsensus != null && consensus.getValidAfterTime().isBefore(currentConsensus.getValidAfterTime())) {
-            logger.warning("New consensus document is older than current consensus document");
+            LOG.warning("New consensus document is older than current consensus document");
             return;
         }
 
         synchronized (TrustedAuthorities.getInstance()) {
             switch (consensus.verifySignatures()) {
                 case STATUS_FAILED:
-                    logger.warning("Unable to verify signatures on consensus document, discarding...");
+                    LOG.warning("Unable to verify signatures on consensus document, discarding...");
                     return;
 
                 case STATUS_NEED_CERTS:
@@ -278,13 +275,13 @@ public class Directory {
             if (status.hasFlag("Running") && status.hasFlag("Valid")) {
                 addRouter(updateOrCreateRouter(status, oldRouterByIdentity));
             }
-            final Descriptor d = getDescriptorForRouterStatus(status, consensus.getFlavor() == ConsensusDocument.ConsensusFlavor.MICRODESC);
+            final Descriptor d = getDescriptorForRouterStatus(status);
             if (d != null) {
                 d.setLastListed(consensus.getValidAfterTime().getTime());
             }
         }
 
-        logger.fine("Loaded " + routersByIdentity.size() + " routers from consensus document");
+        LOG.fine("Loaded " + routersByIdentity.size() + " routers from consensus document");
         currentConsensus = consensus;
 
         if (!fromCache) {
@@ -302,12 +299,8 @@ public class Directory {
         }
     }
 
-    private Descriptor getDescriptorForRouterStatus(RouterStatus rs, boolean isMicrodescriptor) {
-        if (isMicrodescriptor) {
-            return microdescriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
-        } else {
-            return basicDescriptorCache.getDescriptor(rs.getDescriptorDigest());
-        }
+    private Descriptor getDescriptorForRouterStatus(RouterStatus rs) {
+        return microdescriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
     }
 
     private RouterImpl updateOrCreateRouter(RouterStatus status, Map<HexDigest, RouterImpl> knownRouters) {
@@ -318,33 +311,22 @@ public class Directory {
         return router;
     }
 
-    private void clearAll() {
-        routersByIdentity.clear();
-        routersByNickname.clear();
-    }
-
-    private boolean isValidDirectoryCache(RouterImpl router) {
-        if (router.getDirectoryPort() == 0)
-            return false;
-        if (router.hasFlag("BadDirectory"))
-            return false;
-        return router.hasFlag("V2Dir");
-    }
-
     private void addRouter(RouterImpl router) {
         routersByIdentity.put(router.getIdentityHash(), router);
-        addRouterByNickname(router);
-    }
 
-    private void addRouterByNickname(RouterImpl router) {
         final String name = router.getNickname();
         if (name == null || name.equals("Unnamed"))
             return;
         if (routersByNickname.containsKey(router.getNickname())) {
-            //logger.warn("Duplicate router nickname: "+ router.getNickname());
+            //LOG.warn("Duplicate router nickname: "+ router.getNickname());
             return;
         }
         routersByNickname.put(name, router);
+    }
+
+    private void clearAll() {
+        routersByIdentity.clear();
+        routersByNickname.clear();
     }
 
     public synchronized void addRouterMicrodescriptors(List<RouterMicrodescriptor> microdescriptors) {
@@ -352,7 +334,7 @@ public class Directory {
         needRecalculateMinimumRouterInfo = true;
     }
 
-    synchronized public List<Router> getRoutersWithDownloadableDescriptors() {
+    public synchronized List<Router> getRoutersWithDownloadableDescriptors() {
         waitUntilLoaded();
         final List<Router> routers = new ArrayList<Router>();
         for (RouterImpl router : routersByIdentity.values()) {
@@ -404,18 +386,6 @@ public class Directory {
         }
     }
 
-    public List<Router> getRouterListByNames(List<String> names) {
-        waitUntilLoaded();
-        final List<Router> routers = new ArrayList<Router>();
-        for (String n : names) {
-            final Router r = getRouterByName(n);
-            if (r == null)
-                throw new TorException("Could not find router named: " + n);
-            routers.add(r);
-        }
-        return routers;
-    }
-
     public List<Router> getAllRouters() {
         waitUntilLoaded();
         synchronized (routersByIdentity) {
@@ -445,10 +415,5 @@ public class Directory {
 
     public RouterMicrodescriptor getMicrodescriptorFromCache(HexDigest descriptorDigest) {
         return microdescriptorCache.getDescriptor(descriptorDigest);
-    }
-
-
-    public RouterDescriptor getBasicDescriptorFromCache(HexDigest descriptorDigest) {
-        return basicDescriptorCache.getDescriptor(descriptorDigest);
     }
 }

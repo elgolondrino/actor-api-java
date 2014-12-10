@@ -75,8 +75,6 @@ public class RouterImpl implements Router {
         }
         if (status.getMicrodescriptorDigest() != null) {
             descriptor = directory.getMicrodescriptorFromCache(status.getMicrodescriptorDigest());
-        } else if (status.getDescriptorDigest() != null) {
-            descriptor = directory.getBasicDescriptorFromCache(status.getDescriptorDigest());
         }
     }
 

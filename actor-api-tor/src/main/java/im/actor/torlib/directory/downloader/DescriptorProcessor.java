@@ -17,14 +17,11 @@ public class DescriptorProcessor {
 	private final static int MIN_DL_REQUESTS = 3;
 	private final static int MAX_CLIENT_INTERVAL_WITHOUT_REQUEST = 10 * 60 * 1000;
 
-	private final TorConfig config;
 	private final Directory directory;
 	
 	private Date lastDescriptorDownload;
-	
-	
-	DescriptorProcessor(TorConfig config, Directory directory) {
-		this.config = config;
+
+	public DescriptorProcessor(Directory directory) {
 		this.directory = directory;
 	}
 
@@ -84,18 +81,10 @@ public class DescriptorProcessor {
 	}
 
 	private HexDigest getDescriptorDigestForRouter(Router r) {
-		if(useMicrodescriptors()) {
-			return r.getMicrodescriptorDigest();
-		} else {
-			return r.getDescriptorDigest();
-		}
+		return r.getMicrodescriptorDigest();
 	}
 	
-	private boolean useMicrodescriptors() {
-		return config.getUseMicrodescriptors() != TorConfig.AutoBoolValue.FALSE;
-	}
-
-	List< List<HexDigest> > getDescriptorDigestsToDownload() {
+	public List< List<HexDigest> > getDescriptorDigestsToDownload() {
 		final ConsensusDocument consensus = directory.getCurrentConsensusDocument();
 		if(consensus == null || !consensus.isLive()) {
 			return Collections.emptyList();

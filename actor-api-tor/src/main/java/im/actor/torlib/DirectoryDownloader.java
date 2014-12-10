@@ -10,24 +10,21 @@ import im.actor.torlib.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.Directory;
+import im.actor.torlib.directory.DirectorySyncActor;
+import im.actor.torlib.directory.DirectorySyncInt;
 import im.actor.torlib.directory.downloader.DirectoryDocumentRequestor;
-import im.actor.torlib.directory.downloader.DirectoryDownloadTask;
 import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
 
 public class DirectoryDownloader {
     private final static Logger logger = Logger.getLogger(DirectoryDownloader.class.getName());
 
-    private final TorConfig config;
     private final TorInitializationTracker initializationTracker;
     private CircuitManager circuitManager;
     private boolean isStarted;
     private boolean isStopped;
-    private DirectoryDownloadTask downloadTask;
-    private Thread downloadTaskThread;
+    private DirectorySyncInt directorySync;
 
-
-    public DirectoryDownloader(TorConfig config, TorInitializationTracker initializationTracker) {
-        this.config = config;
+    public DirectoryDownloader(TorInitializationTracker initializationTracker) {
         this.initializationTracker = initializationTracker;
     }
 
@@ -44,9 +41,8 @@ public class DirectoryDownloader {
             throw new IllegalStateException("Must set CircuitManager instance with setCircuitManager() before starting.");
         }
 
-        downloadTask = new DirectoryDownloadTask(config, directory, this);
-        downloadTaskThread = new Thread(downloadTask);
-        downloadTaskThread.start();
+        directorySync = DirectorySyncActor.get(directory, this);
+        directorySync.startDirectorySync();
         isStarted = true;
     }
 
@@ -54,8 +50,9 @@ public class DirectoryDownloader {
         if (!isStarted || isStopped) {
             return;
         }
-        downloadTask.stop();
-        downloadTaskThread.interrupt();
+        isStopped = true;
+        isStarted = false;
+        directorySync.stopSync();
     }
 
     public RouterDescriptor downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {

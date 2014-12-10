@@ -7,7 +7,7 @@ import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class ConsensusFetcher extends DocumentFetcher<ConsensusDocument> {
 
-    private final static String CONSENSUS_PATH = "/tor/status-vote/current/consensus";
+    private final static String CONSENSUS_PATH = "/tor/status-vote/current/consensus-microdesc";
 
     public ConsensusFetcher() {
     }

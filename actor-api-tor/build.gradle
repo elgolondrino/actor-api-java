@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.droidkit:actors:0.6.1'
     compile 'com.droidkit:bser:1.2'
     testCompile project(":actor-api-java")
     testCompile group: 'junit', name: 'junit', version: '4.11'
