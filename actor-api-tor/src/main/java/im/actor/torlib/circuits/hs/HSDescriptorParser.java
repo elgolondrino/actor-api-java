@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorSignature;
-import im.actor.torlib.directory.DocumentFieldParserImpl;
+import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentObject;

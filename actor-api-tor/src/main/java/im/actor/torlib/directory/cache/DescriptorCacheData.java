@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.cache;
 
 import java.util.ArrayList;
 import java.util.HashMap;

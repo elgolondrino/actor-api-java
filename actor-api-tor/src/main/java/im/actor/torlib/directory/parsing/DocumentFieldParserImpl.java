@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.parsing;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -18,10 +18,6 @@ import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.Timestamp;
-import im.actor.torlib.directory.parsing.DocumentFieldParser;
-import im.actor.torlib.directory.parsing.DocumentObject;
-import im.actor.torlib.directory.parsing.DocumentParsingHandler;
-import im.actor.torlib.directory.parsing.NameIntegerParameter;
 import im.actor.utils.Base64;
 
 public class DocumentFieldParserImpl implements DocumentFieldParser {

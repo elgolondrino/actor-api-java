@@ -13,12 +13,11 @@ import im.actor.torlib.Router;
 import im.actor.torlib.Stream;
 import im.actor.torlib.StreamConnectFailedException;
 import im.actor.torlib.TorException;
-import im.actor.torlib.directory.DocumentFieldParserImpl;
+import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
 import im.actor.torlib.directory.downloader.HttpConnection;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 import im.actor.torlib.*;
-import im.actor.torlib.directory.DocumentFieldParserImpl;
 
 public class HSDescriptorDownloader {
 	private final static Logger logger = Logger.getLogger(HSDescriptorDirectory.class.getName());

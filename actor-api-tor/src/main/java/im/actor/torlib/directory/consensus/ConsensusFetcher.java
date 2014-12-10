@@ -1,8 +1,9 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.directory.consensus;
 
 import java.nio.ByteBuffer;
 
 import im.actor.torlib.ConsensusDocument;
+import im.actor.torlib.directory.downloader.DocumentFetcher;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class ConsensusFetcher extends DocumentFetcher<ConsensusDocument> {
@@ -13,12 +14,12 @@ public class ConsensusFetcher extends DocumentFetcher<ConsensusDocument> {
     }
 
     @Override
-    String getRequestPath() {
+    public String getRequestPath() {
         return CONSENSUS_PATH;
     }
 
     @Override
-    DocumentParser<ConsensusDocument> createParser(ByteBuffer response) {
+    public DocumentParser<ConsensusDocument> createParser(ByteBuffer response) {
         return PARSER_FACTORY.createConsensusDocumentParser(response);
     }
 }

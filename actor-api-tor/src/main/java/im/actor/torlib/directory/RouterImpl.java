@@ -5,7 +5,6 @@ import java.util.Set;
 
 import im.actor.torlib.Descriptor;
 import im.actor.torlib.Router;
-import im.actor.torlib.RouterDescriptor;
 import im.actor.torlib.RouterStatus;
 import im.actor.torlib.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
@@ -87,12 +86,13 @@ public class RouterImpl implements Router {
     }
 
     public boolean isHibernating() {
-        final RouterDescriptor rd = downcastDescriptor();
-        if (rd == null) {
-            return false;
-        } else {
-            return rd.isHibernating();
-        }
+//        final Descriptor rd = downcastDescriptor();
+//        if (rd == null) {
+//            return false;
+//        } else {
+//            return rd.Descriptor();
+//        }
+        return false;
     }
 
     public boolean isRunning() {
@@ -136,12 +136,13 @@ public class RouterImpl implements Router {
     }
 
     public TorPublicKey getIdentityKey() {
-        final RouterDescriptor rd = downcastDescriptor();
-        if (rd != null) {
-            return rd.getIdentityKey();
-        } else {
-            return null;
-        }
+//        final Descriptor rd = downcastDescriptor();
+//        if (rd != null) {
+//            return rd.getIdentityKey();
+//        } else {
+//            return null;
+//        }
+        return null;
     }
 
     public String getNickname() {
@@ -192,30 +193,15 @@ public class RouterImpl implements Router {
     }
 
     public int getAverageBandwidth() {
-        final RouterDescriptor rd = downcastDescriptor();
-        if (rd == null) {
-            return 0;
-        } else {
-            return rd.getAverageBandwidth();
-        }
+        return 0;
     }
 
     public int getBurstBandwidth() {
-        final RouterDescriptor rd = downcastDescriptor();
-        if (rd == null) {
-            return 0;
-        } else {
-            return rd.getBurstBandwidth();
-        }
+        return 0;
     }
 
     public int getObservedBandwidth() {
-        final RouterDescriptor rd = downcastDescriptor();
-        if (rd == null) {
-            return 0;
-        } else {
-            return rd.getObservedBandwidth();
-        }
+        return 0;
     }
 
     public boolean exitPolicyAccepts(IPv4Address address, int port) {
@@ -246,12 +232,8 @@ public class RouterImpl implements Router {
         return cc;
     }
 
-    private RouterDescriptor downcastDescriptor() {
+    private Descriptor downcastDescriptor() {
         refreshDescriptor();
-        if (descriptor instanceof RouterDescriptor) {
-            return (RouterDescriptor) descriptor;
-        } else {
-            return null;
-        }
+        return descriptor;
     }
 }

@@ -10,8 +10,10 @@ import im.actor.torlib.*;
 import im.actor.torlib.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.cache.DescriptorCache;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParserFactory;
+import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 
 /**
@@ -34,7 +36,7 @@ public class Directory {
     private final TorConfig config;
     private final StateFile stateFile;
 
-    private final DescriptorCache<RouterMicrodescriptor> microdescriptorCache;
+    private final DescriptorCache<Descriptor> microdescriptorCache;
     private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
     private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
 
@@ -46,14 +48,14 @@ public class Directory {
     private ConsensusDocument currentConsensus;
     private ConsensusDocument consensusWaitingForCertificates;
 
-    public Directory(TorConfig config, DirectoryStore customDirectoryStore) {
+    public Directory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
-        this.store = (customDirectoryStore == null) ? (new DirectoryStoreImpl(config)) : (customDirectoryStore);
+        this.store = new DirectoryStore(config);
         this.config = config;
         this.stateFile = new StateFile(store, this);
-        this.microdescriptorCache = new DescriptorCache<RouterMicrodescriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
+        this.microdescriptorCache = new DescriptorCache<Descriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
-            protected DocumentParser<RouterMicrodescriptor> createDocumentParser(ByteBuffer buffer) {
+            protected DocumentParser<Descriptor> createDocumentParser(ByteBuffer buffer) {
                 return PARSER_FACTORY.createRouterMicrodescriptorParser(buffer);
             }
         };
@@ -329,7 +331,7 @@ public class Directory {
         routersByNickname.clear();
     }
 
-    public synchronized void addRouterMicrodescriptors(List<RouterMicrodescriptor> microdescriptors) {
+    public synchronized void addRouterMicrodescriptors(List<Descriptor> microdescriptors) {
         microdescriptorCache.addDescriptors(microdescriptors);
         needRecalculateMinimumRouterInfo = true;
     }
@@ -413,7 +415,7 @@ public class Directory {
         stateFile.addGuardEntry(entry);
     }
 
-    public RouterMicrodescriptor getMicrodescriptorFromCache(HexDigest descriptorDigest) {
+    public Descriptor getMicrodescriptorFromCache(HexDigest descriptorDigest) {
         return microdescriptorCache.getDescriptor(descriptorDigest);
     }
 }

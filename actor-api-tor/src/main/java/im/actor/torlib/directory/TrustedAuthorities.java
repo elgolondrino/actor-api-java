@@ -9,10 +9,8 @@ import im.actor.torlib.Tor;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
+import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingHandler;
-import im.actor.torlib.Tor;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 /*
  * This class contains the hardcoded 'bootstrap' directory authority

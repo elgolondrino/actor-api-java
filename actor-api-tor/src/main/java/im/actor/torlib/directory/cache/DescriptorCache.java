@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.cache;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -15,10 +15,6 @@ import im.actor.torlib.Threading;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
-import im.actor.torlib.misc.GuardedBy;
-import im.actor.torlib.Threading;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.misc.GuardedBy;
 
 public abstract class DescriptorCache <T extends Descriptor> {

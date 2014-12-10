@@ -8,11 +8,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import im.actor.torlib.BridgeRouter;
-import im.actor.torlib.DirectoryDownloader;
-import im.actor.torlib.Router;
-import im.actor.torlib.RouterDescriptor;
-import im.actor.torlib.TorConfig;
+import im.actor.torlib.*;
 import im.actor.torlib.config.TorConfigBridgeLine;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
@@ -39,7 +35,7 @@ public class Bridges {
 		private void downloadDescriptor() {
 			logger.fine("Downloading descriptor for bridge: "+ target);
 			try {
-				final RouterDescriptor descriptor = directoryDownloader.downloadBridgeDescriptor(target);
+				final Descriptor descriptor = directoryDownloader.downloadBridgeDescriptor(target);
 				if(descriptor != null) {
 					logger.fine("Descriptor received for bridge "+ target +". Adding to list of usable bridges");
 					target.setDescriptor(descriptor);

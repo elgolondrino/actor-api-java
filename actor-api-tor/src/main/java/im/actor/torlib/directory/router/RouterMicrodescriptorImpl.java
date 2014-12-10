@@ -5,153 +5,153 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import im.actor.torlib.RouterMicrodescriptor;
+import im.actor.torlib.Descriptor;
 import im.actor.torlib.Tor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitPorts;
 
-public class RouterMicrodescriptorImpl implements RouterMicrodescriptor {
-	
-	private IPv4Address address;
-	private int routerPort;
-	private TorPublicKey onionKey;
-	private byte[] ntorOnionKey;
-	private Set<String> familyMembers = Collections.emptySet();
-	private ExitPorts acceptPorts;
-	private ExitPorts rejectPorts;
-	private String rawDocumentData;
-	private HexDigest descriptorDigest;
-	private long lastListed;
-	private CacheLocation cacheLocation = CacheLocation.NOT_CACHED;
-	
-	public void setAddress(IPv4Address address) {
-		this.address = address;
-	}
+public class RouterMicrodescriptorImpl implements Descriptor {
 
-	public void setRouterPort(int port) {
-		this.routerPort = port;
-	}
+    private IPv4Address address;
+    private int routerPort;
+    private TorPublicKey onionKey;
+    private byte[] ntorOnionKey;
+    private Set<String> familyMembers = Collections.emptySet();
+    private ExitPorts acceptPorts;
+    private ExitPorts rejectPorts;
+    private String rawDocumentData;
+    private HexDigest descriptorDigest;
+    private long lastListed;
+    private CacheLocation cacheLocation = CacheLocation.NOT_CACHED;
 
-	public void setOnionKey(TorPublicKey onionKey) {
-		this.onionKey = onionKey;
-	}
+    public void setAddress(IPv4Address address) {
+        this.address = address;
+    }
 
-	public void setNtorOnionKey(byte[] ntorOnionKey) {
-		this.ntorOnionKey = ntorOnionKey;
-	}
+    public void setRouterPort(int port) {
+        this.routerPort = port;
+    }
 
-	public void addFamilyMember(String familyMember) {
-		if(familyMembers.isEmpty()) {
-			familyMembers = new HashSet<String>();
-		}
-		familyMembers.add(familyMember);
-	}
+    public void setOnionKey(TorPublicKey onionKey) {
+        this.onionKey = onionKey;
+    }
 
-	public void addAcceptPorts(String portlist) {
-		acceptPorts = ExitPorts.createAcceptExitPorts(portlist);
-	}
-	
-	public void addRejectPorts(String portlist) {
-		rejectPorts = ExitPorts.createRejectExitPorts(portlist);
-	}
-	
-	public void setRawDocumentData(String rawData) {
-		this.rawDocumentData = rawData;
-	}
+    public void setNtorOnionKey(byte[] ntorOnionKey) {
+        this.ntorOnionKey = ntorOnionKey;
+    }
 
-	public void setDescriptorDigest(HexDigest descriptorDigest) {
-		this.descriptorDigest = descriptorDigest;
-	}
+    public void addFamilyMember(String familyMember) {
+        if (familyMembers.isEmpty()) {
+            familyMembers = new HashSet<String>();
+        }
+        familyMembers.add(familyMember);
+    }
 
-	public void setLastListed(long ts) {
-		this.lastListed = ts;
-	}
+    public void addAcceptPorts(String portlist) {
+        acceptPorts = ExitPorts.createAcceptExitPorts(portlist);
+    }
 
-	public boolean isValidDocument() {
-		return (descriptorDigest != null) && (onionKey != null);
-	}
-	
-	public String getRawDocumentData() {
-		return rawDocumentData;
-	}
+    public void addRejectPorts(String portlist) {
+        rejectPorts = ExitPorts.createRejectExitPorts(portlist);
+    }
 
-	public TorPublicKey getOnionKey() {
-		return onionKey;
-	}
+    public void setRawDocumentData(String rawData) {
+        this.rawDocumentData = rawData;
+    }
 
-	public byte[] getNTorOnionKey() {
-		return ntorOnionKey;
-	}
+    public void setDescriptorDigest(HexDigest descriptorDigest) {
+        this.descriptorDigest = descriptorDigest;
+    }
 
-	public IPv4Address getAddress() {
-		return address;
-	}
+    public void setLastListed(long ts) {
+        this.lastListed = ts;
+    }
 
-	public int getRouterPort() {
-		return routerPort;
-	}
+    public boolean isValidDocument() {
+        return (descriptorDigest != null) && (onionKey != null);
+    }
 
-	public Set<String> getFamilyMembers() {
-		return familyMembers;
-	}
+    public String getRawDocumentData() {
+        return rawDocumentData;
+    }
 
-	public boolean exitPolicyAccepts(IPv4Address address, int port) {
-		return exitPolicyAccepts(port);
-	}
+    public TorPublicKey getOnionKey() {
+        return onionKey;
+    }
 
-	public boolean exitPolicyAccepts(int port) {
-		if(acceptPorts == null) {
-			return false;
-		}
-		if(rejectPorts != null && !rejectPorts.acceptsPort(port)) {
-			return false;
-		}
-		return acceptPorts.acceptsPort(port);
-	}
+    public byte[] getNTorOnionKey() {
+        return ntorOnionKey;
+    }
 
-	public HexDigest getDescriptorDigest() {
-		return descriptorDigest;
-	}
-	
-	public boolean equals(Object o) {
-		if(!(o instanceof RouterMicrodescriptorImpl)) 
-			return false;
-		final RouterMicrodescriptorImpl other = (RouterMicrodescriptorImpl) o;
-		if(other.getDescriptorDigest() == null || descriptorDigest == null)
-			return false;
+    public IPv4Address getAddress() {
+        return address;
+    }
 
-		return other.getDescriptorDigest().equals(descriptorDigest);
-	}
+    public int getRouterPort() {
+        return routerPort;
+    }
 
-	public int hashCode() {
-		if(descriptorDigest == null)
-			return 0;
-		return descriptorDigest.hashCode();
-	}
+    public Set<String> getFamilyMembers() {
+        return familyMembers;
+    }
 
-	public long getLastListed() {
-		return lastListed;
-	}
+    public boolean exitPolicyAccepts(IPv4Address address, int port) {
+        return exitPolicyAccepts(port);
+    }
 
-	public void setCacheLocation(CacheLocation location) {
-		this.cacheLocation = location;
-	}
+    public boolean exitPolicyAccepts(int port) {
+        if (acceptPorts == null) {
+            return false;
+        }
+        if (rejectPorts != null && !rejectPorts.acceptsPort(port)) {
+            return false;
+        }
+        return acceptPorts.acceptsPort(port);
+    }
 
-	public CacheLocation getCacheLocation() {
-		return cacheLocation;
-	}
+    public HexDigest getDescriptorDigest() {
+        return descriptorDigest;
+    }
 
-	public int getBodyLength() {
-		return rawDocumentData.length();
-	}
+    public boolean equals(Object o) {
+        if (!(o instanceof RouterMicrodescriptorImpl))
+            return false;
+        final RouterMicrodescriptorImpl other = (RouterMicrodescriptorImpl) o;
+        if (other.getDescriptorDigest() == null || descriptorDigest == null)
+            return false;
 
-	public ByteBuffer getRawDocumentBytes() {
-		if(getRawDocumentData() == null) {
-			return ByteBuffer.allocate(0);
-		} else {
-			return ByteBuffer.wrap(getRawDocumentData().getBytes(Tor.getDefaultCharset()));
-		}
-	}
+        return other.getDescriptorDigest().equals(descriptorDigest);
+    }
+
+    public int hashCode() {
+        if (descriptorDigest == null)
+            return 0;
+        return descriptorDigest.hashCode();
+    }
+
+    public long getLastListed() {
+        return lastListed;
+    }
+
+    public void setCacheLocation(CacheLocation location) {
+        this.cacheLocation = location;
+    }
+
+    public CacheLocation getCacheLocation() {
+        return cacheLocation;
+    }
+
+    public int getBodyLength() {
+        return rawDocumentData.length();
+    }
+
+    public ByteBuffer getRawDocumentBytes() {
+        if (getRawDocumentData() == null) {
+            return ByteBuffer.allocate(0);
+        } else {
+            return ByteBuffer.wrap(getRawDocumentData().getBytes(Tor.getDefaultCharset()));
+        }
+    }
 }

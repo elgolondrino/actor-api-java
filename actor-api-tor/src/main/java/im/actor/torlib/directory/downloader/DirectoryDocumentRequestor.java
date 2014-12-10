@@ -5,18 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.CircuitManager;
-import im.actor.torlib.ConsensusDocument;
-import im.actor.torlib.DirectoryCircuit;
-import im.actor.torlib.KeyCertificate;
-import im.actor.torlib.Router;
-import im.actor.torlib.RouterDescriptor;
-import im.actor.torlib.RouterMicrodescriptor;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
-import im.actor.torlib.Tor;
+import im.actor.torlib.*;
 import im.actor.torlib.circuits.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.consensus.ConsensusFetcher;
 
 /**
  * Synchronously downloads directory documents.
@@ -37,7 +29,7 @@ public class DirectoryDocumentRequestor {
         this.initializationTracker = initializationTracker;
     }
 
-    public RouterDescriptor downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
+    public Descriptor downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
         return fetchSingleDocument(new BridgeDescriptorFetcher());
     }
 
@@ -49,11 +41,7 @@ public class DirectoryDocumentRequestor {
         return fetchDocuments(new CertificateFetcher(required), CircuitManager.DIRECTORY_PURPOSE_CERTIFICATES);
     }
 
-    public List<RouterDescriptor> downloadRouterDescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
-        return fetchDocuments(new RouterDescriptorFetcher(fingerprints), CircuitManager.DIRECTORY_PURPOSE_DESCRIPTORS);
-    }
-
-    public List<RouterMicrodescriptor> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
+    public List<Descriptor> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
         return fetchDocuments(new MicrodescriptorFetcher(fingerprints), CircuitManager.DIRECTORY_PURPOSE_DESCRIPTORS);
     }
 

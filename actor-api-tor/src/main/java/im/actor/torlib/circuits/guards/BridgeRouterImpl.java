@@ -5,14 +5,6 @@ import java.util.Set;
 
 import im.actor.torlib.BridgeRouter;
 import im.actor.torlib.Descriptor;
-import im.actor.torlib.RouterDescriptor;
-import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.geoip.CountryCodeService;
-import im.actor.torlib.BridgeRouter;
-import im.actor.torlib.Descriptor;
-import im.actor.torlib.RouterDescriptor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
@@ -44,7 +36,7 @@ public class BridgeRouterImpl implements BridgeRouter {
 		this.identity = identity;
 	}
 
-	public void setDescriptor(RouterDescriptor descriptor) {
+	public void setDescriptor(Descriptor descriptor) {
 		this.descriptor = descriptor;
 	}
 
@@ -180,11 +172,7 @@ public class BridgeRouterImpl implements BridgeRouter {
 	}
 
 	public boolean isHibernating() {
-		if(descriptor instanceof RouterDescriptor) {
-			return ((RouterDescriptor)descriptor).isHibernating();
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	public boolean isRunning() {

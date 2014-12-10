@@ -1,6 +1,6 @@
 package im.actor.torlib.directory.router;
 
-import im.actor.torlib.RouterMicrodescriptor;
+import im.actor.torlib.Descriptor;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
@@ -9,18 +9,14 @@ import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParsingHandler;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
-import im.actor.torlib.RouterMicrodescriptor;
-import im.actor.torlib.TorParsingException;
-import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.directory.parsing.*;
 
-public class RouterMicrodescriptorParser implements DocumentParser<RouterMicrodescriptor> {
+public class RouterMicrodescriptorParser implements DocumentParser<Descriptor> {
 
 	
 	private final DocumentFieldParser fieldParser;
 	
 	private RouterMicrodescriptorImpl currentDescriptor;
-	private DocumentParsingResultHandler<RouterMicrodescriptor> resultHandler;
+	private DocumentParsingResultHandler<Descriptor> resultHandler;
 	
 	public RouterMicrodescriptorParser(DocumentFieldParser fieldParser) {
 		this.fieldParser = fieldParser;
@@ -40,7 +36,7 @@ public class RouterMicrodescriptorParser implements DocumentParser<RouterMicrode
 		};
 	}
 	
-	public boolean parse(DocumentParsingResultHandler<RouterMicrodescriptor> resultHandler) {
+	public boolean parse(DocumentParsingResultHandler<Descriptor> resultHandler) {
 		this.resultHandler = resultHandler;
 		try {
 			fieldParser.processDocument();
@@ -51,8 +47,8 @@ public class RouterMicrodescriptorParser implements DocumentParser<RouterMicrode
 		}
 	}
 
-	public DocumentParsingResult<RouterMicrodescriptor> parse() {
-		final BasicDocumentParsingResult<RouterMicrodescriptor> result = new BasicDocumentParsingResult<RouterMicrodescriptor>();
+	public DocumentParsingResult<Descriptor> parse() {
+		final BasicDocumentParsingResult<Descriptor> result = new BasicDocumentParsingResult<Descriptor>();
 		parse(result);
 		return result;
 	}

@@ -16,7 +16,7 @@ public class CertificateFetcher extends DocumentFetcher<KeyCertificate>{
 	}
 
 	@Override
-	String getRequestPath() {
+	public String getRequestPath() {
 		return "/tor/keys/fp-sk/"+ getRequiredCertificatesRequestString();
 	}
 
@@ -34,7 +34,7 @@ public class CertificateFetcher extends DocumentFetcher<KeyCertificate>{
 	}
 
 	@Override
-	DocumentParser<KeyCertificate> createParser(ByteBuffer response) {
+	public DocumentParser<KeyCertificate> createParser(ByteBuffer response) {
 		return PARSER_FACTORY.createKeyCertificateParser(response);
 	}
 }
