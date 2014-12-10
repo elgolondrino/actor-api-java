@@ -2,6 +2,7 @@ package im.actor.torlib.directory;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
@@ -12,9 +13,6 @@ import im.actor.torlib.data.RandomSet;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParserFactory;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
-import im.actor.torlib.events.Event;
-import im.actor.torlib.events.EventHandler;
-import im.actor.torlib.events.EventManager;
 
 /**
  * Main interface for accessing directory information and interacting
@@ -32,44 +30,28 @@ public class Directory {
     private final DescriptorCache<RouterMicrodescriptor> microdescriptorCache;
     private final DescriptorCache<RouterDescriptor> basicDescriptorCache;
 
-    private final Map<HexDigest, RouterImpl> routersByIdentity;
-    private final Map<String, RouterImpl> routersByNickname;
-    private final RandomSet<RouterImpl> directoryCaches;
-    private final Set<RequiredCertificate> requiredCertificates;
+    private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
+    private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
+    private final Set<RequiredCertificate> requiredCertificates = new CopyOnWriteArraySet<RequiredCertificate>();
     private boolean haveMinimumRouterInfo;
     private boolean needRecalculateMinimumRouterInfo;
-    private final EventManager consensusChangedManager;
-    private final TorRandom random;
+    private final TorRandom random = new TorRandom();
     private final static DocumentParserFactory parserFactory = new DocumentParserFactoryImpl();
 
     private ConsensusDocument currentConsensus;
     private ConsensusDocument consensusWaitingForCertificates;
 
     public Directory(TorConfig config, DirectoryStore customDirectoryStore) {
-        store = (customDirectoryStore == null) ? (new DirectoryStoreImpl(config)) : (customDirectoryStore);
+        this.store = (customDirectoryStore == null) ? (new DirectoryStoreImpl(config)) : (customDirectoryStore);
         this.config = config;
-        stateFile = new StateFile(store, this);
-        microdescriptorCache = createMicrodescriptorCache(store);
-        basicDescriptorCache = createBasicDescriptorCache(store);
-        routersByIdentity = new HashMap<HexDigest, RouterImpl>();
-        routersByNickname = new HashMap<String, RouterImpl>();
-        directoryCaches = new RandomSet<RouterImpl>();
-        requiredCertificates = new HashSet<ConsensusDocument.RequiredCertificate>();
-        consensusChangedManager = new EventManager();
-        random = new TorRandom();
-    }
-
-    private static DescriptorCache<RouterMicrodescriptor> createMicrodescriptorCache(DirectoryStore store) {
-        return new DescriptorCache<RouterMicrodescriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
+        this.stateFile = new StateFile(store, this);
+        this.microdescriptorCache = new DescriptorCache<RouterMicrodescriptor>(store, DirectoryStore.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStore.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
             protected DocumentParser<RouterMicrodescriptor> createDocumentParser(ByteBuffer buffer) {
                 return parserFactory.createRouterMicrodescriptorParser(buffer);
             }
         };
-    }
-
-    private static DescriptorCache<RouterDescriptor> createBasicDescriptorCache(DirectoryStore store) {
-        return new DescriptorCache<RouterDescriptor>(store, DirectoryStore.CacheFile.DESCRIPTOR_CACHE, DirectoryStore.CacheFile.DESCRIPTOR_JOURNAL) {
+        this.basicDescriptorCache = new DescriptorCache<RouterDescriptor>(store, DirectoryStore.CacheFile.DESCRIPTOR_CACHE, DirectoryStore.CacheFile.DESCRIPTOR_JOURNAL) {
             @Override
             protected DocumentParser<RouterDescriptor> createDocumentParser(ByteBuffer buffer) {
                 return parserFactory.createRouterDescriptorParser(buffer, false);
@@ -195,10 +177,6 @@ public class Directory {
         }
     }
 
-    public Collection<DirectoryServer> getDirectoryAuthorities() {
-        return TrustedAuthorities.getInstance().getAuthorityServers();
-    }
-
     public DirectoryServer getRandomDirectoryAuthority() {
         final List<DirectoryServer> servers = TrustedAuthorities.getInstance().getAuthorityServers();
         final int idx = random.nextInt(servers.size());
@@ -298,9 +276,7 @@ public class Directory {
 
         for (RouterStatus status : consensus.getRouterStatusEntries()) {
             if (status.hasFlag("Running") && status.hasFlag("Valid")) {
-                final RouterImpl router = updateOrCreateRouter(status, oldRouterByIdentity);
-                addRouter(router);
-                classifyRouter(router);
+                addRouter(updateOrCreateRouter(status, oldRouterByIdentity));
             }
             final Descriptor d = getDescriptorForRouterStatus(status, consensus.getFlavor() == ConsensusDocument.ConsensusFlavor.MICRODESC);
             if (d != null) {
@@ -314,8 +290,6 @@ public class Directory {
         if (!fromCache) {
             storeCurrentConsensus();
         }
-        consensusChangedManager.fireEvent(new Event() {
-        });
     }
 
     private void storeCurrentConsensus() {
@@ -347,15 +321,6 @@ public class Directory {
     private void clearAll() {
         routersByIdentity.clear();
         routersByNickname.clear();
-        directoryCaches.clear();
-    }
-
-    private void classifyRouter(RouterImpl router) {
-        if (isValidDirectoryCache(router)) {
-            directoryCaches.add(router);
-        } else {
-            directoryCaches.remove(router);
-        }
     }
 
     private boolean isValidDirectoryCache(RouterImpl router) {
@@ -414,14 +379,6 @@ public class Directory {
         synchronized (TrustedAuthorities.getInstance()) {
             return consensusWaitingForCertificates != null;
         }
-    }
-
-    public void registerConsensusChangedHandler(EventHandler handler) {
-        consensusChangedManager.addListener(handler);
-    }
-
-    public void unregisterConsensusChangedHandler(EventHandler handler) {
-        consensusChangedManager.removeListener(handler);
     }
 
     public Router getRouterByName(String name) {
