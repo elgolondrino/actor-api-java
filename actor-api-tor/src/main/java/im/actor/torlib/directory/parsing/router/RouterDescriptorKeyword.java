@@ -1,6 +1,6 @@
-package im.actor.torlib.directory.router;
+package im.actor.torlib.directory.parsing.router;
 
-public enum RouterMicrodescriptorKeyword {
+public enum RouterDescriptorKeyword {
 	ONION_KEY("onion-key", 0),
 	NTOR_ONION_KEY("ntor-onion-key", 1),
 	A("a", 1),
@@ -13,11 +13,11 @@ public enum RouterMicrodescriptorKeyword {
 	private final String keyword;
 	private final int argumentCount;
 	
-	RouterMicrodescriptorKeyword(String keyword) {
+	RouterDescriptorKeyword(String keyword) {
 		this(keyword, VARIABLE_ARGUMENT_COUNT);
 	}
 
-	RouterMicrodescriptorKeyword(String keyword, int argumentCount) {
+	RouterDescriptorKeyword(String keyword, int argumentCount) {
 		this.keyword = keyword;
 		this.argumentCount = argumentCount;
 	}
@@ -30,8 +30,8 @@ public enum RouterMicrodescriptorKeyword {
 		return argumentCount;
 	}
 	
-	static RouterMicrodescriptorKeyword findKeyword(String keyword) {
-		for(RouterMicrodescriptorKeyword k: values()) {
+	static RouterDescriptorKeyword findKeyword(String keyword) {
+		for(RouterDescriptorKeyword k: values()) {
 			if(k.getKeyword().equals(keyword)) {
 				return k;
 			}

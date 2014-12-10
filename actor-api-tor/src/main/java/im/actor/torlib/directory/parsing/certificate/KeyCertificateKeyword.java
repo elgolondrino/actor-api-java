@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.certificate;
+package im.actor.torlib.directory.parsing.certificate;
 
 public enum KeyCertificateKeyword {
 	/*

@@ -1,6 +1,6 @@
-package im.actor.torlib.directory.router;
+package im.actor.torlib.directory.parsing.router;
 
-import im.actor.torlib.Descriptor;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
@@ -10,15 +10,15 @@ import im.actor.torlib.directory.parsing.DocumentParsingHandler;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 
-public class RouterMicrodescriptorParser implements DocumentParser<Descriptor> {
+public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 
 	
 	private final DocumentFieldParser fieldParser;
 	
-	private RouterMicrodescriptorImpl currentDescriptor;
+	private Descriptor currentDescriptor;
 	private DocumentParsingResultHandler<Descriptor> resultHandler;
 	
-	public RouterMicrodescriptorParser(DocumentFieldParser fieldParser) {
+	public RouterDescriptorParser(DocumentFieldParser fieldParser) {
 		this.fieldParser = fieldParser;
 		this.fieldParser.setHandler(createParsingHandler());
 	}
@@ -54,8 +54,8 @@ public class RouterMicrodescriptorParser implements DocumentParser<Descriptor> {
 	}
 
 	private void processKeywordLine() {
-		final RouterMicrodescriptorKeyword keyword = RouterMicrodescriptorKeyword.findKeyword(fieldParser.getCurrentKeyword());
-		if(!keyword.equals(RouterMicrodescriptorKeyword.UNKNOWN_KEYWORD)) {
+		final RouterDescriptorKeyword keyword = RouterDescriptorKeyword.findKeyword(fieldParser.getCurrentKeyword());
+		if(!keyword.equals(RouterDescriptorKeyword.UNKNOWN_KEYWORD)) {
 			processKeyword(keyword);
 		}
 		if(currentDescriptor != null) {
@@ -65,7 +65,7 @@ public class RouterMicrodescriptorParser implements DocumentParser<Descriptor> {
 	}
 	
 
-	private void processKeyword(RouterMicrodescriptorKeyword keyword) {
+	private void processKeyword(RouterDescriptorKeyword keyword) {
 		fieldParser.verifyExpectedArgumentCount(keyword.getKeyword(), keyword.getArgumentCount());
 		switch(keyword) {
 		case ONION_KEY:
@@ -98,12 +98,12 @@ public class RouterMicrodescriptorParser implements DocumentParser<Descriptor> {
 		if(currentDescriptor != null) {
 			finalizeDescriptor(currentDescriptor);
 		}
-		currentDescriptor = new RouterMicrodescriptorImpl();
-		fieldParser.resetRawDocument(RouterMicrodescriptorKeyword.ONION_KEY.getKeyword() + "\n");
+		currentDescriptor = new Descriptor();
+		fieldParser.resetRawDocument(RouterDescriptorKeyword.ONION_KEY.getKeyword() + "\n");
 		currentDescriptor.setOnionKey(fieldParser.parsePublicKey());
 	}
 
-	private void finalizeDescriptor(RouterMicrodescriptorImpl descriptor) {
+	private void finalizeDescriptor(Descriptor descriptor) {
 		final TorMessageDigest digest = new TorMessageDigest(true);
 		digest.update(descriptor.getRawDocumentData());
 		descriptor.setDescriptorDigest(digest.getHexDigest());

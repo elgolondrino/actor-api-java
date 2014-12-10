@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.consensus;
+package im.actor.torlib.directory.parsing.consensus;
 
 enum DocumentKeyword {
 	/*

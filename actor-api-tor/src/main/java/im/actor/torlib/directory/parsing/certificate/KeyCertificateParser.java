@@ -1,6 +1,6 @@
-package im.actor.torlib.directory.certificate;
+package im.actor.torlib.directory.parsing.certificate;
 
-import im.actor.torlib.KeyCertificate;
+import im.actor.torlib.directory.KeyCertificate;
 import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
@@ -15,7 +15,7 @@ import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 public class KeyCertificateParser implements DocumentParser<KeyCertificate> {
 	private final static int CURRENT_CERTIFICATE_VERSION = 3;
 	private final DocumentFieldParser fieldParser;
-	private KeyCertificateImpl currentCertificate;
+	private KeyCertificate currentCertificate;
 	private DocumentParsingResultHandler<KeyCertificate> resultHandler;
 	
 	public KeyCertificateParser(DocumentFieldParser fieldParser) {
@@ -48,7 +48,7 @@ public class KeyCertificateParser implements DocumentParser<KeyCertificate> {
 	private void startNewCertificate() {
 		fieldParser.resetRawDocument();
 		fieldParser.startSignedEntity();
-		currentCertificate = new KeyCertificateImpl();
+		currentCertificate = new KeyCertificate();
 	}
 	
 	public boolean parse(DocumentParsingResultHandler<KeyCertificate> resultHandler) {

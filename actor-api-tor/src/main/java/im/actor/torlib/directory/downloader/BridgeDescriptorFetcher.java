@@ -2,7 +2,7 @@ package im.actor.torlib.directory.downloader;
 
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.Descriptor;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class BridgeDescriptorFetcher extends DocumentFetcher<Descriptor> {

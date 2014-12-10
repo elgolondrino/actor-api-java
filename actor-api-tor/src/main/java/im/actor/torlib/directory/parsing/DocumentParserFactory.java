@@ -3,8 +3,8 @@ package im.actor.torlib.directory.parsing;
 import java.nio.ByteBuffer;
 
 import im.actor.torlib.directory.ConsensusDocument;
-import im.actor.torlib.Descriptor;
-import im.actor.torlib.KeyCertificate;
+import im.actor.torlib.directory.Descriptor;
+import im.actor.torlib.directory.KeyCertificate;
 
 public interface DocumentParserFactory {
 	DocumentParser<Descriptor> createRouterMicrodescriptorParser(ByteBuffer buffer);

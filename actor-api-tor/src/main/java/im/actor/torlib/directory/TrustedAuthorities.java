@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.torlib.RouterStatus;
+import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.Tor;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;

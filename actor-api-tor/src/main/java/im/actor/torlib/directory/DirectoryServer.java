@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import im.actor.torlib.KeyCertificate;
-import im.actor.torlib.RouterStatus;
+import im.actor.torlib.directory.KeyCertificate;
+import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.data.HexDigest;
 
 /**

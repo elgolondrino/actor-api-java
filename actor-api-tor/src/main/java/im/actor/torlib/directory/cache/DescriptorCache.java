@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Descriptor;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.utils.Threading;

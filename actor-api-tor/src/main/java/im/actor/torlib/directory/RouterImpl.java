@@ -3,9 +3,7 @@ package im.actor.torlib.directory;
 import java.util.Collections;
 import java.util.Set;
 
-import im.actor.torlib.Descriptor;
 import im.actor.torlib.Router;
-import im.actor.torlib.RouterStatus;
 import im.actor.torlib.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;

@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.consensus;
+package im.actor.torlib.directory.downloader;
 
 import java.nio.ByteBuffer;
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import im.actor.torlib.Descriptor;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;
 

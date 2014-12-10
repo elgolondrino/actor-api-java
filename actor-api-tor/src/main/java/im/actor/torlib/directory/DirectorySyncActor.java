@@ -5,7 +5,7 @@ import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
-import im.actor.torlib.KeyCertificate;
+import im.actor.torlib.directory.KeyCertificate;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;

@@ -9,8 +9,8 @@ import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.Timestamp;
-import im.actor.torlib.directory.consensus.DirectorySignature;
-import im.actor.torlib.directory.consensus.RequiredCertificateImpl;
+import im.actor.torlib.directory.parsing.consensus.DirectorySignature;
+import im.actor.torlib.directory.parsing.consensus.RequiredCertificateImpl;
 
 public class ConsensusDocument implements Document {
 

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import im.actor.torlib.*;
 import im.actor.torlib.config.TorConfigBridgeLine;
 import im.actor.torlib.crypto.TorRandom;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
 

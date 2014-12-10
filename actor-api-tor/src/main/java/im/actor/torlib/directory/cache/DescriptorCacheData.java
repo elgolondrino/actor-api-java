@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import im.actor.torlib.Descriptor;
+import im.actor.torlib.directory.Descriptor;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.misc.GuardedBy;
 

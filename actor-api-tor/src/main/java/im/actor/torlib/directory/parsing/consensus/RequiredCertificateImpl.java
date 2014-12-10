@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.consensus;
+package im.actor.torlib.directory.parsing.consensus;
 
 import im.actor.torlib.directory.ConsensusDocument;
 import im.actor.torlib.data.HexDigest;
