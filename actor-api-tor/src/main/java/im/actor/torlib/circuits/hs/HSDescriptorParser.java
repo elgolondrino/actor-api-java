@@ -3,7 +3,7 @@ package im.actor.torlib.circuits.hs;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;

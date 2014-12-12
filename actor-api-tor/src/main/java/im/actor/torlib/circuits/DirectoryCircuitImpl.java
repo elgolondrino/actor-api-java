@@ -7,8 +7,7 @@ import im.actor.torlib.*;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.DirectoryCircuit;
-import im.actor.torlib.Stream;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
+import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class DirectoryCircuitImpl extends CircuitImpl implements DirectoryCircuit {
 	
@@ -16,13 +15,13 @@ public class DirectoryCircuitImpl extends CircuitImpl implements DirectoryCircui
 		super(circuitManager, prechosenPath);
 	}
 	
-	public Stream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-		final StreamImpl stream = createNewStream(autoclose);
+	public TorStream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+		final TorStream torStream = createNewStream(autoclose);
 		try {
-			stream.openDirectory(timeout);
-			return stream;
+			torStream.openDirectory(timeout);
+			return torStream;
 		} catch (Exception e) {
-			removeStream(stream);
+			removeStream(torStream);
 			return processStreamOpenException(e);
 		}
 	}

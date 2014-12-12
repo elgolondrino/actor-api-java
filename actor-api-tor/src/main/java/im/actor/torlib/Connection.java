@@ -1,6 +1,8 @@
 package im.actor.torlib;
 
 
+import im.actor.torlib.errors.ConnectionIOException;
+
 /**
  * A network connection to a Tor onion router.   
  */
@@ -22,7 +24,7 @@ public interface Connection {
 	 * Send a protocol {@link Cell} on this connection.
 	 * 
 	 * @param cell The {@link Cell} to transfer.
-	 * @throws ConnectionIOException If the cell could not be send because the connection is not connected
+	 * @throws im.actor.torlib.errors.ConnectionIOException If the cell could not be send because the connection is not connected
 	 *                                   or if an error occured while sending the cell data.
 	 */
 	void sendCell(Cell cell) throws ConnectionIOException;

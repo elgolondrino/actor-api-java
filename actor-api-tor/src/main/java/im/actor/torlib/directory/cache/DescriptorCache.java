@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import im.actor.torlib.directory.Descriptor;
+import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.utils.Threading;
@@ -17,7 +17,7 @@ import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.utils.misc.GuardedBy;
 
-public abstract class DescriptorCache <T extends Descriptor> {
+public abstract class DescriptorCache <T extends DescriptorDocument> {
 	private final static Logger logger = Logger.getLogger(DescriptorCache.class.getName());
 	
 	private final DescriptorCacheData<T> data;
@@ -69,7 +69,7 @@ public abstract class DescriptorCache <T extends Descriptor> {
 		int duplicateCount = 0;
 		for(T d: descriptors) {
 			if(data.addDescriptor(d)) {
-				if(d.getCacheLocation() == Descriptor.CacheLocation.NOT_CACHED) {
+				if(d.getCacheLocation() == DescriptorDocument.CacheLocation.NOT_CACHED) {
 					journalLength += d.getBodyLength();
 					journalDescriptors.add(d);
 				}
@@ -127,7 +127,7 @@ public abstract class DescriptorCache <T extends Descriptor> {
 		final DocumentParsingResult<T> result = parser.parse();
 		if(result.isOkay()) {
 			for(T d: result.getParsedDocuments()) {
-				d.setCacheLocation(Descriptor.CacheLocation.CACHED_CACHEFILE);
+				d.setCacheLocation(DescriptorDocument.CacheLocation.CACHED_CACHEFILE);
 				data.addDescriptor(d);
 			}
 		}
@@ -145,7 +145,7 @@ public abstract class DescriptorCache <T extends Descriptor> {
 			int duplicateCount = 0;
 			logger.fine("Loaded "+ result.getParsedDocuments().size() + " descriptors from journal");
 			for(T d: result.getParsedDocuments()) {
-				d.setCacheLocation(Descriptor.CacheLocation.CACHED_JOURNAL);
+				d.setCacheLocation(DescriptorDocument.CacheLocation.CACHED_JOURNAL);
 				if(!data.addDescriptor(d)) {
 					duplicateCount += 1;
 				}

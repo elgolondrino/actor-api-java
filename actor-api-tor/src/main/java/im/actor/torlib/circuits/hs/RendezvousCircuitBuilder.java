@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import im.actor.torlib.*;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
+import im.actor.torlib.errors.TorException;
 
 public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit>{
 	private final Logger logger = Logger.getLogger(RendezvousCircuitBuilder.class.getName());

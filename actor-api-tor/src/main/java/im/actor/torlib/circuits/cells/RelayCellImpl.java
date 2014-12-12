@@ -5,9 +5,7 @@ import java.nio.ByteBuffer;
 import im.actor.torlib.Cell;
 import im.actor.torlib.CircuitNode;
 import im.actor.torlib.RelayCell;
-import im.actor.torlib.TorException;
-import im.actor.torlib.Cell;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class RelayCellImpl extends CellImpl implements RelayCell {
 

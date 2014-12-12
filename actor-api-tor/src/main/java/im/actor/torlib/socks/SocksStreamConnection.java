@@ -7,17 +7,17 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Stream;
+import im.actor.torlib.circuits.TorStream;
 
 public class SocksStreamConnection {
 	private final static Logger logger = Logger.getLogger(SocksStreamConnection.class.getName());
 	
-	public static void runConnection(Socket socket, Stream stream) {
-		SocksStreamConnection ssc = new SocksStreamConnection(socket, stream);
+	public static void runConnection(Socket socket, TorStream torStream) {
+		SocksStreamConnection ssc = new SocksStreamConnection(socket, torStream);
 		ssc.run();
 	}
 	private final static int TRANSFER_BUFFER_SIZE = 4096;
-	private final Stream stream;
+	private final TorStream torStream;
 	private final InputStream torInputStream;
 	private final OutputStream torOutputStream;
 	private final Socket socket;
@@ -27,11 +27,11 @@ public class SocksStreamConnection {
 	private volatile boolean outgoingClosed;
 	private volatile boolean incomingClosed;
 
-	private SocksStreamConnection(Socket socket, Stream stream) {
+	private SocksStreamConnection(Socket socket, TorStream torStream) {
 		this.socket = socket;
-		this.stream = stream;
-		torInputStream = stream.getInputStream();
-		torOutputStream = stream.getOutputStream();
+		this.torStream = torStream;
+		torInputStream = torStream.getInputStream();
+		torOutputStream = torStream.getOutputStream();
 		
 		incomingThread = createIncomingThread();
 		outgoingThread = createOutgoingThread();
@@ -65,7 +65,7 @@ public class SocksStreamConnection {
 			try {
 				incomingTransferLoop();
 			} catch (IOException e) {
-				logger.fine("System error on incoming stream IO  "+ stream +" : "+ e.getMessage());
+				logger.fine("System error on incoming stream IO  "+ torStream +" : "+ e.getMessage());
 			} finally {
 				synchronized(lock) {
 					incomingClosed = true;
@@ -80,7 +80,7 @@ public class SocksStreamConnection {
 			try {
 				outgoingTransferLoop();
 			} catch (IOException e) {
-				logger.fine("System error on outgoing stream IO "+ stream +" : "+ e.getMessage());
+				logger.fine("System error on outgoing stream IO "+ torStream +" : "+ e.getMessage());
 			} finally {
 				synchronized(lock) {
 					outgoingClosed = true;
@@ -95,11 +95,11 @@ public class SocksStreamConnection {
 		while(true) {
 			final int n = torInputStream.read(incomingBuffer);
 			if(n == -1) {
-				logger.fine("EOF on TOR input stream "+ stream);
+				logger.fine("EOF on TOR input stream "+ torStream);
 				socket.shutdownOutput();
 				return;
 			} else if(n > 0) {
-				logger.fine("Transferring "+ n +" bytes from "+ stream +" to SOCKS socket");
+				logger.fine("Transferring "+ n +" bytes from "+ torStream +" to SOCKS socket");
 				if(!socket.isOutputShutdown()) {
 					socket.getOutputStream().write(incomingBuffer, 0, n);
 					socket.getOutputStream().flush();
@@ -114,14 +114,14 @@ public class SocksStreamConnection {
 	private void outgoingTransferLoop() throws IOException {
 		final byte[] outgoingBuffer = new byte[TRANSFER_BUFFER_SIZE];
 		while(true) {
-			stream.waitForSendWindow();
+			torStream.waitForSendWindow();
 			final int n = socket.getInputStream().read(outgoingBuffer);
 			if(n == -1) {
 				torOutputStream.close();
-				logger.fine("EOF on SOCKS socket connected to "+ stream);
+				logger.fine("EOF on SOCKS socket connected to "+ torStream);
 				return;
 			} else if(n > 0) {
-				logger.fine("Transferring "+ n +" bytes from SOCKS socket to "+ stream);
+				logger.fine("Transferring "+ n +" bytes from SOCKS socket to "+ torStream);
 				torOutputStream.write(outgoingBuffer, 0, n);
 				torOutputStream.flush();
 			}

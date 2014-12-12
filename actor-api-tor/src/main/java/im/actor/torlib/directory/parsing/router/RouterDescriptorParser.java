@@ -1,7 +1,7 @@
 package im.actor.torlib.directory.parsing.router;
 
-import im.actor.torlib.directory.Descriptor;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
@@ -10,13 +10,13 @@ import im.actor.torlib.directory.parsing.DocumentParsingHandler;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 
-public class RouterDescriptorParser implements DocumentParser<Descriptor> {
+public class RouterDescriptorParser implements DocumentParser<DescriptorDocument> {
 
 	
 	private final DocumentFieldParser fieldParser;
 	
-	private Descriptor currentDescriptor;
-	private DocumentParsingResultHandler<Descriptor> resultHandler;
+	private DescriptorDocument currentDescriptorDocument;
+	private DocumentParsingResultHandler<DescriptorDocument> resultHandler;
 	
 	public RouterDescriptorParser(DocumentFieldParser fieldParser) {
 		this.fieldParser = fieldParser;
@@ -29,14 +29,14 @@ public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 				processKeywordLine();
 			}
 			public void endOfDocument() { 
-				if(currentDescriptor != null) {
-					finalizeDescriptor(currentDescriptor);
+				if(currentDescriptorDocument != null) {
+					finalizeDescriptor(currentDescriptorDocument);
 				}
 			}
 		};
 	}
 	
-	public boolean parse(DocumentParsingResultHandler<Descriptor> resultHandler) {
+	public boolean parse(DocumentParsingResultHandler<DescriptorDocument> resultHandler) {
 		this.resultHandler = resultHandler;
 		try {
 			fieldParser.processDocument();
@@ -47,8 +47,8 @@ public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 		}
 	}
 
-	public DocumentParsingResult<Descriptor> parse() {
-		final BasicDocumentParsingResult<Descriptor> result = new BasicDocumentParsingResult<Descriptor>();
+	public DocumentParsingResult<DescriptorDocument> parse() {
+		final BasicDocumentParsingResult<DescriptorDocument> result = new BasicDocumentParsingResult<DescriptorDocument>();
 		parse(result);
 		return result;
 	}
@@ -58,8 +58,8 @@ public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 		if(!keyword.equals(RouterDescriptorKeyword.UNKNOWN_KEYWORD)) {
 			processKeyword(keyword);
 		}
-		if(currentDescriptor != null) {
-			currentDescriptor.setRawDocumentData(fieldParser.getRawDocument());
+		if(currentDescriptorDocument != null) {
+			currentDescriptorDocument.setRawDocumentData(fieldParser.getRawDocument());
 		}
 
 	}
@@ -73,14 +73,14 @@ public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 			break;
 			
 		case NTOR_ONION_KEY:
-			if(currentDescriptor != null) {
-				currentDescriptor.setNtorOnionKey(fieldParser.parseNtorPublicKey());
+			if(currentDescriptorDocument != null) {
+				currentDescriptorDocument.setNtorOnionKey(fieldParser.parseNtorPublicKey());
 			}
 			break;
 			
 		case FAMILY:
-			while(fieldParser.argumentsRemaining() > 0 && currentDescriptor != null) {
-				currentDescriptor.addFamilyMember(fieldParser.parseString());
+			while(fieldParser.argumentsRemaining() > 0 && currentDescriptorDocument != null) {
+				currentDescriptorDocument.addFamilyMember(fieldParser.parseString());
 			}
 			break;
 		
@@ -95,34 +95,34 @@ public class RouterDescriptorParser implements DocumentParser<Descriptor> {
 	}
 	
 	private void processOnionKeyLine() {
-		if(currentDescriptor != null) {
-			finalizeDescriptor(currentDescriptor);
+		if(currentDescriptorDocument != null) {
+			finalizeDescriptor(currentDescriptorDocument);
 		}
-		currentDescriptor = new Descriptor();
+		currentDescriptorDocument = new DescriptorDocument();
 		fieldParser.resetRawDocument(RouterDescriptorKeyword.ONION_KEY.getKeyword() + "\n");
-		currentDescriptor.setOnionKey(fieldParser.parsePublicKey());
+		currentDescriptorDocument.setOnionKey(fieldParser.parsePublicKey());
 	}
 
-	private void finalizeDescriptor(Descriptor descriptor) {
+	private void finalizeDescriptor(DescriptorDocument descriptorDocument) {
 		final TorMessageDigest digest = new TorMessageDigest(true);
-		digest.update(descriptor.getRawDocumentData());
-		descriptor.setDescriptorDigest(digest.getHexDigest());
-		if(!descriptor.isValidDocument()) {
-			resultHandler.documentInvalid(descriptor, "Microdescriptor data invalid");
+		digest.update(descriptorDocument.getRawDocumentData());
+		descriptorDocument.setDescriptorDigest(digest.getHexDigest());
+		if(!descriptorDocument.isValidDocument()) {
+			resultHandler.documentInvalid(descriptorDocument, "Microdescriptor data invalid");
 		} else {
-			resultHandler.documentParsed(descriptor);
+			resultHandler.documentParsed(descriptorDocument);
 		}
 	}
 
 	private void processP() {
-		if(currentDescriptor == null) {
+		if(currentDescriptorDocument == null) {
 			return;
 		}
 		final String ruleType = fieldParser.parseString();
 		if("accept".equals(ruleType)) {
-			currentDescriptor.addAcceptPorts(fieldParser.parseString());
+			currentDescriptorDocument.addAcceptPorts(fieldParser.parseString());
 		} else if("reject".equals(ruleType)) {
-			currentDescriptor.addRejectPorts(fieldParser.parseString());
+			currentDescriptorDocument.addRejectPorts(fieldParser.parseString());
 		} else {
 			fieldParser.logWarn("Unexpected P field in microdescriptor: "+ ruleType);
 		}

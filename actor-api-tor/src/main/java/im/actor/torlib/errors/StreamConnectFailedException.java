@@ -1,5 +1,7 @@
-package im.actor.torlib;
+package im.actor.torlib.errors;
 
+
+import im.actor.torlib.RelayCell;
 
 public class StreamConnectFailedException extends Exception {
 

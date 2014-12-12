@@ -4,9 +4,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import im.actor.torlib.ExitCircuit;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
-import im.actor.torlib.Stream;
+import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class OpenExitStreamTask implements Runnable {
 	private final static Logger logger = Logger.getLogger(OpenExitStreamTask.class.getName());
@@ -40,7 +38,7 @@ public class OpenExitStreamTask implements Runnable {
 		}
 	}
 
-	private Stream tryOpenExitStream() throws InterruptedException, TimeoutException, StreamConnectFailedException {
+	private TorStream tryOpenExitStream() throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		if(exitRequest.isAddressTarget()) {
 			return circuit.openExitStream(exitRequest.getAddress(), exitRequest.getPort(), exitRequest.getStreamTimeout());
 		} else {

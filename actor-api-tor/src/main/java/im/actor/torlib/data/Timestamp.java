@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorParsingException;
 
 public class Timestamp {
 	private final Date date;

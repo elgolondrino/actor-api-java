@@ -1,7 +1,7 @@
 package im.actor.torlib.sockets;
 
 import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.utils.Threading;
 import im.actor.torlib.TorClient;
 
@@ -17,7 +17,7 @@ public class OrchidSocketImpl extends SocketImpl {
 	private final TorClient torClient;
 
 	private Lock streamLock = Threading.lock("stream");
-	private Stream stream;
+	private TorStream torStream;
 	
 	OrchidSocketImpl(TorClient torClient) {
 		this.torClient = torClient;
@@ -79,19 +79,19 @@ public class OrchidSocketImpl extends SocketImpl {
 	}
 
 	private void doConnect(String host, int port) throws IOException {
-		Stream stream;
+		TorStream torStream;
 
 		// Try to avoid holding the stream lock here whilst calling into torclient to avoid accidental inversions.
 
 		streamLock.lock();
-		stream = this.stream;
+		torStream = this.torStream;
 		streamLock.unlock();
 
-		if (stream != null)
+		if (torStream != null)
 			throw new SocketException("Already connected");
 
 		try {
-			stream = torClient.openExitStreamTo(host, port);
+			torStream = torClient.openExitStreamTo(host, port);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new SocketException("connect() interrupted");
@@ -102,12 +102,12 @@ public class OrchidSocketImpl extends SocketImpl {
 		}
 
 		streamLock.lock();
-		if (this.stream != null) {
+		if (this.torStream != null) {
 			// Raced with another concurrent call.
 			streamLock.unlock();
-			stream.close();
+			torStream.close();
 		} else {
-			this.stream = stream;
+			this.torStream = torStream;
 			streamLock.unlock();
 		}
 	}
@@ -127,12 +127,12 @@ public class OrchidSocketImpl extends SocketImpl {
 		throw new UnsupportedOperationException();
 	}
 
-	private Stream getStream() throws IOException {
+	private TorStream getTorStream() throws IOException {
 		streamLock.lock();
 		try {
-			if (stream == null)
+			if (torStream == null)
 				throw new IOException("Not connected");
-			return stream;
+			return torStream;
 		} finally {
 			streamLock.unlock();
 		}
@@ -140,25 +140,25 @@ public class OrchidSocketImpl extends SocketImpl {
 
 	@Override
 	protected InputStream getInputStream() throws IOException {
-		return getStream().getInputStream();
+		return getTorStream().getInputStream();
 	}
 
 	@Override
 	protected OutputStream getOutputStream() throws IOException {
-		return getStream().getOutputStream();
+		return getTorStream().getOutputStream();
 	}
 
 	@Override
 	protected int available() throws IOException {
-		return getStream().getInputStream().available();
+		return getTorStream().getInputStream().available();
 	}
 
 	@Override
 	protected void close() throws IOException {
-		Stream toClose;
+		TorStream toClose;
 		streamLock.lock();
-		toClose = this.stream;
-		this.stream = null;
+		toClose = this.torStream;
+		this.torStream = null;
 		streamLock.unlock();
 		if (toClose != null)
 			toClose.close();

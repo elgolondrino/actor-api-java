@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.utils.Base64;
 import im.actor.utils.Hex;
 

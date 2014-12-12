@@ -10,12 +10,12 @@ import im.actor.torlib.DirectoryCircuit;
 import im.actor.torlib.InternalCircuit;
 import im.actor.torlib.OpenFailedException;
 import im.actor.torlib.Router;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
-import im.actor.torlib.TorException;
+import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.errors.StreamConnectFailedException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
-import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
-import im.actor.torlib.directory.downloader.HttpConnection;
+import im.actor.torlib.errors.DirectoryRequestFailedException;
+import im.actor.torlib.documents.downloader.TorHttpConnection;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 import im.actor.torlib.*;
 
@@ -47,10 +47,10 @@ public class HSDescriptorDownloader {
 	private HSDescriptor downloadDescriptorFrom(HSDescriptorDirectory dd) {
 		logger.fine("Downloading descriptor from "+ dd.getDirectory());
 		
-		Stream stream = null;
+		TorStream torStream = null;
 		try {
-			stream = openHSDirectoryStream(dd.getDirectory());
-			HttpConnection http = new HttpConnection(stream);
+			torStream = openHSDirectoryStream(dd.getDirectory());
+			TorHttpConnection http = new TorHttpConnection(torStream);
 			http.sendGetRequest("/tor/rendezvous2/"+ dd.getDescriptorId().toBase32());
 			http.readResponse();
 			if(http.getStatusCode() == 200) {
@@ -75,9 +75,9 @@ public class HSDescriptorDownloader {
 			logger.info("Directory request to HS directory "+ dd.getDirectory() + " failed "+ e.getMessage());
 			return null;
 		} finally {
-			if(stream != null) {
-				stream.close();
-				stream.getCircuit().markForClose();
+			if(torStream != null) {
+				torStream.close();
+				torStream.getCircuit().markForClose();
 			}
 		}
 		
@@ -85,7 +85,7 @@ public class HSDescriptorDownloader {
 		
 	}
 	
-	private Stream openHSDirectoryStream(Router directory) throws TimeoutException, InterruptedException, OpenFailedException {
+	private TorStream openHSDirectoryStream(Router directory) throws TimeoutException, InterruptedException, OpenFailedException {
 
 		final InternalCircuit circuit = circuitManager.getCleanInternalCircuit();
 		

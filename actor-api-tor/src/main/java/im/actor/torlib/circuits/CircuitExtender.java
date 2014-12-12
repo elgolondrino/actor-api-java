@@ -6,15 +6,12 @@ import im.actor.torlib.Cell;
 import im.actor.torlib.CircuitNode;
 import im.actor.torlib.RelayCell;
 import im.actor.torlib.Router;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.crypto.TorCreateFastKeyAgreement;
 import im.actor.torlib.crypto.TorKeyAgreement;
 import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.crypto.TorStreamCipher;
-import im.actor.torlib.Cell;
-import im.actor.torlib.crypto.TorKeyAgreement;
 import im.actor.torlib.crypto.TorStreamCipher;
 
 public class CircuitExtender {

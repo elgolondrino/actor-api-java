@@ -20,12 +20,12 @@ import javax.net.ssl.SSLSocket;
 
 import im.actor.torlib.Connection;
 import im.actor.torlib.ConnectionCache;
-import im.actor.torlib.ConnectionFailedException;
-import im.actor.torlib.ConnectionHandshakeException;
-import im.actor.torlib.ConnectionTimeoutException;
+import im.actor.torlib.errors.ConnectionFailedException;
+import im.actor.torlib.errors.ConnectionHandshakeException;
+import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.circuits.TorInitializationTracker;
+import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 

@@ -1,5 +1,8 @@
 package im.actor.torlib;
 
+import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.errors.StreamConnectFailedException;
+
 import java.util.concurrent.TimeoutException;
 
 public interface DirectoryCircuit extends Circuit {
@@ -12,5 +15,5 @@ public interface DirectoryCircuit extends Circuit {
 	 * 
 	 * @return The status response returned by trying to open the stream.
 	 */
-	Stream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException;
+	TorStream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException;
 }

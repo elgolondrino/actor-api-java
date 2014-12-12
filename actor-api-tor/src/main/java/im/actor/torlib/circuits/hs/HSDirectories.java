@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import im.actor.torlib.directory.ConsensusDocument;
+import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.Router;
 import im.actor.torlib.crypto.TorRandom;

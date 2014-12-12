@@ -1,6 +1,6 @@
 package im.actor.torlib.data.exitpolicy;
 
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.data.IPv4Address;
 
 public class PolicyRule {

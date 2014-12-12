@@ -1,5 +1,14 @@
 package im.actor.torlib.circuits;
 
+import im.actor.torlib.Circuit;
+import im.actor.torlib.CircuitNode;
+import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCellImpl;
+import im.actor.torlib.dashboard.DashboardRenderable;
+import im.actor.torlib.dashboard.DashboardRenderer;
+import im.actor.torlib.errors.StreamConnectFailedException;
+import im.actor.torlib.errors.TorException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,36 +16,23 @@ import java.io.PrintWriter;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Circuit;
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
-import im.actor.torlib.TorException;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
-import im.actor.torlib.Stream;
-import im.actor.torlib.TorException;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
-import im.actor.torlib.dashboard.DashboardRenderer;
+public class TorStream implements DashboardRenderable {
 
-public class StreamImpl implements Stream, DashboardRenderable {
-	private final static Logger logger = Logger.getLogger(StreamImpl.class.getName());
+	private final static Logger logger = Logger.getLogger(TorStream.class.getName());
 
 	private final static int STREAMWINDOW_START = 500;
 	private final static int STREAMWINDOW_INCREMENT = 50;
 	private final static int STREAMWINDOW_MAX_UNFLUSHED = 10;
-	
+
 	private final CircuitImpl circuit;
-	
+
 	private final int streamId;
 	private final boolean autoclose;
-	
+
 	private final CircuitNode targetNode;
 	private final TorInputStream inputStream;
 	private final TorOutputStream outputStream;
-	
+
 	private boolean isClosed;
 	private boolean relayEndReceived;
 	private int relayEndReason;
@@ -47,8 +43,8 @@ public class StreamImpl implements Stream, DashboardRenderable {
 	private int deliverWindow;
 
 	private String streamTarget = "";
-	
-	StreamImpl(CircuitImpl circuit, CircuitNode targetNode, int streamId, boolean autoclose) {
+
+	public TorStream(CircuitImpl circuit, CircuitNode targetNode, int streamId, boolean autoclose) {
 		this.circuit = circuit;
 		this.targetNode = targetNode;
 		this.streamId = streamId;
@@ -59,7 +55,7 @@ public class StreamImpl implements Stream, DashboardRenderable {
 		deliverWindow = STREAMWINDOW_START;
 	}
 
-	void addInputCell(RelayCell cell) {
+	public void addInputCell(RelayCell cell) {
 		if(isClosed)
 			return;
 		if(cell.getRelayCommand() == RelayCell.RELAY_END) {
@@ -82,7 +78,7 @@ public class StreamImpl implements Stream, DashboardRenderable {
 		}
 		else {
 			inputStream.addInputCell(cell);
-			synchronized(windowLock) { 
+			synchronized(windowLock) {
 				deliverWindow--;
 				if(deliverWindow < 0)
 					throw new TorException("Stream has negative delivery window");
@@ -120,9 +116,9 @@ public class StreamImpl implements Stream, DashboardRenderable {
 	public void close() {
 		if(isClosed)
 			return;
-		
+
 		logger.fine("Closing stream "+ this);
-		
+
 		isClosed = true;
 		inputStream.close();
 		outputStream.close();
@@ -130,7 +126,7 @@ public class StreamImpl implements Stream, DashboardRenderable {
 		if(autoclose) {
 			circuit.markForClose();
 		}
-		
+
 		if(!relayEndReceived) {
 			final RelayCell cell = new RelayCellImpl(circuit.getFinalCircuitNode(), circuit.getCircuitId(), streamId, RelayCell.RELAY_END);
 			cell.putByte(RelayCell.REASON_DONE);
@@ -145,14 +141,14 @@ public class StreamImpl implements Stream, DashboardRenderable {
 		waitForRelayConnected(timeout);
 	}
 
-	void openExit(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+	public void openExit(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		streamTarget = target + ":"+ port;
 		final RelayCell cell = new RelayCellImpl(circuit.getFinalCircuitNode(), circuit.getCircuitId(), streamId, RelayCell.RELAY_BEGIN);
 		cell.putString(target + ":"+ port);
 		circuit.sendRelayCellToFinalNode(cell);
 		waitForRelayConnected(timeout);
 	}
-	
+
 	private void waitForRelayConnected(long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		final long start = System.currentTimeMillis();
 		long elapsed = 0;
@@ -168,7 +164,7 @@ public class StreamImpl implements Stream, DashboardRenderable {
 				}
 
 				waitConnectLock.wait(timeout - elapsed);
-				
+
 				elapsed = System.currentTimeMillis() - start;
 			}
 		}

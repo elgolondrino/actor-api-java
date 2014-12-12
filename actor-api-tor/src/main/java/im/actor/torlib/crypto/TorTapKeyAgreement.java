@@ -14,7 +14,7 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
 
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 /**
  * The <code>TorKeyAgreement</code> class implements the diffie-hellman key agreement
  * protocol using the parameters specified in the main Tor specification (tor-spec.txt).

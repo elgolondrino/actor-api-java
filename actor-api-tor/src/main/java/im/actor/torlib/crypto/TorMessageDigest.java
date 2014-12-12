@@ -4,9 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.data.HexDigest;
 
 /**

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorNTorKeyAgreement;
 import im.actor.torlib.crypto.TorPublicKey;

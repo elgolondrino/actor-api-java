@@ -1,11 +1,11 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.documents.downloader;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import im.actor.torlib.directory.ConsensusDocument;
+import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.Router;
 import im.actor.torlib.data.HexDigest;

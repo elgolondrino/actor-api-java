@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.ConnectionCache;
-import im.actor.torlib.ConnectionIOException;
+import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 

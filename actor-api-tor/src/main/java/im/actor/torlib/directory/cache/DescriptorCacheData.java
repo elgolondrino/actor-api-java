@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import im.actor.torlib.directory.Descriptor;
+import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.data.HexDigest;
 import im.actor.utils.misc.GuardedBy;
 
 
 
-public class DescriptorCacheData <T extends Descriptor> {
+public class DescriptorCacheData <T extends DescriptorDocument> {
 
 	/** 7 days */
 	private final static long EXPIRY_PERIOD = 7 * 24 * 60 * 60 * 1000;

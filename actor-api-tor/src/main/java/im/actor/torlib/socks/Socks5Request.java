@@ -3,7 +3,7 @@ package im.actor.torlib.socks;
 import java.net.Socket;
 
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class Socks5Request extends SocksRequest {
 	final static int SOCKS5_VERSION = 5;

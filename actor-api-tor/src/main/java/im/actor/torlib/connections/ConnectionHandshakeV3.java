@@ -16,8 +16,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import im.actor.torlib.Cell;
-import im.actor.torlib.ConnectionHandshakeException;
-import im.actor.torlib.ConnectionIOException;
+import im.actor.torlib.errors.ConnectionHandshakeException;
+import im.actor.torlib.errors.ConnectionIOException;
 
 public class ConnectionHandshakeV3 extends ConnectionHandshake {
 

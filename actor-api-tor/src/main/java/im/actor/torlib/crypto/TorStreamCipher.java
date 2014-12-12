@@ -7,7 +7,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class TorStreamCipher {
 	public static final int KEY_LEN = 16;

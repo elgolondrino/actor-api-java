@@ -3,8 +3,7 @@ package im.actor.torlib.circuits;
 import java.util.concurrent.TimeoutException;
 
 import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
+import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
 import im.actor.utils.misc.GuardedBy;
@@ -20,7 +19,7 @@ public class StreamExitRequest implements ExitTarget {
 	private final Object requestCompletionLock;
 	
 	@GuardedBy("requestCompletionLock") private CompletionStatus completionStatus;
-	@GuardedBy("requestCompletionLock") private Stream stream;
+	@GuardedBy("requestCompletionLock") private TorStream torStream;
 	@GuardedBy("requestCompletionLock") private int streamOpenFailReason;
 	
 	@GuardedBy("this") private boolean isReserved;
@@ -93,9 +92,9 @@ public class StreamExitRequest implements ExitTarget {
 		}
 	}
 	
-	void setCompletedSuccessfully(Stream stream) {
+	void setCompletedSuccessfully(TorStream torStream) {
 		synchronized (requestCompletionLock) {
-			this.stream = stream;
+			this.torStream = torStream;
 			newStatus(CompletionStatus.SUCCESS);
 		}
 	}
@@ -115,7 +114,7 @@ public class StreamExitRequest implements ExitTarget {
 	}
 
 	
-	Stream getStream() throws OpenFailedException, TimeoutException, StreamConnectFailedException, InterruptedException {
+	TorStream getTorStream() throws OpenFailedException, TimeoutException, StreamConnectFailedException, InterruptedException {
 		synchronized(requestCompletionLock) {
 			switch(completionStatus) {
 			case NOT_COMPLETED:
@@ -129,7 +128,7 @@ public class StreamExitRequest implements ExitTarget {
 			case INTERRUPTED:
 				throw new InterruptedException();
 			case SUCCESS:
-				return stream;
+				return torStream;
 			default:
 				throw new IllegalStateException("Unknown completion status");
 			}

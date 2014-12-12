@@ -3,8 +3,7 @@ package im.actor.torlib.crypto;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class TorRandom {
 

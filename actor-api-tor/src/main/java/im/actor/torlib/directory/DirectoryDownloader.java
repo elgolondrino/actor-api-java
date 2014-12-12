@@ -7,11 +7,14 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
-import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
-import im.actor.torlib.circuits.TorInitializationTracker;
+import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.documents.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.downloader.DirectoryDocumentRequestor;
-import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
+import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
+import im.actor.torlib.errors.DirectoryRequestFailedException;
+import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.documents.KeyCertificateDocument;
 
 public class DirectoryDownloader {
     private final static Logger logger = Logger.getLogger(DirectoryDownloader.class.getName());
@@ -53,7 +56,7 @@ public class DirectoryDownloader {
         directorySync.stopSync();
     }
 
-    public Descriptor downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
+    public DescriptorDocument downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openBridgeCircuit(bridge));
         return requestor.downloadBridgeDescriptor(bridge);
     }
@@ -63,26 +66,26 @@ public class DirectoryDownloader {
         return requestor.downloadCurrentConsensus();
     }
 
-    public List<KeyCertificate> downloadKeyCertificates(Set<RequiredCertificate> required) throws DirectoryRequestFailedException {
+    public List<KeyCertificateDocument> downloadKeyCertificates(Set<RequiredCertificate> required) throws DirectoryRequestFailedException {
         return downloadKeyCertificates(required, openCircuit());
     }
 
-    public List<KeyCertificate> downloadKeyCertificates(Set<RequiredCertificate> required, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
+    public List<KeyCertificateDocument> downloadKeyCertificates(Set<RequiredCertificate> required, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(circuit, initializationTracker);
         return requestor.downloadKeyCertificates(required);
     }
 
-    public List<Descriptor> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
+    public List<DescriptorDocument> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
         return downloadRouterMicrodescriptors(fingerprints, openCircuit());
     }
 
-    public List<Descriptor> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
+    public List<DescriptorDocument> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(circuit, initializationTracker);
-        final List<Descriptor> ds = requestor.downloadRouterMicrodescriptors(fingerprints);
+        final List<DescriptorDocument> ds = requestor.downloadRouterDescriptors(fingerprints);
         return removeUnrequestedDescriptors(fingerprints, ds);
     }
 
-    private <T extends Descriptor> List<T> removeUnrequestedDescriptors(Set<HexDigest> requested, List<T> received) {
+    private <T extends DescriptorDocument> List<T> removeUnrequestedDescriptors(Set<HexDigest> requested, List<T> received) {
         final List<T> result = new ArrayList<T>();
         int unrequestedCount = 0;
         for (T d : received) {

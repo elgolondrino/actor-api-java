@@ -1,7 +1,7 @@
 package im.actor.torlib.directory.parsing.certificate;
 
-import im.actor.torlib.directory.KeyCertificate;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.documents.KeyCertificateDocument;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
 import im.actor.torlib.data.IPv4Address;
@@ -12,11 +12,11 @@ import im.actor.torlib.directory.parsing.DocumentParsingHandler;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
 
-public class KeyCertificateParser implements DocumentParser<KeyCertificate> {
+public class KeyCertificateParser implements DocumentParser<KeyCertificateDocument> {
 	private final static int CURRENT_CERTIFICATE_VERSION = 3;
 	private final DocumentFieldParser fieldParser;
-	private KeyCertificate currentCertificate;
-	private DocumentParsingResultHandler<KeyCertificate> resultHandler;
+	private KeyCertificateDocument currentCertificate;
+	private DocumentParsingResultHandler<KeyCertificateDocument> resultHandler;
 	
 	public KeyCertificateParser(DocumentFieldParser fieldParser) {
 		this.fieldParser = fieldParser;
@@ -48,10 +48,10 @@ public class KeyCertificateParser implements DocumentParser<KeyCertificate> {
 	private void startNewCertificate() {
 		fieldParser.resetRawDocument();
 		fieldParser.startSignedEntity();
-		currentCertificate = new KeyCertificate();
+		currentCertificate = new KeyCertificateDocument();
 	}
 	
-	public boolean parse(DocumentParsingResultHandler<KeyCertificate> resultHandler) {
+	public boolean parse(DocumentParsingResultHandler<KeyCertificateDocument> resultHandler) {
 		this.resultHandler = resultHandler;
 		startNewCertificate();
 		try {
@@ -63,8 +63,8 @@ public class KeyCertificateParser implements DocumentParser<KeyCertificate> {
 		}
 	}
 	
-	public DocumentParsingResult<KeyCertificate> parse() {
-		final BasicDocumentParsingResult<KeyCertificate> result = new BasicDocumentParsingResult<KeyCertificate>();
+	public DocumentParsingResult<KeyCertificateDocument> parse() {
+		final BasicDocumentParsingResult<KeyCertificateDocument> result = new BasicDocumentParsingResult<KeyCertificateDocument>();
 		parse(result);
 		return result;
 	}

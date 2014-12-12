@@ -5,10 +5,9 @@ import java.util.logging.Logger;
 import im.actor.torlib.CircuitNode;
 import im.actor.torlib.RelayCell;
 import im.actor.torlib.Router;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorNTorKeyAgreement;
-import im.actor.torlib.TorException;
 
 public class NTorCircuitExtender {
 	private final static Logger logger = Logger.getLogger(NTorCircuitExtender.class.getName());

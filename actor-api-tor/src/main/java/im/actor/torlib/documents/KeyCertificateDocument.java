@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.documents;
 
 import im.actor.torlib.Document;
 import im.actor.torlib.Tor;
@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
  * directory authorities and bind a long-term identity key to a
  * more temporary signing key. 
  */
-public class KeyCertificate implements Document {
+public class KeyCertificateDocument implements Document {
 	private IPv4Address directoryAddress;
 	private int directoryPort;
 	private HexDigest fingerprint;

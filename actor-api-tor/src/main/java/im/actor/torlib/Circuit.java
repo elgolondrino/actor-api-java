@@ -1,5 +1,7 @@
 package im.actor.torlib;
 
+import im.actor.torlib.circuits.TorStream;
+
 import java.util.List;
 
 /**
@@ -32,7 +34,7 @@ public interface Circuit {
 	 *  
 	 * @return The Connection object for the network connection to the entry router of this 
 	 *         circuit.
-	 * @throws TorException If this circuit is not currently connected.
+	 * @throws im.actor.torlib.errors.TorException If this circuit is not currently connected.
 	 */
 	Connection getConnection();
 	
@@ -87,7 +89,7 @@ public interface Circuit {
 
 	void deliverControlCell(Cell cell);
 	
-	List<Stream> getActiveStreams();
+	List<TorStream> getActiveStreams();
 
 	void markForClose();
 		

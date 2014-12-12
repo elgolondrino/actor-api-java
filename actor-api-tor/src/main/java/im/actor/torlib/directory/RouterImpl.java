@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import im.actor.torlib.Router;
-import im.actor.torlib.TorException;
+import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
@@ -18,7 +19,7 @@ public class RouterImpl implements Router {
     private final Directory directory;
     private final HexDigest identityHash;
     protected RouterStatus status;
-    private Descriptor descriptor;
+    private DescriptorDocument descriptorDocument;
 
     private volatile String cachedCountryCode;
 
@@ -34,13 +35,13 @@ public class RouterImpl implements Router {
             throw new TorException("Identity hash does not match status update");
         this.status = status;
         this.cachedCountryCode = null;
-        this.descriptor = null;
+        this.descriptorDocument = null;
         refreshDescriptor();
     }
 
     public boolean isDescriptorDownloadable() {
         refreshDescriptor();
-        if (descriptor != null) {
+        if (descriptorDocument != null) {
             return false;
         }
 
@@ -57,17 +58,17 @@ public class RouterImpl implements Router {
         return status.getAddress();
     }
 
-    public Descriptor getCurrentDescriptor() {
+    public DescriptorDocument getCurrentDescriptor() {
         refreshDescriptor();
-        return descriptor;
+        return descriptorDocument;
     }
 
     private synchronized void refreshDescriptor() {
-        if (descriptor != null || directory == null) {
+        if (descriptorDocument != null || directory == null) {
             return;
         }
         if (status.getMicrodescriptorDigest() != null) {
-            descriptor = directory.getDescriptorFromCache(status.getMicrodescriptorDigest());
+            descriptorDocument = directory.getDescriptorFromCache(status.getMicrodescriptorDigest());
         }
     }
 
@@ -129,8 +130,8 @@ public class RouterImpl implements Router {
 
     public TorPublicKey getOnionKey() {
         refreshDescriptor();
-        if (descriptor != null) {
-            return descriptor.getOnionKey();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getOnionKey();
         } else {
             return null;
         }
@@ -138,8 +139,8 @@ public class RouterImpl implements Router {
 
     public byte[] getNTorOnionKey() {
         refreshDescriptor();
-        if (descriptor != null) {
-            return descriptor.getNTorOnionKey();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getNTorOnionKey();
         } else {
             return null;
         }
@@ -155,8 +156,8 @@ public class RouterImpl implements Router {
 
     public Set<String> getFamilyMembers() {
         refreshDescriptor();
-        if (descriptor != null) {
-            return descriptor.getFamilyMembers();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getFamilyMembers();
         } else {
             return Collections.emptySet();
         }
@@ -164,12 +165,12 @@ public class RouterImpl implements Router {
 
     public boolean exitPolicyAccepts(IPv4Address address, int port) {
         refreshDescriptor();
-        if (descriptor == null) {
+        if (descriptorDocument == null) {
             return false;
         } else if (address == null) {
-            return descriptor.exitPolicyAccepts(port);
+            return descriptorDocument.exitPolicyAccepts(port);
         } else {
-            return descriptor.exitPolicyAccepts(address, port);
+            return descriptorDocument.exitPolicyAccepts(address, port);
         }
     }
 

@@ -16,11 +16,10 @@ import java.util.logging.Logger;
 import im.actor.torlib.Cell;
 import im.actor.torlib.CircuitNode;
 import im.actor.torlib.Connection;
-import im.actor.torlib.ConnectionIOException;
+import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.RelayCell;
-import im.actor.torlib.Stream;
 import im.actor.utils.Threading;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.dashboard.DashboardRenderable;
@@ -37,7 +36,7 @@ public class CircuitIO implements DashboardRenderable {
 	
 	private final BlockingQueue<RelayCell> relayCellResponseQueue;
 	private final BlockingQueue<Cell> controlCellResponseQueue;
-	private final Map<Integer, StreamImpl> streamMap;
+	private final Map<Integer, TorStream> streamMap;
 	private final ReentrantLock streamLock = Threading.lock("stream");
 	private final ReentrantLock relaySendLock = Threading.lock("relaySend");
 
@@ -51,7 +50,7 @@ public class CircuitIO implements DashboardRenderable {
 		
 		this.relayCellResponseQueue = new LinkedBlockingQueue<RelayCell>();
 		this.controlCellResponseQueue = new LinkedBlockingQueue<Cell>();
-		this.streamMap = new HashMap<Integer, StreamImpl>();
+		this.streamMap = new HashMap<Integer, TorStream>();
 	}
 	
 	Connection getConnection() {
@@ -174,12 +173,12 @@ public class CircuitIO implements DashboardRenderable {
 
 		streamLock.lock();
 		try {
-			final StreamImpl stream = streamMap.get(cell.getStreamId());
+			final TorStream torStream = streamMap.get(cell.getStreamId());
 			// It's not unusual for the stream to not be found.  For example, if a RELAY_CONNECTED arrives after
 			// the client has stopped waiting for it, the stream will never be tracked and eventually the edge node
 			// will send a RELAY_END for this stream.
-			if(stream != null) {
-				stream.addInputCell(cell);
+			if(torStream != null) {
+				torStream.addInputCell(cell);
 			}
 		} finally {
 			streamLock.unlock();
@@ -296,8 +295,8 @@ public class CircuitIO implements DashboardRenderable {
 			}
 			circuit.setStateDestroyed();
 			connection.removeCircuit(circuit);
-			final List<StreamImpl> tmpList = new ArrayList<StreamImpl>(streamMap.values());
-			for(StreamImpl s: tmpList) {
+			final List<TorStream> tmpList = new ArrayList<TorStream>(streamMap.values());
+			for(TorStream s: tmpList) {
 				s.close();
 			}
 			isClosed = true;
@@ -306,23 +305,23 @@ public class CircuitIO implements DashboardRenderable {
 		}
 	}
 	
-	StreamImpl createNewStream(boolean autoclose) {
+	TorStream createNewStream(boolean autoclose) {
 		streamLock.lock();
 		try {
 			final int streamId = circuit.getStatus().nextStreamId();
-			final StreamImpl stream = new StreamImpl(circuit, circuit.getFinalCircuitNode(), streamId, autoclose);
-			streamMap.put(streamId, stream);
-			return stream;
+			final TorStream torStream = new TorStream(circuit, circuit.getFinalCircuitNode(), streamId, autoclose);
+			streamMap.put(streamId, torStream);
+			return torStream;
 		} finally {
 			streamLock.unlock();
 		}
 	}
 
-	void removeStream(StreamImpl stream) {
+	void removeStream(TorStream torStream) {
 		boolean shouldClose;
 		streamLock.lock();
 		try {
-			streamMap.remove(stream.getStreamId());
+			streamMap.remove(torStream.getStreamId());
 			shouldClose = streamMap.isEmpty() && isMarkedForClose;
 		} finally {
 			streamLock.unlock();
@@ -331,10 +330,10 @@ public class CircuitIO implements DashboardRenderable {
 			closeCircuit();
 	}
 	
-	List<Stream> getActiveStreams() {
+	List<TorStream> getActiveStreams() {
 		streamLock.lock();
 		try {
-			return new ArrayList<Stream>(streamMap.values());
+			return new ArrayList<TorStream>(streamMap.values());
 		} finally {
 			streamLock.unlock();
 		}
@@ -344,7 +343,7 @@ public class CircuitIO implements DashboardRenderable {
 		if((flags & DASHBOARD_STREAMS) == 0) {
 			return;
 		}
-		for(Stream s: getActiveStreams()) {
+		for(TorStream s: getActiveStreams()) {
 			renderer.renderComponent(writer, flags, s);
 		}
 	}

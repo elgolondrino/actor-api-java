@@ -21,7 +21,7 @@ public interface DocumentFieldParser {
 	 * called before calling this method to set a <code>DocumentParsingHandler</code> for processing
 	 * this document.
 	 * 
-	 * @throws im.actor.torlib.TorParsingException If a parsing error occurs while processing the document.
+	 * @throws im.actor.torlib.errors.TorParsingException If a parsing error occurs while processing the document.
 	 */
 	void processDocument();
 	
@@ -36,7 +36,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument item and return it as a String
 	 * 
 	 * @return The next argument as a String
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining on the current keyword line.
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining on the current keyword line.
 	 */
 	String parseString();
 	
@@ -52,7 +52,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as an integer boolean value.  The legal values
 	 * are '1' for true or '0' for false.
 	 * @return Return the next argument interpreted as a boolean value.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot be
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot be
 	 *         parsed as a boolean integer value.
 	 */
 	boolean parseBoolean();
@@ -65,7 +65,7 @@ public interface DocumentFieldParser {
 	 * be considered valid.
 	 * 
 	 * @return The next argument as a <code>String</code> if it is a validly formatted nickname.
-	 * @throws im.actor.torlib.TorParsingException  If no arguments are remaining or if the current argument is not
+	 * @throws im.actor.torlib.errors.TorParsingException  If no arguments are remaining or if the current argument is not
 	 *         a valid router nickname.
 	 */
 	String parseNickname();
@@ -74,7 +74,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as an integer.
 	 * 
 	 * @return The next argument interpreted as an integer.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as an integer value.
 	 */
 	int parseInteger();
@@ -84,7 +84,7 @@ public interface DocumentFieldParser {
 	 * 
 	 * @param item A string to parse as an integer.
 	 * @return The integer value of the <code>item</code> argument.
-	 * @throws im.actor.torlib.TorParsingException If the <code>item</code> argument cannot be parsed as an
+	 * @throws im.actor.torlib.errors.TorParsingException If the <code>item</code> argument cannot be parsed as an
 	 *         integer value.
 	 */
 	int parseInteger(String item);
@@ -93,7 +93,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as a comma separated list of integers.
 	 * 
 	 * @return An array of integers.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as a list of integers.
 	 */
 	int[] parseIntegerList();
@@ -103,7 +103,7 @@ public interface DocumentFieldParser {
 	 * value is an integer between 0 and 65535 inclusive.
 	 * 
 	 * @return The next argument interpreted as an integer port value.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as a legal port value.
 	 */
 	int parsePort();
@@ -114,7 +114,7 @@ public interface DocumentFieldParser {
 	 * 
 	 * @param item A string to parse as an integer port value.
 	 * @return The port integer value of the <code>item</code> argument
-	 * @throws im.actor.torlib.TorParsingException If the <code>item</code> argument cannot be parsed as a
+	 * @throws im.actor.torlib.errors.TorParsingException If the <code>item</code> argument cannot be parsed as a
 	 *         legal port value.
 	 */
 	int parsePort(String item);
@@ -123,7 +123,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as Base64 encoded binary data.  
 	 * 
 	 * @return The bytes decoded from the Base64 encoded argument.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as Base64 encoded data.
 	 */
 	byte[] parseBase64Data();
@@ -134,7 +134,7 @@ public interface DocumentFieldParser {
 	 * The format of a timestamp is: YYYY-MM-DD HH:MM:SS
 	 * 
 	 * @return The parsed <code>Timestamp</code> value.
-	 * @throws im.actor.torlib.TorParsingException If there are not sufficient arguments remaining or if the current
+	 * @throws im.actor.torlib.errors.TorParsingException If there are not sufficient arguments remaining or if the current
 	 *         arguments could not be parsed as a timestamp field.
 	 */
 	Timestamp parseTimestamp();
@@ -143,7 +143,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as a hex encoded digest string.
 	 * 
 	 * @return The parsed <code>HexDigest</code> value.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as a hex encoded digest string.
 	 */
 	HexDigest parseHexDigest();
@@ -153,7 +153,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as a base 32 encoded digest string.
 	 * 
 	 * @return The parsed <code>HexDigest</code> value.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as a base 32 encoded digest string.
 	 */
 	HexDigest parseBase32Digest();
@@ -163,7 +163,7 @@ public interface DocumentFieldParser {
 	 * hex encoded fingerprint string.
 	 *  
 	 * @return The parsed <code>HexDigest</code> value extracted from the concatenated string.
-	 * @throws im.actor.torlib.TorParsingException If the concatenation of the remaining arguments could not be parsed
+	 * @throws im.actor.torlib.errors.TorParsingException If the concatenation of the remaining arguments could not be parsed
 	 *         as a hex encoded fingerprint string.
 	 */
 	HexDigest parseFingerprint();
@@ -172,7 +172,7 @@ public interface DocumentFieldParser {
 	 * Extract the next argument and interpret it as an IPv4 network address in dotted quad notation.
 	 * 
 	 * @return The parsed <code>IPv4Address</code> value.
-	 * @throws im.actor.torlib.TorParsingException If no arguments are remaining or if the current argument cannot
+	 * @throws im.actor.torlib.errors.TorParsingException If no arguments are remaining or if the current argument cannot
 	 *         be parsed as an IPv4 network address.
 	 */
 	IPv4Address parseAddress();
@@ -182,7 +182,7 @@ public interface DocumentFieldParser {
 	 * encoded public key.
 	 * 
 	 * @return The extracted <code>TorPublicKey</code> value.
-	 * @throws im.actor.torlib.TorParsingException If no document object is found following the current keyword line,
+	 * @throws im.actor.torlib.errors.TorParsingException If no document object is found following the current keyword line,
 	 *         or if the document object cannot be parsed as a PEM encoded public key.
 	 */
 	TorPublicKey parsePublicKey();
@@ -193,7 +193,7 @@ public interface DocumentFieldParser {
 	 * Base64 encoded PKCS1 signature object.
 	 * 
 	 * @return The extracted <code>TorSignature</code> value.
-	 * @throws im.actor.torlib.TorParsingException If no document object is found following the current keyword line,
+	 * @throws im.actor.torlib.errors.TorParsingException If no document object is found following the current keyword line,
 	 *         or if the document object cannot be parsed as a signature.
 	 */
 	TorSignature parseSignature();
@@ -203,7 +203,7 @@ public interface DocumentFieldParser {
 	 * it further.
 	 * 
 	 * @return The extracted <code>DocumentObject</code>.
-	 * @throws im.actor.torlib.TorParsingException If no document object is found following the current keyword line.
+	 * @throws im.actor.torlib.errors.TorParsingException If no document object is found following the current keyword line.
 	 */
 	DocumentObject parseObject();
 	
@@ -288,7 +288,7 @@ public interface DocumentFieldParser {
 	 * 
 	 * @param keyword The name of the current keyword. (used for errors)
 	 * @param argumentCount The expected number of arguments.
-	 * @throws im.actor.torlib.TorParsingException If the number of remaining arguments does not match
+	 * @throws im.actor.torlib.errors.TorParsingException If the number of remaining arguments does not match
 	 *         <code>argumentCount</code>.
 	 */
 	void verifyExpectedArgumentCount(String keyword, int argumentCount);

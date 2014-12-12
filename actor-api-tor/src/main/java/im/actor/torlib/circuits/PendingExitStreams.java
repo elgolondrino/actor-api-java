@@ -7,11 +7,9 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
+import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.OpenFailedException;
 
 public class PendingExitStreams {
 	
@@ -24,17 +22,17 @@ public class PendingExitStreams {
 		pendingRequests = new HashSet<StreamExitRequest>();
 	}
 	
-	public Stream openExitStream(IPv4Address address, int port) throws InterruptedException, OpenFailedException {
+	public TorStream openExitStream(IPv4Address address, int port) throws InterruptedException, OpenFailedException {
 		final StreamExitRequest request = new StreamExitRequest(lock, address, port);
 		return openExitStreamByRequest(request);
 	}
 	
-	public Stream openExitStream(String hostname, int port) throws InterruptedException, OpenFailedException {
+	public TorStream openExitStream(String hostname, int port) throws InterruptedException, OpenFailedException {
 		final StreamExitRequest request =  new StreamExitRequest(lock, hostname, port);
 		return openExitStreamByRequest(request);
 	}
 	
-	private Stream openExitStreamByRequest(StreamExitRequest request) throws InterruptedException, OpenFailedException {
+	private TorStream openExitStreamByRequest(StreamExitRequest request) throws InterruptedException, OpenFailedException {
 		if(config.getCircuitStreamTimeout() != 0) {
 			request.setStreamTimeout(config.getCircuitStreamTimeout());
 		}
@@ -49,13 +47,13 @@ public class PendingExitStreams {
 		}
 	}
 	
-	private Stream handleRequest(StreamExitRequest request) throws InterruptedException, OpenFailedException {
+	private TorStream handleRequest(StreamExitRequest request) throws InterruptedException, OpenFailedException {
 		while(true) {
 			while(!request.isCompleted()) {
 				lock.wait();
 			}
 			try {
-				return request.getStream();
+				return request.getTorStream();
 			} catch (TimeoutException e) {
 				request.resetForRetry();
 			} catch (StreamConnectFailedException e) {

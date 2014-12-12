@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
-import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.documents.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.cache.DescriptorCache;
@@ -17,6 +18,8 @@ import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.directory.storage.StateFile;
+import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.documents.KeyCertificateDocument;
 
 /**
  * Main interface for accessing directory information and interacting
@@ -35,10 +38,9 @@ public class Directory {
     private final int id;
 
     private final DirectoryStorage store;
-    private final TorConfig config;
     private final StateFile stateFile;
 
-    private final DescriptorCache<Descriptor> microdescriptorCache;
+    private final DescriptorCache<DescriptorDocument> microdescriptorCache;
     private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
     private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
 
@@ -53,22 +55,17 @@ public class Directory {
     public Directory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
         this.store = new DirectoryStorage(config);
-        this.config = config;
         this.stateFile = new StateFile(store, this);
-        this.microdescriptorCache = new DescriptorCache<Descriptor>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
+        this.microdescriptorCache = new DescriptorCache<DescriptorDocument>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
-            protected DocumentParser<Descriptor> createDocumentParser(ByteBuffer buffer) {
-                return PARSER_FACTORY.createRouterMicrodescriptorParser(buffer);
+            protected DocumentParser<DescriptorDocument> createDocumentParser(ByteBuffer buffer) {
+                return PARSER_FACTORY.createRouterDescriptorParser(buffer);
             }
         };
     }
 
     public int getId() {
         return id;
-    }
-
-    public TorConfig getConfig() {
-        return config;
     }
 
     public synchronized boolean haveMinimumRouterInfo() {
@@ -140,10 +137,10 @@ public class Directory {
     }
 
     private void loadCertificates(ByteBuffer buffer) {
-        final DocumentParser<KeyCertificate> parser = PARSER_FACTORY.createKeyCertificateParser(buffer);
-        final DocumentParsingResult<KeyCertificate> result = parser.parse();
+        final DocumentParser<KeyCertificateDocument> parser = PARSER_FACTORY.createKeyCertificateParser(buffer);
+        final DocumentParsingResult<KeyCertificateDocument> result = parser.parse();
         if (testResult(result, "certificates")) {
-            for (KeyCertificate cert : result.getParsedDocuments()) {
+            for (KeyCertificateDocument cert : result.getParsedDocuments()) {
                 addCertificate(cert);
             }
         }
@@ -192,7 +189,7 @@ public class Directory {
         return new HashSet<ConsensusDocument.RequiredCertificate>(requiredCertificates);
     }
 
-    public void addCertificate(KeyCertificate certificate) {
+    public void addCertificate(KeyCertificateDocument certificate) {
         synchronized (TrustedAuthorities.getInstance()) {
             final boolean wasRequired = removeRequiredCertificate(certificate);
             final DirectoryServer as = TrustedAuthorities.getInstance().getAuthorityServerByIdentity(certificate.getAuthorityFingerprint());
@@ -222,7 +219,7 @@ public class Directory {
         }
     }
 
-    private boolean removeRequiredCertificate(KeyCertificate certificate) {
+    private boolean removeRequiredCertificate(KeyCertificateDocument certificate) {
         final Iterator<RequiredCertificate> it = requiredCertificates.iterator();
         while (it.hasNext()) {
             RequiredCertificate r = it.next();
@@ -236,7 +233,7 @@ public class Directory {
 
     public void storeCertificates() {
         synchronized (TrustedAuthorities.getInstance()) {
-            final List<KeyCertificate> certs = new ArrayList<KeyCertificate>();
+            final List<KeyCertificateDocument> certs = new ArrayList<KeyCertificateDocument>();
             for (DirectoryServer ds : TrustedAuthorities.getInstance().getAuthorityServers()) {
                 certs.addAll(ds.getCertificates());
             }
@@ -278,7 +275,7 @@ public class Directory {
             if (status.hasFlag("Running") && status.hasFlag("Valid")) {
                 addRouter(updateOrCreateRouter(status, oldRouterByIdentity));
             }
-            final Descriptor d = getDescriptorForRouterStatus(status);
+            final DescriptorDocument d = getDescriptorForRouterStatus(status);
             if (d != null) {
                 d.setLastListed(consensus.getValidAfterTime().getTime());
             }
@@ -294,15 +291,11 @@ public class Directory {
 
     private void storeCurrentConsensus() {
         if (currentConsensus != null) {
-            if (currentConsensus.getFlavor() == ConsensusDocument.ConsensusFlavor.MICRODESC) {
-                store.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, currentConsensus);
-            } else {
-                store.writeDocument(DirectoryStorage.CacheFile.CONSENSUS, currentConsensus);
-            }
+            store.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, currentConsensus);
         }
     }
 
-    private Descriptor getDescriptorForRouterStatus(RouterStatus rs) {
+    private DescriptorDocument getDescriptorForRouterStatus(RouterStatus rs) {
         return microdescriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
     }
 
@@ -332,8 +325,8 @@ public class Directory {
         routersByNickname.clear();
     }
 
-    public synchronized void addRouterDescriptors(List<Descriptor> descriptors) {
-        microdescriptorCache.addDescriptors(descriptors);
+    public synchronized void addRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
+        microdescriptorCache.addDescriptors(descriptorDocuments);
         needRecalculateMinimumRouterInfo = true;
     }
 
@@ -416,7 +409,7 @@ public class Directory {
         stateFile.addGuardEntry(entry);
     }
 
-    public Descriptor getDescriptorFromCache(HexDigest descriptorDigest) {
+    public DescriptorDocument getDescriptorFromCache(HexDigest descriptorDigest) {
         return microdescriptorCache.getDescriptor(descriptorDigest);
     }
 }

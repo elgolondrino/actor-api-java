@@ -8,9 +8,9 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.CircuitManager;
 import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Stream;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class SocksClientTask implements Runnable {
 	private final static Logger logger = Logger.getLogger(SocksClientTask.class.getName());
@@ -69,10 +69,10 @@ public class SocksClientTask implements Runnable {
 			}
 			
 			try {
-				final Stream stream = openConnectStream(request);
+				final TorStream torStream = openConnectStream(request);
 				logger.fine("SOCKS CONNECT to "+ request.getTarget()+ " completed");
 				request.sendSuccess();
-				runOpenConnection(stream);
+				runOpenConnection(torStream);
 			} catch (InterruptedException e) {
 				logger.info("SOCKS CONNECT to "+ request.getTarget() + " was thread interrupted");
 				Thread.currentThread().interrupt();
@@ -94,11 +94,11 @@ public class SocksClientTask implements Runnable {
 	}
 		
 
-	private void runOpenConnection(Stream stream) {
-		SocksStreamConnection.runConnection(socket, stream);
+	private void runOpenConnection(TorStream torStream) {
+		SocksStreamConnection.runConnection(socket, torStream);
 	}
 
-	private Stream openConnectStream(SocksRequest request) throws InterruptedException, TimeoutException, OpenFailedException {
+	private TorStream openConnectStream(SocksRequest request) throws InterruptedException, TimeoutException, OpenFailedException {
 		if(request.hasHostname()) {
 			logger.fine("SOCKS CONNECT request to "+ request.getHostname() +":"+ request.getPort());
 			return circuitManager.openExitStreamTo(request.getHostname(), request.getPort());

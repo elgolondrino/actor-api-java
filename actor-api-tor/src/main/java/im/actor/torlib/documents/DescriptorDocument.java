@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.documents;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitPorts;
 
-public class Descriptor implements Document {
+public class DescriptorDocument implements Document {
 	public enum CacheLocation { NOT_CACHED, CACHED_CACHEFILE, CACHED_JOURNAL }
 	private IPv4Address address;
 	private int routerPort;
@@ -116,9 +116,9 @@ public class Descriptor implements Document {
 	}
 
 	public boolean equals(Object o) {
-		if (!(o instanceof Descriptor))
+		if (!(o instanceof DescriptorDocument))
 			return false;
-		final Descriptor other = (Descriptor) o;
+		final DescriptorDocument other = (DescriptorDocument) o;
 		if (other.getDescriptorDigest() == null || descriptorDigest == null)
 			return false;
 

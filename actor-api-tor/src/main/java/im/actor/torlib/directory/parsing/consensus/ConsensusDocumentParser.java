@@ -1,7 +1,7 @@
 package im.actor.torlib.directory.parsing.consensus;
 
-import im.actor.torlib.directory.ConsensusDocument;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentParser;

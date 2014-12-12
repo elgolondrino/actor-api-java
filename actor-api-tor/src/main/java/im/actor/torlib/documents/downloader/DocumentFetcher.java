@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.documents.downloader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,6 +9,7 @@ import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentParser;
 import im.actor.torlib.directory.parsing.DocumentParserFactory;
+import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 public abstract class DocumentFetcher<T> {
     protected final static DocumentParserFactory PARSER_FACTORY = new DocumentParserFactoryImpl();
@@ -18,8 +19,8 @@ public abstract class DocumentFetcher<T> {
 
     public abstract DocumentParser<T> createParser(ByteBuffer response);
 
-    public List<T> requestDocuments(HttpConnection httpConnection) throws IOException, DirectoryRequestFailedException {
-        final ByteBuffer body = makeRequest(httpConnection);
+    public List<T> requestDocuments(TorHttpConnection torHttpConnection) throws IOException, DirectoryRequestFailedException {
+        final ByteBuffer body = makeRequest(torHttpConnection);
         if (body.hasRemaining()) {
             return processResponse(body);
         } else {
@@ -27,17 +28,17 @@ public abstract class DocumentFetcher<T> {
         }
     }
 
-    private ByteBuffer makeRequest(HttpConnection httpConnection) throws IOException, DirectoryRequestFailedException {
+    private ByteBuffer makeRequest(TorHttpConnection torHttpConnection) throws IOException, DirectoryRequestFailedException {
 
-        httpConnection.sendGetRequest(getRequestPath());
-        httpConnection.readResponse();
-        if (httpConnection.getStatusCode() == 200) {
-            return httpConnection.getMessageBody();
+        torHttpConnection.sendGetRequest(getRequestPath());
+        torHttpConnection.readResponse();
+        if (torHttpConnection.getStatusCode() == 200) {
+            return torHttpConnection.getMessageBody();
         }
 
         throw new DirectoryRequestFailedException("Request " + getRequestPath() + " to directory " +
-                httpConnection.getHost() + " returned error code: " +
-                httpConnection.getStatusCode() + " " + httpConnection.getStatusMessage());
+                torHttpConnection.getHost() + " returned error code: " +
+                torHttpConnection.getStatusCode() + " " + torHttpConnection.getStatusMessage());
 
     }
 

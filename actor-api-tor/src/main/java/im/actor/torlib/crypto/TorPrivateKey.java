@@ -7,8 +7,7 @@ import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class TorPrivateKey {
 

@@ -12,7 +12,6 @@ import java.util.Map;
 public class DirectoryStorage {
     public enum CacheFile {
         CERTIFICATES("certificates"),
-        CONSENSUS("consensus"),
         CONSENSUS_MICRODESC("consensus-microdesc"),
         MICRODESCRIPTOR_CACHE("cached-microdescs"),
         MICRODESCRIPTOR_JOURNAL("cached-microdescs.new"),

@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import javax.net.SocketFactory;
 
-import im.actor.torlib.circuits.TorInitializationTracker;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.connections.ConnectionCacheImpl;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
@@ -16,6 +16,8 @@ import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.sockets.OrchidSocketFactory;
 import im.actor.torlib.socks.SocksPortListener;
+import im.actor.torlib.state.TorInitializationListener;
+import im.actor.torlib.state.TorInitializationTracker;
 
 /**
  * This class is the main entry-point for running a Tor proxy
@@ -124,7 +126,7 @@ public class TorClient {
         }
     }
 
-    public Stream openExitStreamTo(String hostname, int port) throws InterruptedException, TimeoutException, OpenFailedException {
+    public TorStream openExitStreamTo(String hostname, int port) throws InterruptedException, TimeoutException, OpenFailedException {
         ensureStarted();
         return circuitManager.openExitStreamTo(hostname, port);
     }

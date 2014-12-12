@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import im.actor.torlib.directory.KeyCertificate;
-import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.documents.KeyCertificateDocument;
 
 /**
  * Represents a directory authority server or a directory cache.
  */
 public class DirectoryServer extends RouterImpl {
-    private List<KeyCertificate> certificates = new ArrayList<KeyCertificate>();
+    private List<KeyCertificateDocument> certificates = new ArrayList<KeyCertificateDocument>();
 
     private boolean isHiddenServiceAuthority = false;
     private boolean isBridgeAuthority = false;
@@ -80,8 +79,8 @@ public class DirectoryServer extends RouterImpl {
         return v3Ident;
     }
 
-    public KeyCertificate getCertificateByFingerprint(HexDigest fingerprint) {
-        for (KeyCertificate kc : getCertificates()) {
+    public KeyCertificateDocument getCertificateByFingerprint(HexDigest fingerprint) {
+        for (KeyCertificateDocument kc : getCertificates()) {
             if (kc.getAuthoritySigningKey().getFingerprint().equals(fingerprint)) {
                 return kc;
             }
@@ -89,18 +88,18 @@ public class DirectoryServer extends RouterImpl {
         return null;
     }
 
-    public List<KeyCertificate> getCertificates() {
+    public List<KeyCertificateDocument> getCertificates() {
         synchronized (certificates) {
             purgeExpiredCertificates();
             purgeOldCertificates();
-            return new ArrayList<KeyCertificate>(certificates);
+            return new ArrayList<KeyCertificateDocument>(certificates);
         }
     }
 
     private void purgeExpiredCertificates() {
-        Iterator<KeyCertificate> it = certificates.iterator();
+        Iterator<KeyCertificateDocument> it = certificates.iterator();
         while (it.hasNext()) {
-            KeyCertificate elem = it.next();
+            KeyCertificateDocument elem = it.next();
             if (elem.isExpired()) {
                 it.remove();
             }
@@ -111,19 +110,19 @@ public class DirectoryServer extends RouterImpl {
         if (certificates.size() < 2) {
             return;
         }
-        final KeyCertificate newest = getNewestCertificate();
-        final Iterator<KeyCertificate> it = certificates.iterator();
+        final KeyCertificateDocument newest = getNewestCertificate();
+        final Iterator<KeyCertificateDocument> it = certificates.iterator();
         while (it.hasNext()) {
-            KeyCertificate elem = it.next();
+            KeyCertificateDocument elem = it.next();
             if (elem != newest && isMoreThan48HoursOlder(newest, elem)) {
                 it.remove();
             }
         }
     }
 
-    private KeyCertificate getNewestCertificate() {
-        KeyCertificate newest = null;
-        for (KeyCertificate kc : certificates) {
+    private KeyCertificateDocument getNewestCertificate() {
+        KeyCertificateDocument newest = null;
+        for (KeyCertificateDocument kc : certificates) {
             if (newest == null || getPublishedMilliseconds(newest) > getPublishedMilliseconds(kc)) {
                 newest = kc;
             }
@@ -131,16 +130,16 @@ public class DirectoryServer extends RouterImpl {
         return newest;
     }
 
-    private boolean isMoreThan48HoursOlder(KeyCertificate newer, KeyCertificate older) {
+    private boolean isMoreThan48HoursOlder(KeyCertificateDocument newer, KeyCertificateDocument older) {
         final long milliseconds = 48 * 60 * 60 * 1000;
         return (getPublishedMilliseconds(newer) - getPublishedMilliseconds(older)) > milliseconds;
     }
 
-    private long getPublishedMilliseconds(KeyCertificate certificate) {
+    private long getPublishedMilliseconds(KeyCertificateDocument certificate) {
         return certificate.getKeyPublishedTime().getDate().getTime();
     }
 
-    public void addCertificate(KeyCertificate certificate) {
+    public void addCertificate(KeyCertificateDocument certificate) {
         if (!certificate.getAuthorityFingerprint().equals(v3Ident)) {
             throw new IllegalArgumentException("This certificate does not appear to belong to this directory authority");
         }

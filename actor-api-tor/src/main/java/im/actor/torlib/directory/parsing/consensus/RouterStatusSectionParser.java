@@ -1,9 +1,8 @@
 package im.actor.torlib.directory.parsing.consensus;
 
-import im.actor.torlib.directory.ConsensusDocument;
-import im.actor.torlib.directory.ConsensusDocument.ConsensusFlavor;
+import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.RouterStatus;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
@@ -61,9 +60,6 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
         currentEntry = new RouterStatus();
         currentEntry.setNickname(fieldParser.parseNickname());
         currentEntry.setIdentity(parseBase64Digest());
-        if (document.getFlavor() != ConsensusFlavor.MICRODESC) {
-            parseBase64Digest();
-        }
         currentEntry.setPublicationTime(fieldParser.parseTimestamp());
         currentEntry.setAddress(fieldParser.parseAddress());
         currentEntry.setRouterPort(fieldParser.parsePort());
@@ -89,9 +85,7 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
             if (parts.length == 2)
                 parseBandwidthItem(parts[0], fieldParser.parseInteger(parts[1]));
         }
-        if (document.getFlavor() == ConsensusFlavor.MICRODESC) {
-            addCurrentEntry();
-        }
+        addCurrentEntry();
     }
 
     private void parseBandwidthItem(String key, int value) {
@@ -102,22 +96,17 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
     }
 
     private void parsePortList() {
-        if (document.getFlavor() == ConsensusFlavor.MICRODESC) {
-            throw new TorParsingException("'p' line does not appear in consensus flavor 'microdesc'");
-        }
-        final String arg = fieldParser.parseString();
-        if (arg.equals("accept")) {
-            currentEntry.setAcceptedPorts(fieldParser.parseString());
-        } else if (arg.equals("reject")) {
-            currentEntry.setRejectedPorts(fieldParser.parseString());
-        }
-        addCurrentEntry();
+        throw new TorParsingException("'p' line does not appear in consensus flavor 'microdesc'");
+//        final String arg = fieldParser.parseString();
+//        if (arg.equals("accept")) {
+//            currentEntry.setAcceptedPorts(fieldParser.parseString());
+//        } else if (arg.equals("reject")) {
+//            currentEntry.setRejectedPorts(fieldParser.parseString());
+//        }
+//        addCurrentEntry();
     }
 
     private void parseMicrodescriptorHash() {
-        if (document.getFlavor() != ConsensusFlavor.MICRODESC) {
-            throw new TorParsingException("'m' line is invalid unless consensus flavor is microdesc");
-        }
         final byte[] hashBytes = fieldParser.parseBase64Data();
         if (hashBytes.length != TorMessageDigest.TOR_DIGEST256_SIZE) {
             throw new TorParsingException("'m' line has incorrect digest size " + hashBytes.length + " != " + TorMessageDigest.TOR_DIGEST256_SIZE);

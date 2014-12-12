@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.errors;
 
 public class DirectoryRequestFailedException extends Exception {
 

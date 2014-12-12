@@ -12,8 +12,8 @@ import javax.net.ssl.SSLSocket;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
 
-import im.actor.torlib.ConnectionHandshakeException;
-import im.actor.torlib.ConnectionIOException;
+import im.actor.torlib.errors.ConnectionHandshakeException;
+import im.actor.torlib.errors.ConnectionIOException;
 
 /**
  * This class performs a Version 2 handshake as described in section 2 of

@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.circuits.hs.HSDescriptorCookie.CookieType;
 import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.crypto.TorStreamCipher;
-import im.actor.torlib.TorParsingException;
 import im.actor.torlib.crypto.TorStreamCipher;
 
 public class HSAuthentication {

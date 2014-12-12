@@ -8,8 +8,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 /**
  * The <code>HybridEncryption</code> class implements the "hybrid encryption" scheme

@@ -10,6 +10,7 @@ import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
 	
@@ -28,17 +29,17 @@ public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
 		this.failedExitRequests = new HashSet<ExitTarget>();
 	}
 	
-	public Stream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+	public TorStream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		return openExitStream(address.toString(), port, timeout);
 	}
 
-	public Stream openExitStream(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-		final StreamImpl stream = createNewStream();
+	public TorStream openExitStream(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+		final TorStream torStream = createNewStream();
 		try {
-			stream.openExit(target, port, timeout);
-			return stream;
+			torStream.openExit(target, port, timeout);
+			return torStream;
 		} catch (Exception e) {
-			removeStream(stream);
+			removeStream(torStream);
 			return processStreamOpenException(e);
 		}
 	}

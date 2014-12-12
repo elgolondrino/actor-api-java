@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import im.actor.torlib.BridgeRouter;
-import im.actor.torlib.directory.Descriptor;
+import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
@@ -15,7 +15,7 @@ public class BridgeRouterImpl implements BridgeRouter {
 	private final int port;
 	
 	private HexDigest identity;
-	private Descriptor descriptor;
+	private DescriptorDocument descriptorDocument;
 	
 	private volatile String cachedCountryCode;
 	
@@ -36,8 +36,8 @@ public class BridgeRouterImpl implements BridgeRouter {
 		this.identity = identity;
 	}
 
-	public void setDescriptor(Descriptor descriptor) {
-		this.descriptor = descriptor;
+	public void setDescriptorDocument(DescriptorDocument descriptorDocument) {
+		this.descriptorDocument = descriptorDocument;
 	}
 
 	@Override
@@ -107,8 +107,8 @@ public class BridgeRouterImpl implements BridgeRouter {
 		return "";
 	}
 
-	public Descriptor getCurrentDescriptor() {
-		return descriptor;
+	public DescriptorDocument getCurrentDescriptor() {
+		return descriptorDocument;
 	}
 
 	public HexDigest getMicrodescriptorDigest() {
@@ -116,16 +116,16 @@ public class BridgeRouterImpl implements BridgeRouter {
 	}
 
 	public TorPublicKey getOnionKey() {
-		if(descriptor != null) {
-			return descriptor.getOnionKey();
+		if(descriptorDocument != null) {
+			return descriptorDocument.getOnionKey();
 		} else {
 			return null;
 		}
 	}
 
 	public byte[] getNTorOnionKey() {
-		if(descriptor != null) {
-			return descriptor.getNTorOnionKey();
+		if(descriptorDocument != null) {
+			return descriptorDocument.getNTorOnionKey();
 		} else {
 			return null;
 		}
@@ -140,8 +140,8 @@ public class BridgeRouterImpl implements BridgeRouter {
 	}
 
 	public Set<String> getFamilyMembers() {
-		if(descriptor != null) {
-			return descriptor.getFamilyMembers();
+		if(descriptorDocument != null) {
+			return descriptorDocument.getFamilyMembers();
 		} else {
 			return Collections.emptySet();
 		}

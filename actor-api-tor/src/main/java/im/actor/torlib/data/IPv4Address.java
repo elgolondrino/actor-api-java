@@ -3,8 +3,8 @@ package im.actor.torlib.data;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import im.actor.torlib.TorException;
-import im.actor.torlib.TorParsingException;
+import im.actor.torlib.errors.TorException;
+import im.actor.torlib.errors.TorParsingException;
 
 public class IPv4Address {
 	

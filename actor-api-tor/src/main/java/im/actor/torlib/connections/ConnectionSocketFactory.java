@@ -12,7 +12,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class ConnectionSocketFactory {
 	static final String[] V1_CIPHERS_ONLY = {

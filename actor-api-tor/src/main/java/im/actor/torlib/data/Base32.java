@@ -1,6 +1,6 @@
 package im.actor.torlib.data;
 
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class Base32 {
 	private final static String BASE32_CHARS = "abcdefghijklmnopqrstuvwxyz234567";

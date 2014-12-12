@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import im.actor.torlib.RelayCell;
-import im.actor.torlib.Stream;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.utils.misc.GuardedBy;
 import im.actor.utils.misc.ThreadSafe;
@@ -18,7 +17,7 @@ public class TorInputStream extends InputStream {
 	private final static RelayCell CLOSE_SENTINEL = new RelayCellImpl(null, 0, 0, 0);
 	private final static ByteBuffer EMPTY_BUFFER  = ByteBuffer.allocate(0);
 	
-	private final Stream stream;
+	private final TorStream torStream;
 	
 	private final Object lock = new Object();
 	
@@ -40,13 +39,13 @@ public class TorInputStream extends InputStream {
 	/** Set when close() is called on this stream */
 	@GuardedBy("lock") private boolean isClosed;
 	
-	TorInputStream(Stream stream) {
-		this.stream = stream;
+	public TorInputStream(TorStream torStream) {
+		this.torStream = torStream;
 		this.incomingCells = new LinkedList<RelayCell>();
 		this.currentBuffer = EMPTY_BUFFER;
 	}
 
-	long getBytesReceived() {
+	public long getBytesReceived() {
 		synchronized (lock) {
 			return bytesReceived;
 		}
@@ -138,10 +137,10 @@ public class TorInputStream extends InputStream {
 			incomingCells.add(CLOSE_SENTINEL);
 			lock.notifyAll();
 		}
-		stream.close();
+		torStream.close();
 	}
 
-	void addEndCell(RelayCell cell) {
+	public void addEndCell(RelayCell cell) {
 		synchronized (lock) {
 			if(isClosed) {
 				return;
@@ -151,7 +150,7 @@ public class TorInputStream extends InputStream {
 		}
 	}
 
-	void addInputCell(RelayCell cell) {
+	public void addInputCell(RelayCell cell) {
 		synchronized (lock) {
 			if(isClosed) {
 				return;
@@ -215,14 +214,14 @@ public class TorInputStream extends InputStream {
 			throw new IOException("Read interrupted");
 		}
 	}
-	
-	int unflushedCellCount() {
+
+	public int unflushedCellCount() {
 		synchronized (lock) {
 			return incomingCells.size();
 		}
 	}
 
 	public String toString() {
-			return "TorInputStream stream="+ stream.getStreamId() +" node="+ stream.getTargetNode();
+			return "TorInputStream stream="+ torStream.getStreamId() +" node="+ torStream.getTargetNode();
 	}
 }

@@ -11,9 +11,9 @@ import java.util.logging.Logger;
 import im.actor.torlib.*;
 import im.actor.torlib.config.TorConfigBridgeLine;
 import im.actor.torlib.crypto.TorRandom;
-import im.actor.torlib.directory.Descriptor;
+import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.directory.DirectoryDownloader;
-import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
+import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 public class Bridges {
 	private static final Logger logger = Logger.getLogger(Bridges.class.getName());
@@ -37,10 +37,10 @@ public class Bridges {
 		private void downloadDescriptor() {
 			logger.fine("Downloading descriptor for bridge: "+ target);
 			try {
-				final Descriptor descriptor = directoryDownloader.downloadBridgeDescriptor(target);
-				if(descriptor != null) {
+				final DescriptorDocument descriptorDocument = directoryDownloader.downloadBridgeDescriptor(target);
+				if(descriptorDocument != null) {
 					logger.fine("Descriptor received for bridge "+ target +". Adding to list of usable bridges");
-					target.setDescriptor(descriptor);
+					target.setDescriptorDocument(descriptorDocument);
 					synchronized(lock) {
 						bridgeRouters.add(target);
 						lock.notifyAll();

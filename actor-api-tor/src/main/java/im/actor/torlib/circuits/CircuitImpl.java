@@ -17,18 +17,13 @@ import im.actor.torlib.ExitCircuit;
 import im.actor.torlib.InternalCircuit;
 import im.actor.torlib.RelayCell;
 import im.actor.torlib.Router;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.StreamConnectFailedException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.*;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
 
 /**
  * This class represents an established circuit through the Tor network.
@@ -221,10 +216,10 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 		io.deliverRelayCell(cell);
 	}
 
-	protected StreamImpl createNewStream(boolean autoclose) {
+	protected TorStream createNewStream(boolean autoclose) {
 		return io.createNewStream(autoclose);
 	}
-	protected StreamImpl createNewStream() {
+	protected TorStream createNewStream() {
 		return createNewStream(false);
 	}
 
@@ -242,11 +237,11 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 	}
 
 
-	public void removeStream(StreamImpl stream) {
-		io.removeStream(stream);
+	public void removeStream(TorStream torStream) {
+		io.removeStream(torStream);
 	}
 
-	protected Stream processStreamOpenException(Exception e) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+	protected TorStream processStreamOpenException(Exception e) throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		if(e instanceof InterruptedException) {
 			throw (InterruptedException) e;
 		} else if(e instanceof TimeoutException) {
@@ -277,7 +272,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 		return sb.toString();
 	}
 
-	public List<Stream> getActiveStreams() {
+	public List<TorStream> getActiveStreams() {
 		if(io == null) {
 			return Collections.emptyList();
 		} else {

@@ -13,8 +13,8 @@ import javax.net.ssl.SSLSocket;
 
 import im.actor.torlib.BridgeRouter;
 import im.actor.torlib.Cell;
-import im.actor.torlib.ConnectionHandshakeException;
-import im.actor.torlib.ConnectionIOException;
+import im.actor.torlib.errors.ConnectionHandshakeException;
+import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.cells.CellImpl;

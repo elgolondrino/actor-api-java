@@ -1,13 +1,13 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.documents.downloader;
 
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-import im.actor.torlib.directory.KeyCertificate;
-import im.actor.torlib.directory.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.documents.KeyCertificateDocument;
+import im.actor.torlib.documents.ConsensusDocument.RequiredCertificate;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
-public class CertificateFetcher extends DocumentFetcher<KeyCertificate>{
+public class CertificateFetcher extends DocumentFetcher<KeyCertificateDocument>{
 
 	private final Set<RequiredCertificate> requiredCertificates;
 	
@@ -34,7 +34,7 @@ public class CertificateFetcher extends DocumentFetcher<KeyCertificate>{
 	}
 
 	@Override
-	public DocumentParser<KeyCertificate> createParser(ByteBuffer response) {
+	public DocumentParser<KeyCertificateDocument> createParser(ByteBuffer response) {
 		return PARSER_FACTORY.createKeyCertificateParser(response);
 	}
 }

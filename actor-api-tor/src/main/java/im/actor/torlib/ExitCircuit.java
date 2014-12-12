@@ -2,8 +2,10 @@ package im.actor.torlib;
 
 import java.util.concurrent.TimeoutException;
 
+import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.torlib.errors.StreamConnectFailedException;
 
 public interface ExitCircuit extends Circuit {
 	
@@ -15,7 +17,7 @@ public interface ExitCircuit extends Circuit {
 	 * @param port The port of the exit target.
 	 * @return The status response returned by trying to open the stream.
 	 */
-	Stream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException;
+	TorStream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException;
 	
 	/**
 	 * Open an exit stream from the final node in this circuit to the
@@ -25,7 +27,7 @@ public interface ExitCircuit extends Circuit {
 	 * @param port The port of the exit target.
 	 * @return The status response returned by trying to open the stream.
 	 */
-	Stream openExitStream(String hostname, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException;
+	TorStream openExitStream(String hostname, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException;
 	
 	/**
 	 * Return true if the final node of this circuit is believed to be able to connect to

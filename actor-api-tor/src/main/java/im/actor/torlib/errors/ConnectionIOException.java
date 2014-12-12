@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.errors;
 
 public class ConnectionIOException extends Exception {
 

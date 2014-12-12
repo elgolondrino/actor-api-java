@@ -5,12 +5,14 @@ import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
+import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.Timestamp;
-import im.actor.torlib.directory.downloader.DescriptorProcessor;
-import im.actor.torlib.directory.downloader.DirectoryRequestFailedException;
+import im.actor.torlib.documents.downloader.DescriptorProcessor;
+import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -209,7 +211,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
     private class DownloadCertificatesTask implements Runnable {
         public void run() {
             try {
-                for (KeyCertificate c : downloader.downloadKeyCertificates(directory.getRequiredCertificates())) {
+                for (KeyCertificateDocument c : downloader.downloadKeyCertificates(directory.getRequiredCertificates())) {
                     directory.addCertificate(c);
                 }
                 directory.storeCertificates();

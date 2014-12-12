@@ -9,13 +9,10 @@ import im.actor.torlib.DirectoryCircuit;
 import im.actor.torlib.HiddenServiceCircuit;
 import im.actor.torlib.InternalCircuit;
 import im.actor.torlib.Router;
-import im.actor.torlib.Stream;
-import im.actor.torlib.StreamConnectFailedException;
+import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.*;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 
 public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit, DirectoryCircuit, HiddenServiceCircuit {
 
@@ -54,16 +51,16 @@ public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit,
 		extender.extendTo(target);
 	}
 	
-	public Stream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+	public TorStream openDirectoryStream(long timeout, boolean autoclose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		if(type != InternalType.HS_DIRECTORY) {
 			throw new IllegalStateException("Cannot open directory stream on internal circuit with type "+ type);
 		}
-		final StreamImpl stream = createNewStream();
+		final TorStream torStream = createNewStream();
 		try {
-			stream.openDirectory(timeout);
-			return stream;
+			torStream.openDirectory(timeout);
+			return torStream;
 		} catch (Exception e) {
-			removeStream(stream);
+			removeStream(torStream);
 			return processStreamOpenException(e);
 		}
 	}
@@ -85,17 +82,17 @@ public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit,
 		return this;
 	}
 
-	public Stream openStream(int port, long timeout) 
+	public TorStream openStream(int port, long timeout)
 			throws InterruptedException, TimeoutException, StreamConnectFailedException {
 		if(type != InternalType.HS_CIRCUIT) {
 			throw new IllegalStateException("Cannot open stream to hidden service from internal circuit type "+ type);
 		}
-		final StreamImpl stream = createNewStream();
+		final TorStream torStream = createNewStream();
 		try {
-			stream.openExit("", port, timeout);
-			return stream;
+			torStream.openExit("", port, timeout);
+			return torStream;
 		} catch (Exception e) {
-			removeStream(stream);
+			removeStream(torStream);
 			return processStreamOpenException(e);
 		}
 	}

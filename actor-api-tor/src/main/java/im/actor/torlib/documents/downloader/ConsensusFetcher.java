@@ -1,9 +1,8 @@
-package im.actor.torlib.directory.downloader;
+package im.actor.torlib.documents.downloader;
 
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.directory.ConsensusDocument;
-import im.actor.torlib.directory.downloader.DocumentFetcher;
+import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class ConsensusFetcher extends DocumentFetcher<ConsensusDocument> {

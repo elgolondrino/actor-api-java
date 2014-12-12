@@ -13,6 +13,7 @@ import im.actor.torlib.*;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 
 public class CircuitCreationTask implements Runnable {

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import im.actor.torlib.Tor;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.utils.Base64;
 import im.actor.utils.Hex;

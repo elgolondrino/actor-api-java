@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.CircuitManager;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.TorException;
+import im.actor.torlib.errors.TorException;
 
 public class SocksPortListener {
 	private final static Logger logger = Logger.getLogger(SocksPortListener.class.getName());

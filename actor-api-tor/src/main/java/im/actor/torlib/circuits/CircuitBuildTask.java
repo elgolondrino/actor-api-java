@@ -3,20 +3,13 @@ package im.actor.torlib.circuits;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.Connection;
-import im.actor.torlib.ConnectionCache;
-import im.actor.torlib.ConnectionFailedException;
-import im.actor.torlib.ConnectionHandshakeException;
-import im.actor.torlib.ConnectionTimeoutException;
-import im.actor.torlib.Router;
-import im.actor.torlib.Tor;
-import im.actor.torlib.TorException;
+import im.actor.torlib.*;
+import im.actor.torlib.errors.ConnectionFailedException;
+import im.actor.torlib.errors.ConnectionHandshakeException;
+import im.actor.torlib.errors.ConnectionTimeoutException;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.ConnectionFailedException;
-import im.actor.torlib.Tor;
-import im.actor.torlib.TorException;
+import im.actor.torlib.state.TorInitializationTracker;
 
 public class CircuitBuildTask implements Runnable {
 	private final static Logger logger = Logger.getLogger(CircuitBuildTask.class.getName());
