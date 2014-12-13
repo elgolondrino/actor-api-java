@@ -12,7 +12,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Document;
+import im.actor.torlib.documents.Document;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorRandom;
 

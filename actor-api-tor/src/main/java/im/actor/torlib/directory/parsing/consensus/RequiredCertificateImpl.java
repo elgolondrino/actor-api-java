@@ -48,14 +48,6 @@ public class RequiredCertificateImpl implements ConsensusDocument.RequiredCertif
 		return true;
 	}
 
-	public void incrementDownloadFailureCount() {
-		downloadFailureCount += 1;
-	}
-	
-	public int getDownloadFailureCount() {
-		return downloadFailureCount;
-	}
-
 	public HexDigest getAuthorityIdentity() {
 		return identity;
 	}
@@ -63,7 +55,4 @@ public class RequiredCertificateImpl implements ConsensusDocument.RequiredCertif
 	public HexDigest getSigningKey() {
 		return signingKey;
 	}
-	
-	
-
 }

@@ -15,7 +15,7 @@ public class HSDirectories {
     private final static int DIR_CLUSTER_SZ = 3;
     private final NewDirectory directory;
     private final TorRandom random;
-    private ConsensusDocument currentConsensus;
+
     private List<Router> hsDirectories;
 
     HSDirectories(NewDirectory directory) {
@@ -77,11 +77,6 @@ public class HSDirectories {
 
 
     private void refreshFromDirectory() {
-        ConsensusDocument consensus = directory.getObsoleteDirectory().getCurrentConsensusDocument();
-        if (currentConsensus == consensus) {
-            return;
-        }
-        currentConsensus = consensus;
         hsDirectories.clear();
         hsDirectories.addAll(directory.getHsDirectoryRouters());
 

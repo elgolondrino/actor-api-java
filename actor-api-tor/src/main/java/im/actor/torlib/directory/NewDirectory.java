@@ -4,6 +4,7 @@ import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.documents.DescriptorDocument;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,20 +20,20 @@ public class NewDirectory {
 
     private final Directory obsoleteDirectory;
 
-//    private RouterDescriptors descriptors;
-//    private Routers routers;
+    private ConsensusDocument currentConsensus;
 
     public NewDirectory(Directory obsoleteDirectory, TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
         this.obsoleteDirectory = obsoleteDirectory;
         this.config = config;
-
-//        this.descriptors = new RouterDescriptors(obsoleteDirectory.getStore());
-//        this.routers = new Routers(descriptors);
     }
 
     public int getId() {
         return id;
+    }
+
+    public ConsensusDocument getCurrentConsensus() {
+        return currentConsensus;
     }
 
     public Directory getObsoleteDirectory() {
@@ -42,11 +43,11 @@ public class NewDirectory {
     // Updating
     public void applyConsensusDocument(ConsensusDocument consensus) {
         obsoleteDirectory.getRouters().applyNewConsensus(consensus);
+        this.currentConsensus = consensus;
     }
 
-    // TODO: Implement
-    public void applyMobileConsensusDocument() {
-
+    public void applyRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
+        obsoleteDirectory.getRouters().addRouterDescriptors(descriptorDocuments);
     }
 
     // Picking paths
@@ -64,6 +65,10 @@ public class NewDirectory {
     }
 
     // Routers in directory
+
+    public boolean haveMinimumRouterInfo() {
+        return obsoleteDirectory.getRouters().haveMinimumRouterInfo();
+    }
 
     public List<Router> getAllRouters() {
         return obsoleteDirectory.getRouters().getAllRouters();

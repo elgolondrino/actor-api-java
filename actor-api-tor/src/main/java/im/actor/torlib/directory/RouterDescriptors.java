@@ -18,10 +18,10 @@ public class RouterDescriptors {
 
     private final static DocumentParserFactory PARSER_FACTORY = new DocumentParserFactoryImpl();
 
-    private final DescriptorCache<DescriptorDocument> microdescriptorCache;
+    private final DescriptorCache<DescriptorDocument> descriptorCache;
 
     public RouterDescriptors(DirectoryStorage store) {
-        this.microdescriptorCache = new DescriptorCache<DescriptorDocument>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
+        this.descriptorCache = new DescriptorCache<DescriptorDocument>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
             @Override
             protected DocumentParser<DescriptorDocument> createDocumentParser(ByteBuffer buffer) {
                 return PARSER_FACTORY.createRouterDescriptorParser(buffer);
@@ -30,22 +30,22 @@ public class RouterDescriptors {
     }
 
     public void load() {
-        microdescriptorCache.initialLoad();
+        descriptorCache.initialLoad();
     }
 
     public void close() {
-        microdescriptorCache.shutdown();
+        descriptorCache.shutdown();
     }
 
     public DescriptorDocument getDescriptorForRouterStatus(RouterStatus rs) {
-        return microdescriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
+        return descriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
     }
 
     public synchronized void addRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
-        microdescriptorCache.addDescriptors(descriptorDocuments);
+        descriptorCache.addDescriptors(descriptorDocuments);
     }
 
     public DescriptorDocument getDescriptorFromCache(HexDigest descriptorDigest) {
-        return microdescriptorCache.getDescriptor(descriptorDigest);
+        return descriptorCache.getDescriptor(descriptorDigest);
     }
 }

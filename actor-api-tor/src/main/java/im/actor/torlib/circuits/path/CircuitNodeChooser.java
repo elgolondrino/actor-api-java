@@ -79,7 +79,7 @@ public class CircuitNodeChooser {
     }
 
     private Router chooseNodeByBandwidthWeights(List<Router> candidates, WeightRule rule) {
-        final ConsensusDocument consensus = newDirectory.getObsoleteDirectory().getCurrentConsensusDocument();
+        final ConsensusDocument consensus = newDirectory.getCurrentConsensus();
         if (consensus == null) {
             return null;
         }

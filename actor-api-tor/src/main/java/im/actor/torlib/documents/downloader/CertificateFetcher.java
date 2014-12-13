@@ -1,6 +1,7 @@
 package im.actor.torlib.documents.downloader;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Set;
 
 import im.actor.torlib.documents.KeyCertificateDocument;
@@ -9,9 +10,9 @@ import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class CertificateFetcher extends DocumentFetcher<KeyCertificateDocument>{
 
-	private final Set<RequiredCertificate> requiredCertificates;
+	private final List<RequiredCertificate> requiredCertificates;
 	
-	public CertificateFetcher(Set<RequiredCertificate> requiredCertificates) {
+	public CertificateFetcher(List<RequiredCertificate> requiredCertificates) {
 		this.requiredCertificates = requiredCertificates;
 	}
 

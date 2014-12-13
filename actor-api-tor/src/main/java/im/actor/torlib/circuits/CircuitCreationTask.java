@@ -117,7 +117,7 @@ public class CircuitCreationTask implements Runnable {
 
     private void checkCircuitsForCreation() {
 
-        if (!directory.getObsoleteDirectory().haveMinimumRouterInfo()) {
+        if (!directory.haveMinimumRouterInfo()) {
             if (notEnoughDirectoryInformationWarningCounter % 20 == 0)
                 logger.info("Cannot build circuits because we don't have enough directory information");
             notEnoughDirectoryInformationWarningCounter++;
@@ -194,7 +194,7 @@ public class CircuitCreationTask implements Runnable {
         if (exitTargets.isEmpty()) {
             return;
         }
-        if (!directory.getObsoleteDirectory().haveMinimumRouterInfo())
+        if (!directory.haveMinimumRouterInfo())
             return;
         if (circuitManager.getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
             return;

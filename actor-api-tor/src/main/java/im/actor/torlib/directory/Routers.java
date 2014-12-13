@@ -22,12 +22,20 @@ public class Routers {
 
     private RouterDescriptors descriptors;
 
+    private boolean haveMinimumRouterInfo;
+    private boolean needRecalculateMinimumRouterInfo;
+
     public Routers(RouterDescriptors descriptors) {
         this.descriptors = descriptors;
     }
 
     public RouterDescriptors getDescriptors() {
         return descriptors;
+    }
+
+    public void load(){
+        descriptors.load();
+        needRecalculateMinimumRouterInfo = true;
     }
 
     public int getRoutersCount() {
@@ -47,6 +55,25 @@ public class Routers {
         }
     }
 
+    public synchronized boolean haveMinimumRouterInfo() {
+        if (needRecalculateMinimumRouterInfo) {
+            checkMinimumRouterInfo();
+        }
+        return haveMinimumRouterInfo;
+    }
+
+    private synchronized void checkMinimumRouterInfo() {
+//        if (currentConsensus == null || !currentConsensus.isLive()) {
+//            needRecalculateMinimumRouterInfo = true;
+//            haveMinimumRouterInfo = false;
+//            return;
+//        }
+
+        int routerCount = getRoutersCount();
+        int descriptorCount = getDownloadedDescriptorsCount();
+        needRecalculateMinimumRouterInfo = false;
+        haveMinimumRouterInfo = (descriptorCount * 4 > routerCount);
+    }
 
     public Router getRouterByName(String name) {
         if (name.equals("Unnamed")) {
@@ -145,6 +172,11 @@ public class Routers {
 
             return routers;
         }
+    }
+
+    public void addRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
+        descriptors.addRouterDescriptors(descriptorDocuments);
+        needRecalculateMinimumRouterInfo = true;
     }
 
     public void applyNewConsensus(ConsensusDocument consensus) {

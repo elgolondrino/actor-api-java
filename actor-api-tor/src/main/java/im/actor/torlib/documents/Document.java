@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.documents;
 
 import java.nio.ByteBuffer;
 

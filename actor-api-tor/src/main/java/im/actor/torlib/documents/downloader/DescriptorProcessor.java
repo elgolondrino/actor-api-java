@@ -85,10 +85,10 @@ public class DescriptorProcessor {
     }
 
     public List<List<HexDigest>> getDescriptorDigestsToDownload() {
-        final ConsensusDocument consensus = directory.getObsoleteDirectory().getCurrentConsensusDocument();
-        if (consensus == null || !consensus.isLive()) {
-            return Collections.emptyList();
-        }
+//        final ConsensusDocument consensus = directory.getObsoleteDirectory().getCurrentConsensusDocument();
+//        if (consensus == null || !consensus.isLive()) {
+//            return Collections.emptyList();
+//        }
         final List<Router> downloadables = directory.getRoutersWithDownloadableDescriptors();
         if (!canDownloadDescriptors(downloadables.size())) {
             return Collections.emptyList();

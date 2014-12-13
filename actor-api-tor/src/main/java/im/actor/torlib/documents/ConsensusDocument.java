@@ -20,9 +20,6 @@ public class ConsensusDocument implements Document {
     public enum SignatureStatus {STATUS_VERIFIED, STATUS_FAILED, STATUS_NEED_CERTS}
 
     public interface RequiredCertificate {
-        int getDownloadFailureCount();
-
-        void incrementDownloadFailureCount();
 
         HexDigest getAuthorityIdentity();
 

@@ -11,7 +11,7 @@ import im.actor.torlib.documents.KeyCertificateDocument;
  * Represents a directory authority server or a directory cache.
  */
 public class DirectoryServer extends RouterImpl {
-    private List<KeyCertificateDocument> certificates = new ArrayList<KeyCertificateDocument>();
+    private final List<KeyCertificateDocument> certificates = new ArrayList<KeyCertificateDocument>();
 
     private int port;
     private HexDigest v3Ident;

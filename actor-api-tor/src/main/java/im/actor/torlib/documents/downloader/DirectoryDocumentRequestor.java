@@ -42,7 +42,7 @@ public class DirectoryDocumentRequestor {
         return fetchSingleDocument(new ConsensusFetcher(), CircuitManager.DIRECTORY_PURPOSE_CONSENSUS);
     }
 
-    public List<KeyCertificateDocument> downloadKeyCertificates(Set<ConsensusDocument.RequiredCertificate> required) throws DirectoryRequestFailedException {
+    public List<KeyCertificateDocument> downloadKeyCertificates(List<ConsensusDocument.RequiredCertificate> required) throws DirectoryRequestFailedException {
         return fetchDocuments(new CertificateFetcher(required), CircuitManager.DIRECTORY_PURPOSE_CERTIFICATES);
     }
 

@@ -1,6 +1,6 @@
 package im.actor.torlib.directory.storage;
 
-import im.actor.torlib.Document;
+import im.actor.torlib.documents.Document;
 import im.actor.torlib.TorConfig;
 
 import java.nio.ByteBuffer;
