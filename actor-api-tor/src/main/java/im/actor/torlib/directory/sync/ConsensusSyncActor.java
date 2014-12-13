@@ -137,8 +137,10 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         loadCertificates();
         LOG.info("Certificates loaded in " + (System.currentTimeMillis() - start) + " ms");
         LOG.info("Loading directory state...");
+        start = System.currentTimeMillis();
         // OBSOLETE
         directory.loadFromStore();
+        LOG.info("Directory state loaded in " + (System.currentTimeMillis() - start) + " ms");
 
         self().sendOnce(new CheckConsensus());
     }
