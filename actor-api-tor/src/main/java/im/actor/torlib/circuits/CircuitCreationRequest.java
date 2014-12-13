@@ -6,12 +6,10 @@ import java.util.List;
 import im.actor.torlib.Circuit;
 import im.actor.torlib.CircuitBuildHandler;
 import im.actor.torlib.CircuitNode;
-import im.actor.torlib.Connection;
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.Router;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
-import im.actor.torlib.Circuit;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
 
 public class CircuitCreationRequest implements CircuitBuildHandler {
 	private final CircuitImpl circuit;

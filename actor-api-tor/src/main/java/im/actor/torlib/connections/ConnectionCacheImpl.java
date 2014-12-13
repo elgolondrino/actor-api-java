@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocket;
 
-import im.actor.torlib.Connection;
 import im.actor.torlib.ConnectionCache;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;

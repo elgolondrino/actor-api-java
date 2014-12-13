@@ -13,30 +13,11 @@ import im.actor.torlib.documents.KeyCertificateDocument;
 public class DirectoryServer extends RouterImpl {
     private List<KeyCertificateDocument> certificates = new ArrayList<KeyCertificateDocument>();
 
-    private boolean isHiddenServiceAuthority = false;
-    private boolean isBridgeAuthority = false;
-    private boolean isExtraInfoCache = false;
     private int port;
     private HexDigest v3Ident;
 
     public DirectoryServer(RouterStatus status) {
         super(null, status);
-    }
-
-    public void setHiddenServiceAuthority() {
-        isHiddenServiceAuthority = true;
-    }
-
-    public void unsetHiddenServiceAuthority() {
-        isHiddenServiceAuthority = false;
-    }
-
-    public void setBridgeAuthority() {
-        isBridgeAuthority = true;
-    }
-
-    public void setExtraInfoCache() {
-        isExtraInfoCache = true;
     }
 
     public void setPort(int port) {
@@ -47,32 +28,8 @@ public class DirectoryServer extends RouterImpl {
         this.v3Ident = fingerprint;
     }
 
-    public boolean isTrustedAuthority() {
-        return true;
-    }
-
     public boolean isValid() {
         return true;
-    }
-
-    public boolean isV2Authority() {
-        return hasFlag("Authority") && hasFlag("V2Dir");
-    }
-
-    public boolean isV3Authority() {
-        return hasFlag("Authority") && v3Ident != null;
-    }
-
-    public boolean isHiddenServiceAuthority() {
-        return isHiddenServiceAuthority;
-    }
-
-    public boolean isBridgeAuthority() {
-        return isBridgeAuthority;
-    }
-
-    public boolean isExtraInfoCache() {
-        return isExtraInfoCache;
     }
 
     public HexDigest getV3Identity() {

@@ -25,11 +25,8 @@ public class DirectoryDownloader {
     private boolean isStopped;
     private DirectorySyncInt directorySync;
 
-    public DirectoryDownloader(TorInitializationTracker initializationTracker) {
+    public DirectoryDownloader(TorInitializationTracker initializationTracker, CircuitManager circuitManager) {
         this.initializationTracker = initializationTracker;
-    }
-
-    public void setCircuitManager(CircuitManager circuitManager) {
         this.circuitManager = circuitManager;
     }
 
@@ -37,9 +34,6 @@ public class DirectoryDownloader {
         if (isStarted) {
             logger.warning("Directory downloader already running");
             return;
-        }
-        if (circuitManager == null) {
-            throw new IllegalStateException("Must set CircuitManager instance with setCircuitManager() before starting.");
         }
 
         directorySync = DirectorySyncActor.get(directory, this);
@@ -58,7 +52,7 @@ public class DirectoryDownloader {
 
     public DescriptorDocument downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openBridgeCircuit(bridge));
-        return requestor.downloadBridgeDescriptor(bridge);
+        return requestor.downloadBridgeDescriptor();
     }
 
     public ConsensusDocument downloadCurrentConsensus() throws DirectoryRequestFailedException {
@@ -75,11 +69,11 @@ public class DirectoryDownloader {
         return requestor.downloadKeyCertificates(required);
     }
 
-    public List<DescriptorDocument> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
-        return downloadRouterMicrodescriptors(fingerprints, openCircuit());
+    public List<DescriptorDocument> downloadRouterDescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
+        return downloadRouterDescriptors(fingerprints, openCircuit());
     }
 
-    public List<DescriptorDocument> downloadRouterMicrodescriptors(Set<HexDigest> fingerprints, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
+    public List<DescriptorDocument> downloadRouterDescriptors(Set<HexDigest> fingerprints, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(circuit, initializationTracker);
         final List<DescriptorDocument> ds = requestor.downloadRouterDescriptors(fingerprints);
         return removeUnrequestedDescriptors(fingerprints, ds);

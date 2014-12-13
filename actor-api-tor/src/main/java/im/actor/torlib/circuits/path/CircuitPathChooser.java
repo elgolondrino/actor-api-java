@@ -14,20 +14,21 @@ import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.guards.EntryGuards;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.torlib.directory.NewDirectory;
 
 public class CircuitPathChooser {
 
-    public static CircuitPathChooser create(TorConfig config, Directory directory) {
-        return new CircuitPathChooser(directory, new CircuitNodeChooser(config, directory));
+    public static CircuitPathChooser create(TorConfig config, NewDirectory newDirectory) {
+        return new CircuitPathChooser(newDirectory, new CircuitNodeChooser(config, newDirectory));
     }
 
-    private final Directory directory;
+    private final NewDirectory directory;
     private final CircuitNodeChooser nodeChooser;
 
     private EntryGuards entryGuards;
     private boolean useEntryGuards;
 
-    public CircuitPathChooser(Directory directory, CircuitNodeChooser nodeChooser) {
+    public CircuitPathChooser(NewDirectory directory, CircuitNodeChooser nodeChooser) {
         this.directory = directory;
         this.nodeChooser = nodeChooser;
         this.entryGuards = null;
@@ -117,14 +118,14 @@ public class CircuitPathChooser {
 
     private void excludeChosenRouterAndRelated(Router router, Set<Router> excludedRouters) {
         excludedRouters.add(router);
-        for (Router r : directory.getAllRouters()) {
+        for (Router r : directory.getObsoleteDirectory().getAllRouters()) {
             if (areInSameSlash16(router, r)) {
                 excludedRouters.add(r);
             }
         }
 
         for (String s : router.getFamilyMembers()) {
-            Router r = directory.getRouterByName(s);
+            Router r = directory.getObsoleteDirectory().getRouterByName(s);
             if (r != null) {
                 // Is mutual?
                 if (isFamilyMember(r.getFamilyMembers(), router)) {
@@ -136,7 +137,7 @@ public class CircuitPathChooser {
 
     private boolean isFamilyMember(Collection<String> familyMemberNames, Router r) {
         for (String s : familyMemberNames) {
-            Router member = directory.getRouterByName(s);
+            Router member = directory.getObsoleteDirectory().getRouterByName(s);
             if (member != null && member.equals(r)) {
                 return true;
             }

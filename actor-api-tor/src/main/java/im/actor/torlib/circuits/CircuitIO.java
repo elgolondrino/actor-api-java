@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.Cell;
 import im.actor.torlib.CircuitNode;
-import im.actor.torlib.Connection;
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.RelayCell;
 import im.actor.utils.Threading;

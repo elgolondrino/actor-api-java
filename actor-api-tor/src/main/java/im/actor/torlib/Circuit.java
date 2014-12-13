@@ -1,6 +1,7 @@
 package im.actor.torlib;
 
 import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.connections.Connection;
 
 import java.util.List;
 

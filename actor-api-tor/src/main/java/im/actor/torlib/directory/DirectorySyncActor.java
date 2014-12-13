@@ -199,7 +199,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
         public void run() {
             try {
-                directory.addRouterDescriptors(downloader.downloadRouterMicrodescriptors(fingerprints));
+                directory.addRouterDescriptors(downloader.downloadRouterDescriptors(fingerprints));
             } catch (DirectoryRequestFailedException e) {
                 logger.warning("Failed to download router descriptors: " + e.getMessage());
             } finally {

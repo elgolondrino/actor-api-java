@@ -14,6 +14,7 @@ import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
+import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.sockets.OrchidSocketFactory;
 import im.actor.torlib.socks.SocksPortListener;
 import im.actor.torlib.state.TorInitializationListener;
@@ -27,6 +28,7 @@ public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
     private final TorConfig config;
     private final Directory directory;
+    private final NewDirectory newDirectory;
     private final TorInitializationTracker initializationTracker;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
@@ -45,11 +47,15 @@ public class TorClient {
         }
         config = Tor.createConfig();
         directory = new Directory(config);
+        newDirectory = new NewDirectory(directory, config);
+
         initializationTracker = new TorInitializationTracker();
         initializationTracker.addListener(createReadyFlagInitializationListener());
-        connectionCache =  new ConnectionCacheImpl(config, initializationTracker);
-        directoryDownloader = new DirectoryDownloader(initializationTracker);
-        circuitManager = new CircuitManager(config, directoryDownloader, directory, connectionCache, initializationTracker);
+        connectionCache = new ConnectionCacheImpl(config, initializationTracker);
+
+        circuitManager = new CircuitManager(config, newDirectory, connectionCache, initializationTracker);
+        directoryDownloader = new DirectoryDownloader(initializationTracker, circuitManager);
+
         socksListener = new SocksPortListener(config, circuitManager);
         readyLatch = new CountDownLatch(1);
         dashboard = new Dashboard();
@@ -75,7 +81,6 @@ public class TorClient {
             throw new IllegalStateException("Cannot restart a TorClient instance.  Create a new instance instead.");
         }
         logger.info("Starting Orchid (version: " + Tor.getFullVersion() + ")");
-        // verifyUnlimitedStrengthPolicyInstalled();
         directoryDownloader.start(directory);
         circuitManager.startBuildingCircuits();
         if (dashboard.isEnabledByProperty()) {
@@ -114,16 +119,6 @@ public class TorClient {
 
     public CircuitManager getCircuitManager() {
         return circuitManager;
-    }
-
-    public void waitUntilReady() throws InterruptedException {
-        readyLatch.await();
-    }
-
-    public void waitUntilReady(long timeout) throws InterruptedException, TimeoutException {
-        if (!readyLatch.await(timeout, TimeUnit.MILLISECONDS)) {
-            throw new TimeoutException();
-        }
     }
 
     public TorStream openExitStreamTo(String hostname, int port) throws InterruptedException, TimeoutException, OpenFailedException {
@@ -177,19 +172,6 @@ public class TorClient {
 
             public void initializationCompleted() {
                 readyLatch.countDown();
-            }
-        };
-    }
-
-    private static TorInitializationListener createInitalizationListner() {
-        return new TorInitializationListener() {
-
-            public void initializationProgress(String message, int percent) {
-                System.out.println(">>> [ " + percent + "% ]: " + message);
-            }
-
-            public void initializationCompleted() {
-                System.out.println("Tor is ready to go!");
             }
         };
     }

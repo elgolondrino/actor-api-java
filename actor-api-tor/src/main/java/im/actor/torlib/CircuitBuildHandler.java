@@ -1,12 +1,14 @@
 package im.actor.torlib;
 
+import im.actor.torlib.connections.Connection;
+
 /**
  * This callback interface is used for reporting progress when
  * opening a new circuit.
  * method.
  * 
  * The normal sequence of callbacks which are fired when a circuit is opened
- * successfully is {@link #connectionCompleted(Connection)} for the initial 
+ * successfully is {@link #connectionCompleted(im.actor.torlib.connections.Connection)} for the initial
  * connection to the entry router, followed by one or more 
  * {@link #nodeAdded(CircuitNode)} as the circuit is extended with new nodes.
  * When all requested nodes in the path have been added successfully to the

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import im.actor.torlib.Cell;
 import im.actor.torlib.Circuit;
 import im.actor.torlib.CircuitNode;
-import im.actor.torlib.Connection;
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.DirectoryCircuit;
 import im.actor.torlib.ExitCircuit;
 import im.actor.torlib.InternalCircuit;

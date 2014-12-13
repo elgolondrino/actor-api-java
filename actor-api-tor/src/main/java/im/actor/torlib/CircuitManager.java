@@ -13,12 +13,14 @@ import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.guards.EntryGuards;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
+import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 
@@ -37,7 +39,6 @@ public class CircuitManager implements DashboardRenderable {
     }
 
     private final TorConfig config;
-    private final Directory directory;
     private final ConnectionCache connectionCache;
     private final Set<CircuitImpl> activeCircuits;
     private final Queue<InternalCircuit> cleanInternalCircuits;
@@ -54,14 +55,13 @@ public class CircuitManager implements DashboardRenderable {
 
     private boolean isBuilding = false;
 
-    public CircuitManager(TorConfig config, DirectoryDownloader directoryDownloader, Directory directory, ConnectionCache connectionCache, TorInitializationTracker initializationTracker) {
+    public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache, TorInitializationTracker initializationTracker) {
         this.config = config;
-        this.directory = directory;
         this.connectionCache = connectionCache;
         this.pathChooser = CircuitPathChooser.create(config, directory);
-        if (config.getUseEntryGuards() || config.getUseBridges()) {
-            this.pathChooser.enableEntryGuards(new EntryGuards(config, connectionCache, directoryDownloader, directory));
-        }
+//        if (config.getUseEntryGuards() || config.getUseBridges()) {
+//            this.pathChooser.enableEntryGuards(new EntryGuards(config, connectionCache, directoryDownloader, directory));
+//        }
         this.pendingExitStreams = new PendingExitStreams(config);
         this.circuitCreationTask = new CircuitCreationTask(config, directory, connectionCache, pathChooser, this, initializationTracker);
         this.activeCircuits = new HashSet<CircuitImpl>();
@@ -71,7 +71,7 @@ public class CircuitManager implements DashboardRenderable {
         this.initializationTracker = initializationTracker;
         this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
 
-        directoryDownloader.setCircuitManager(this);
+        // directoryDownloader.setCircuitManager(this);
     }
 
     public void startBuildingCircuits() {

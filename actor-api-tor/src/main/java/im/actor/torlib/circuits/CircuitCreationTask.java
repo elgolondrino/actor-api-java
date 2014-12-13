@@ -10,9 +10,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 
@@ -22,7 +24,7 @@ public class CircuitCreationTask implements Runnable {
     private final static int MAX_PENDING_CIRCUITS = 4;
 
     private final TorConfig config;
-    private final Directory directory;
+    private final NewDirectory directory;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final TorInitializationTracker initializationTracker;
@@ -37,7 +39,7 @@ public class CircuitCreationTask implements Runnable {
 
     private final AtomicLong lastNewCircuit;
 
-    public CircuitCreationTask(TorConfig config, Directory directory, ConnectionCache connectionCache, CircuitPathChooser pathChooser, CircuitManager circuitManager, TorInitializationTracker initializationTracker) {
+    public CircuitCreationTask(TorConfig config, NewDirectory directory, ConnectionCache connectionCache, CircuitPathChooser pathChooser, CircuitManager circuitManager, TorInitializationTracker initializationTracker) {
         this.config = config;
         this.directory = directory;
         this.connectionCache = connectionCache;
@@ -115,7 +117,7 @@ public class CircuitCreationTask implements Runnable {
 
     private void checkCircuitsForCreation() {
 
-        if (!directory.haveMinimumRouterInfo()) {
+        if (!directory.getObsoleteDirectory().haveMinimumRouterInfo()) {
             if (notEnoughDirectoryInformationWarningCounter % 20 == 0)
                 logger.info("Cannot build circuits because we don't have enough directory information");
             notEnoughDirectoryInformationWarningCounter++;
@@ -192,7 +194,7 @@ public class CircuitCreationTask implements Runnable {
         if (exitTargets.isEmpty()) {
             return;
         }
-        if (!directory.haveMinimumRouterInfo())
+        if (!directory.getObsoleteDirectory().haveMinimumRouterInfo())
             return;
         if (circuitManager.getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
             return;

@@ -22,7 +22,6 @@ import javax.net.ssl.SSLSocket;
 
 import im.actor.torlib.Cell;
 import im.actor.torlib.Circuit;
-import im.actor.torlib.Connection;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;

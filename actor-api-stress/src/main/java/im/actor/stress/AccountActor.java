@@ -100,47 +100,47 @@ public class AccountActor extends Actor {
 
         startTime = System.currentTimeMillis();
 
-        ask(actorApi.rpc(new RequestAuthCode(phoneNumber, APP_ID, APP_KEY)),
-                new FutureCallback<ResponseAuthCode>() {
-
-                    @Override
-                    public void onResult(ResponseAuthCode result) {
-                        onAuthCodeRequested(result);
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-                        AppLog.w("Received sms request error (" + phoneNumber + ") " + throwable.getMessage());
-                        StashLog.w("Sms request error", "message", throwable.getMessage(), "phone", phoneNumber + "");
-                        throwable.printStackTrace();
-                        startAuth();
-                    }
-                });
+//        ask(actorApi.rpc(new RequestAuthCode(phoneNumber, APP_ID, APP_KEY)),
+//                new FutureCallback<ResponseAuthCode>() {
+//
+//                    @Override
+//                    public void onResult(ResponseAuthCode result) {
+//                        onAuthCodeRequested(result);
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable throwable) {
+//                        AppLog.w("Received sms request error (" + phoneNumber + ") " + throwable.getMessage());
+//                        StashLog.w("Sms request error", "message", throwable.getMessage(), "phone", phoneNumber + "");
+//                        throwable.printStackTrace();
+//                        startAuth();
+//                    }
+//                });
     }
 
-    private void onAuthCodeRequested(ResponseAuthCode authCode) {
-        // Create key
-        byte[] publicKey = KeyTools.encodeRsaPublicKey(keyPair.getPublic());
-
-        ask(actorApi.rpc(new RequestSignUp(phoneNumber, authCode.getSmsHash(), smsCode,
-                        ACCOUNT_NAME, publicKey, DEVICE_HASH, DEVICE_TITLE, APP_ID
-                        , APP_KEY, false)),
-                new FutureCallback<ResponseAuth>() {
-
-                    @Override
-                    public void onResult(ResponseAuth result) {
-                        onAuthenticated(result);
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-                        AppLog.w("Received sms code error (" + phoneNumber + ") " + throwable.getMessage());
-                        StashLog.w("Sms Code error", "message", throwable.getMessage(), "phone", phoneNumber + "");
-                        throwable.printStackTrace();
-                        startAuth();
-                    }
-                });
-    }
+//    private void onAuthCodeRequested(ResponseAuthCode authCode) {
+//        // Create key
+//        byte[] publicKey = KeyTools.encodeRsaPublicKey(keyPair.getPublic());
+//
+//        ask(actorApi.rpc(new RequestSignUp(phoneNumber, authCode.getSmsHash(), smsCode,
+//                        ACCOUNT_NAME, publicKey, DEVICE_HASH, DEVICE_TITLE, APP_ID
+//                        , APP_KEY, false)),
+//                new FutureCallback<ResponseAuth>() {
+//
+//                    @Override
+//                    public void onResult(ResponseAuth result) {
+//                        onAuthenticated(result);
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable throwable) {
+//                        AppLog.w("Received sms code error (" + phoneNumber + ") " + throwable.getMessage());
+//                        StashLog.w("Sms Code error", "message", throwable.getMessage(), "phone", phoneNumber + "");
+//                        throwable.printStackTrace();
+//                        startAuth();
+//                    }
+//                });
+//    }
 
     private void onAuthenticated(
             ResponseAuth auth) {
@@ -379,24 +379,24 @@ public class AccountActor extends Actor {
 //                performSend(holder);
 //            }
 //        });
-        final long requestStart = System.currentTimeMillis();
-        ask(actorApi.rpc(new RequestSendMessage(new OutPeer(PeerType.PRIVATE, holder.uid, holder.accessHash),
-                RandomUtils.nextLong(), new MessageContent(1,
-                new TextMessage("jUnit Test", 0, null).toByteArray()))), new FutureCallback<ResponseMessageSent>() {
-            @Override
-            public void onResult(ResponseMessageSent result) {
-                StashLog.v("MessageSent", "phone", phoneNumber + "",
-                        "duration", "" + (System.currentTimeMillis() - requestStart));
-                mainActor.send(new StressActor.OnMessageSent(phoneNumber));
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
-                StashLog.w("MessageSendError", "message", throwable.getMessage(), "phone", phoneNumber + "",
-                        "duration", "" + (System.currentTimeMillis() - requestStart));
-            }
-        });
+//        final long requestStart = System.currentTimeMillis();
+//        ask(actorApi.rpc(new RequestSendMessage(new OutPeer(PeerType.PRIVATE, holder.uid, holder.accessHash),
+//                RandomUtils.nextLong(), new MessageContent(1,
+//                new TextMessage("jUnit Test", 0, null).toByteArray()))), new FutureCallback<ResponseMessageSent>() {
+//            @Override
+//            public void onResult(ResponseMessageSent result) {
+//                StashLog.v("MessageSent", "phone", phoneNumber + "",
+//                        "duration", "" + (System.currentTimeMillis() - requestStart));
+//                mainActor.send(new StressActor.OnMessageSent(phoneNumber));
+//            }
+//
+//            @Override
+//            public void onError(Throwable throwable) {
+//                throwable.printStackTrace();
+//                StashLog.w("MessageSendError", "message", throwable.getMessage(), "phone", phoneNumber + "",
+//                        "duration", "" + (System.currentTimeMillis() - requestStart));
+//            }
+//        });
     }
 
     public static class PerformAuth {

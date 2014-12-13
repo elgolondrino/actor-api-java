@@ -72,17 +72,8 @@ public class CircuitExtender {
             throw new TorException("Cannot EXTEND an empty circuit");
         }
 
-        if (useNtor(targetRouter)) {
-            final NTorCircuitExtender nce = new NTorCircuitExtender(this, targetRouter);
-            return nce.extendTo();
-        } else {
-            final TapCircuitExtender tce = new TapCircuitExtender(this, targetRouter);
-            return tce.extendTo();
-        }
-    }
-
-    private boolean useNtor(Router targetRouter) {
-        return targetRouter.getNTorOnionKey() != null;
+        final NTorCircuitExtender nce = new NTorCircuitExtender(this, targetRouter);
+        return nce.extendTo();
     }
 
     private void logProtocolViolation(String sourceName, Router targetRouter) {

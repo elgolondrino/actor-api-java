@@ -12,18 +12,18 @@ import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.geoip.CountryCodeService;
 
 public class RouterImpl implements Router {
-    public static RouterImpl createFromRouterStatus(Directory directory, RouterStatus status) {
+    public static RouterImpl createFromRouterStatus(RouterDescriptors directory, RouterStatus status) {
         return new RouterImpl(directory, status);
     }
 
-    private final Directory directory;
+    private final RouterDescriptors directory;
     private final HexDigest identityHash;
     protected RouterStatus status;
     private DescriptorDocument descriptorDocument;
 
     private volatile String cachedCountryCode;
 
-    protected RouterImpl(Directory directory, RouterStatus status) {
+    protected RouterImpl(RouterDescriptors directory, RouterStatus status) {
         this.directory = directory;
         this.identityHash = status.getIdentity();
         this.status = status;

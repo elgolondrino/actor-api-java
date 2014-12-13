@@ -34,7 +34,7 @@ public class DirectoryDocumentRequestor {
         this.initializationTracker = initializationTracker;
     }
 
-    public DescriptorDocument downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
+    public DescriptorDocument downloadBridgeDescriptor() throws DirectoryRequestFailedException {
         return fetchSingleDocument(new BridgeDescriptorFetcher());
     }
 

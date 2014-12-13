@@ -33,16 +33,10 @@ public class Directory {
     private final Object loadLock = new Object();
     private boolean isLoaded = false;
 
-    private final TorRandom random = new TorRandom();
-
     private final int id;
 
     private final DirectoryStorage store;
     private final StateFile stateFile;
-
-    private final DescriptorCache<DescriptorDocument> microdescriptorCache;
-    private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
-    private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
 
     private final Set<RequiredCertificate> requiredCertificates = new CopyOnWriteArraySet<RequiredCertificate>();
 
@@ -52,16 +46,15 @@ public class Directory {
     private ConsensusDocument currentConsensus;
     private ConsensusDocument consensusWaitingForCertificates;
 
+    private RouterDescriptors descriptors;
+    private Routers routers;
+
     public Directory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
         this.store = new DirectoryStorage(config);
         this.stateFile = new StateFile(store, this);
-        this.microdescriptorCache = new DescriptorCache<DescriptorDocument>(store, DirectoryStorage.CacheFile.MICRODESCRIPTOR_CACHE, DirectoryStorage.CacheFile.MICRODESCRIPTOR_JOURNAL) {
-            @Override
-            protected DocumentParser<DescriptorDocument> createDocumentParser(ByteBuffer buffer) {
-                return PARSER_FACTORY.createRouterDescriptorParser(buffer);
-            }
-        };
+        this.descriptors = new RouterDescriptors(store);
+        this.routers = new Routers(descriptors);
     }
 
     public int getId() {
@@ -82,13 +75,8 @@ public class Directory {
             return;
         }
 
-        int routerCount = 0;
-        int descriptorCount = 0;
-        for (Router r : routersByIdentity.values()) {
-            routerCount++;
-            if (!r.isDescriptorDownloadable())
-                descriptorCount++;
-        }
+        int routerCount = routers.getRoutersCount();
+        int descriptorCount = routers.getDownloadedDescriptorsCount();
         needRecalculateMinimumRouterInfo = false;
         haveMinimumRouterInfo = (descriptorCount * 4 > routerCount);
     }
@@ -110,7 +98,7 @@ public class Directory {
             logElapsed();
 
             LOG.info("Loading microdescriptor cache");
-            microdescriptorCache.initialLoad();
+            descriptors.load();
             needRecalculateMinimumRouterInfo = true;
             logElapsed();
 
@@ -124,7 +112,7 @@ public class Directory {
     }
 
     public void close() {
-        microdescriptorCache.shutdown();
+        descriptors.close();
     }
 
     private long last = 0;
@@ -177,12 +165,6 @@ public class Directory {
                 }
             }
         }
-    }
-
-    public DirectoryServer getRandomDirectoryAuthority() {
-        final List<DirectoryServer> servers = TrustedAuthorities.getInstance().getAuthorityServers();
-        final int idx = random.nextInt(servers.size());
-        return servers.get(idx);
     }
 
     public Set<ConsensusDocument.RequiredCertificate> getRequiredCertificates() {
@@ -267,21 +249,9 @@ public class Directory {
             requiredCertificates.addAll(consensus.getRequiredCertificates());
 
         }
-        final Map<HexDigest, RouterImpl> oldRouterByIdentity = new HashMap<HexDigest, RouterImpl>(routersByIdentity);
 
-        clearAll();
+        routers.applyNewConsensus(consensus);
 
-        for (RouterStatus status : consensus.getRouterStatusEntries()) {
-            if (status.hasFlag("Running") && status.hasFlag("Valid")) {
-                addRouter(updateOrCreateRouter(status, oldRouterByIdentity));
-            }
-            final DescriptorDocument d = getDescriptorForRouterStatus(status);
-            if (d != null) {
-                d.setLastListed(consensus.getValidAfterTime().getTime());
-            }
-        }
-
-        LOG.fine("Loaded " + routersByIdentity.size() + " routers from consensus document");
         currentConsensus = consensus;
 
         if (!fromCache) {
@@ -295,59 +265,12 @@ public class Directory {
         }
     }
 
-    private DescriptorDocument getDescriptorForRouterStatus(RouterStatus rs) {
-        return microdescriptorCache.getDescriptor(rs.getMicrodescriptorDigest());
-    }
-
-    private RouterImpl updateOrCreateRouter(RouterStatus status, Map<HexDigest, RouterImpl> knownRouters) {
-        final RouterImpl router = knownRouters.get(status.getIdentity());
-        if (router == null)
-            return RouterImpl.createFromRouterStatus(this, status);
-        router.updateStatus(status);
-        return router;
-    }
-
-    private void addRouter(RouterImpl router) {
-        routersByIdentity.put(router.getIdentityHash(), router);
-
-        final String name = router.getNickname();
-        if (name == null || name.equals("Unnamed"))
-            return;
-        if (routersByNickname.containsKey(router.getNickname())) {
-            //LOG.warn("Duplicate router nickname: "+ router.getNickname());
-            return;
-        }
-        routersByNickname.put(name, router);
-    }
-
-    private void clearAll() {
-        routersByIdentity.clear();
-        routersByNickname.clear();
-    }
 
     public synchronized void addRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
-        microdescriptorCache.addDescriptors(descriptorDocuments);
+        descriptors.addRouterDescriptors(descriptorDocuments);
         needRecalculateMinimumRouterInfo = true;
     }
 
-    public synchronized List<Router> getRoutersWithDownloadableDescriptors() {
-        waitUntilLoaded();
-        final List<Router> routers = new ArrayList<Router>();
-        for (RouterImpl router : routersByIdentity.values()) {
-            if (router.isDescriptorDownloadable())
-                routers.add(router);
-        }
-
-        for (int i = 0; i < routers.size(); i++) {
-            final Router a = routers.get(i);
-            final int swapIdx = random.nextInt(routers.size());
-            final Router b = routers.get(swapIdx);
-            routers.set(i, b);
-            routers.set(swapIdx, a);
-        }
-
-        return routers;
-    }
 
     public ConsensusDocument getCurrentConsensusDocument() {
         return currentConsensus;
@@ -360,33 +283,23 @@ public class Directory {
     }
 
     public Router getRouterByName(String name) {
-        if (name.equals("Unnamed")) {
-            return null;
-        }
-        if (name.length() == 41 && name.charAt(0) == '$') {
-            try {
-                final HexDigest identity = HexDigest.createFromString(name.substring(1));
-                return getRouterByIdentity(identity);
-            } catch (Exception e) {
-                return null;
-            }
-        }
         waitUntilLoaded();
-        return routersByNickname.get(name);
-    }
-
-    public Router getRouterByIdentity(HexDigest identity) {
-        waitUntilLoaded();
-        synchronized (routersByIdentity) {
-            return routersByIdentity.get(identity);
-        }
+        return routers.getRouterByName(name);
     }
 
     public List<Router> getAllRouters() {
         waitUntilLoaded();
-        synchronized (routersByIdentity) {
-            return new ArrayList<Router>(routersByIdentity.values());
-        }
+        return routers.getAllRouters();
+    }
+
+    public synchronized List<Router> getRoutersWithDownloadableDescriptors() {
+        waitUntilLoaded();
+        return routers.getRoutersWithDownloadableDescriptors();
+    }
+
+    public Router getRouterByIdentity(HexDigest identity) {
+        waitUntilLoaded();
+        return routers.getRouterByIdentity(identity);
     }
 
     public GuardEntry createGuardEntryFor(Router router) {
@@ -407,9 +320,5 @@ public class Directory {
     public void addGuardEntry(GuardEntry entry) {
         waitUntilLoaded();
         stateFile.addGuardEntry(entry);
-    }
-
-    public DescriptorDocument getDescriptorFromCache(HexDigest descriptorDigest) {
-        return microdescriptorCache.getDescriptor(descriptorDigest);
     }
 }
