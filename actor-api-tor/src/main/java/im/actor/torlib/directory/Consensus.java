@@ -48,15 +48,15 @@ public class Consensus extends BserObject {
         return consensus1;
     }
 
-    private int validAfter;
-    private int freshUntil;
-    private int validUntil;
+    protected int validAfter;
+    protected int freshUntil;
+    protected int validUntil;
 
-    private List<RouterStatus> routers = new ArrayList<RouterStatus>();
+    protected List<RouterStatus> routers = new ArrayList<RouterStatus>();
 
-    private HashMap<String, Integer> weights = new HashMap<String, Integer>();
+    protected HashMap<String, Integer> weights = new HashMap<String, Integer>();
 
-    private Consensus() {
+    public Consensus() {
 
     }
 
@@ -110,6 +110,11 @@ public class Consensus extends BserObject {
         writer.writeInt(2, freshUntil);
         writer.writeInt(3, validUntil);
         writer.writeRepeatedObj(4, routers);
+
+        for (String s : weights.keySet()) {
+            writer.writeString(5, s);
+            writer.writeInt(6, weights.get(s));
+        }
     }
 
     @Override
@@ -120,6 +125,13 @@ public class Consensus extends BserObject {
 
         routers = values.getRepeatedObj(4, RouterStatus.class);
 
+
+        List<String> keys = values.getRepeatedString(5);
+        List<Integer> vals = values.getRepeatedInt(6);
         weights.clear();
+
+        for (int i = 0; i < keys.size(); i++) {
+            weights.put(keys.get(i), vals.get(i));
+        }
     }
 }

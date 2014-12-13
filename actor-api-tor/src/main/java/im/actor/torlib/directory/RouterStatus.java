@@ -16,18 +16,18 @@ import java.util.Set;
  * Created by ex3ndr on 13.12.14.
  */
 public class RouterStatus extends BserObject {
-    private String nickname;
-    private HexDigest identity;
-    private HexDigest v3Ident;
-    private HexDigest microdescriptorDigest;
-    private IPv4Address address;
-    private int routerPort;
-    private int directoryPort;
-    private int publicationTime;
-    private Set<StatusFlag> flags = new HashSet<StatusFlag>();
-    private String version;
-    private int bandwidthEstimate;
-    private boolean hasBandwidth;
+    protected String nickname;
+    protected HexDigest identity;
+    protected HexDigest v3Ident;
+    protected HexDigest microdescriptorDigest;
+    protected IPv4Address address;
+    protected int routerPort;
+    protected int directoryPort;
+    protected int publicationTime;
+    protected Set<StatusFlag> flags = new HashSet<StatusFlag>();
+    protected String version;
+    protected int bandwidthEstimate;
+    protected boolean hasBandwidth;
 
     public RouterStatus() {
     }
@@ -137,16 +137,16 @@ public class RouterStatus extends BserObject {
         nickname = values.getString(1);
         identity = HexDigest.createFromDigestBytes(values.getBytes(2));
         if (values.optBytes(3) != null) {
-            v3Ident = HexDigest.createDigestForData(values.getBytes(3));
+            v3Ident = HexDigest.createFromDigestBytes(values.getBytes(3));
         }
         if (values.optBytes(4) != null) {
-            microdescriptorDigest = HexDigest.createDigestForData(values.getBytes(4));
+            microdescriptorDigest = HexDigest.createFromDigestBytes(values.getBytes(4));
         }
         address = new IPv4Address(values.getInt(5));
         routerPort = values.getInt(6);
         directoryPort = values.getInt(7);
         publicationTime = values.getInt(8);
-        version = values.getString(9);
+        version = values.optString(9);
 
         flags.clear();
         for (int i : values.getRepeatedInt(10)) {
@@ -174,7 +174,9 @@ public class RouterStatus extends BserObject {
         writer.writeInt(6, routerPort);
         writer.writeInt(7, directoryPort);
         writer.writeInt(8, publicationTime);
-        writer.writeString(9, version);
+        if (version != null) {
+            writer.writeString(9, version);
+        }
 
         List<Integer> flags = new ArrayList<Integer>();
         for (StatusFlag f : this.flags) {

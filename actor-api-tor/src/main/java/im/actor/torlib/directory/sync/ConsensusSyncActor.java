@@ -5,6 +5,7 @@ import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
+import com.droidkit.bser.Bser;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.DirectoryCircuit;
 import im.actor.torlib.directory.Consensus;
@@ -26,6 +27,7 @@ import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -81,18 +83,29 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
 
     private Consensus loadConsensus() {
-        ByteBuffer byteBuffer = storage.loadCacheFile(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC);
-        final DocumentParser<ConsensusDocument> parser = PARSER_FACTORY.createConsensusDocumentParser(byteBuffer);
-        final DocumentParsingResult<ConsensusDocument> result = parser.parse();
-        if (result.isOkay() && result.getDocument().isValidDocument()) {
-            return Consensus.fromConsensusDocument(result.getDocument());
-        } else {
-            return null;
+//        ByteBuffer byteBuffer = storage.loadCacheFile(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC);
+//        final DocumentParser<ConsensusDocument> parser = PARSER_FACTORY.createConsensusDocumentParser(byteBuffer);
+//        final DocumentParsingResult<ConsensusDocument> result = parser.parse();
+//        if (result.isOkay() && result.getDocument().isValidDocument()) {
+//            return Consensus.fromConsensusDocument(result.getDocument());
+//        } else {
+//            return null;
+//        }
+
+        byte[] data = safeFileWriter.loadData();
+        if (data != null) {
+            try {
+                return Bser.parse(Consensus.class, data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
-    private void saveConsensus(ConsensusDocument consensus) {
-        storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
+    private void saveConsensus(Consensus consensus) {
+        safeFileWriter.saveData(consensus.toByteArray());
+        // storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
     }
 
     private void loadCertificates() {
@@ -110,16 +123,19 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     @Override
     public void startSync() {
         LOG.info("Loading consensus...");
+        long start = System.currentTimeMillis();
         Consensus consensusDocument = loadConsensus();
         if (consensusDocument != null) {
-            LOG.info("Consensus loaded.");
+            LOG.info("Consensus loaded in " + (System.currentTimeMillis() - start) + " ms");
             applyCurrentConsensus(consensusDocument);
         } else {
             LOG.info("Consensus NOT loaded.");
             applyCurrentConsensus(null);
         }
         LOG.info("Loading certificates...");
+        start = System.currentTimeMillis();
         loadCertificates();
+        LOG.info("Certificates loaded in " + (System.currentTimeMillis() - start) + " ms");
         LOG.info("Loading directory state...");
         // OBSOLETE
         directory.loadFromStore();
@@ -206,7 +222,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         Consensus consensus1 = Consensus.fromConsensusDocument(consensus);
         applyCurrentConsensus(consensus1);
-        saveConsensus(consensus);
+        saveConsensus(consensus1);
     }
 
     private void onConsensusDownloadFailed() {
