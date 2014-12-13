@@ -20,7 +20,7 @@ public class NewDirectory {
     private final TorConfig config;
     private final DirectoryStorage store;
 
-    private ConsensusDocument currentConsensus;
+    private Consensus currentConsensus;
 
     private Routers routers;
 
@@ -42,7 +42,7 @@ public class NewDirectory {
         return store;
     }
 
-    public ConsensusDocument getCurrentConsensus() {
+    public Consensus getCurrentConsensus() {
         return currentConsensus;
     }
 
@@ -52,7 +52,7 @@ public class NewDirectory {
     }
 
     // Updating
-    public void applyConsensusDocument(ConsensusDocument consensus) {
+    public void applyConsensusDocument(Consensus consensus) {
         routers.applyNewConsensus(consensus);
         this.currentConsensus = consensus;
     }

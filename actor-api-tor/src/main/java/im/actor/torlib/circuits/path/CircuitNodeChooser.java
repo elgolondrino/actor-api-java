@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.routers.Router;
@@ -79,7 +80,7 @@ public class CircuitNodeChooser {
     }
 
     private Router chooseNodeByBandwidthWeights(List<Router> candidates, WeightRule rule) {
-        final ConsensusDocument consensus = newDirectory.getCurrentConsensus();
+        final Consensus consensus = newDirectory.getCurrentConsensus();
         if (consensus == null) {
             return null;
         }
@@ -88,7 +89,7 @@ public class CircuitNodeChooser {
     }
 
 
-    private BandwidthWeightedRouters computeWeightedBandwidths(List<Router> candidates, ConsensusDocument consensus, WeightRule rule) {
+    private BandwidthWeightedRouters computeWeightedBandwidths(List<Router> candidates, Consensus consensus, WeightRule rule) {
         final CircuitNodeChooserWeightParameters wp = CircuitNodeChooserWeightParameters.create(consensus, rule);
         if (!wp.isValid()) {
             logger.warning("Got invalid bandwidth weights. Falling back to old selection method");

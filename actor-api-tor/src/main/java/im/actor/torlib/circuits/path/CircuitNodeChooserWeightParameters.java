@@ -1,5 +1,6 @@
 package im.actor.torlib.circuits.path;
 
+import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.routers.Router;
 
@@ -17,9 +18,9 @@ class CircuitNodeChooserWeightParameters {
 	private final static String ZERO = "zero";
 	private final static String ONE = "one";
 	
-	static CircuitNodeChooserWeightParameters create(ConsensusDocument consensus, CircuitNodeChooser.WeightRule rule) {
+	static CircuitNodeChooserWeightParameters create(Consensus consensus, CircuitNodeChooser.WeightRule rule) {
 		final double[] vars = new double[VAR_COUNT];
-		final long scale = consensus.getWeightScaleParameter();
+		final long scale = 10000;
 		final String[] tags = getTagsForWeightRule(rule);
 		if(!populateVars(consensus, scale, tags, vars)) {
 			return new CircuitNodeChooserWeightParameters(new double[VAR_COUNT], false);
@@ -28,7 +29,7 @@ class CircuitNodeChooserWeightParameters {
 		}
 	}
 		
-	static boolean populateVars(ConsensusDocument consensus, long scale, String[] tags, double[] vars) {
+	static boolean populateVars(Consensus consensus, long scale, String[] tags, double[] vars) {
 		for(int i = 0; i < VAR_COUNT; i++) {
 			vars[i] = tagToVarValue(consensus, scale, tags[i]);
 			if(vars[i] < 0.0) {
@@ -40,7 +41,7 @@ class CircuitNodeChooserWeightParameters {
 		return true;
 	}
 
-	static double tagToVarValue(ConsensusDocument consensus, long scale, String tag) {
+	static double tagToVarValue(Consensus consensus, long scale, String tag) {
 		if(tag.equals(ZERO)) {
 			return 0.0;
 		} else if (tag.equals(ONE)) {

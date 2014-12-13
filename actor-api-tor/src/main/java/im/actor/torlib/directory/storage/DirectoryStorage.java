@@ -15,8 +15,6 @@ public class DirectoryStorage {
         CONSENSUS_MICRODESC("consensus-microdesc"),
         MICRODESCRIPTOR_CACHE("cached-microdescs"),
         MICRODESCRIPTOR_JOURNAL("cached-microdescs.new"),
-        DESCRIPTOR_CACHE("cached-descriptors"),
-        DESCRIPTOR_JOURNAL("cached-descriptors.new"),
         STATE("state");
 
         final private String filename;

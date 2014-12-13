@@ -54,7 +54,7 @@ public class TorClient {
         connectionCache = new ConnectionCacheImpl(config, initializationTracker);
 
         circuitManager = new CircuitManager(config, newDirectory, connectionCache, initializationTracker);
-        directoryDownloader = new DirectoryDownloader(initializationTracker, circuitManager);
+        directoryDownloader = new DirectoryDownloader(circuitManager);
 
         socksListener = new SocksPortListener(config, circuitManager);
         readyLatch = new CountDownLatch(1);

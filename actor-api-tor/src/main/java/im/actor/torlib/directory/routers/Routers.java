@@ -1,6 +1,7 @@
 package im.actor.torlib.directory.routers;
 
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
@@ -180,14 +181,14 @@ public class Routers {
         needRecalculateMinimumRouterInfo = true;
     }
 
-    public void applyNewConsensus(ConsensusDocument consensus) {
+    public void applyNewConsensus(Consensus consensus) {
         synchronized (LOCK) {
             final Map<HexDigest, RouterImpl> oldRouterByIdentity = new HashMap<HexDigest, RouterImpl>(routersByIdentity);
 
             routersByIdentity.clear();
             routersByNickname.clear();
 
-            for (RouterStatus status : consensus.getRouterStatusEntries()) {
+            for (RouterStatus status : consensus.getRouters()) {
                 if (status.hasFlag("Running") && status.hasFlag("Valid")) {
                     RouterImpl router = oldRouterByIdentity.get(status.getIdentity());
                     if (router == null) {
@@ -199,7 +200,7 @@ public class Routers {
                 }
                 final DescriptorDocument d = descriptors.getDescriptorForRouterStatus(status);
                 if (d != null) {
-                    d.setLastListed(consensus.getValidAfterTime().getTime());
+                    d.setLastListed(consensus.getValidAfter() * 1000L);
                 }
             }
 

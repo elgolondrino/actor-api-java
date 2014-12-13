@@ -7,6 +7,7 @@ import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.NewDirectory;
@@ -55,7 +56,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     private NewDirectory directory;
     private DirectoryStorage storage;
 
-    private ConsensusDocument currentConsensus;
+    private Consensus currentConsensus;
     private ConsensusDocument currentPendingConsensus;
     private List<ConsensusDocument.RequiredCertificate> requiredCertificates
             = new ArrayList<ConsensusDocument.RequiredCertificate>();
@@ -104,7 +105,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         ConsensusDocument consensusDocument = loadConsensus();
         if (consensusDocument != null) {
             LOG.info("Consensus loaded.");
-            applyCurrentConsensus(consensusDocument);
+            applyCurrentConsensus(Consensus.fromConsensusDocument(consensusDocument));
         } else {
             LOG.info("Consensus NOT loaded.");
             applyCurrentConsensus(null);
@@ -174,7 +175,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     private void onConsensusDownloaded(ConsensusDocument consensus) {
         isDownloadingConsensus = false;
 
-        if (currentConsensus != null && consensus.getValidAfterTime().isBefore(currentConsensus.getValidAfterTime())) {
+        if (currentConsensus != null && consensus.getValidAfterTime().getTime() > currentConsensus.getValidAfter() * 1000L) {
             LOG.warning("New consensus document is older than current consensus document");
             return;
         }
@@ -195,7 +196,8 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
                 break;
         }
 
-        applyCurrentConsensus(consensus);
+        Consensus consensus1 = Consensus.fromConsensusDocument(consensus);
+        applyCurrentConsensus(consensus1);
         storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
     }
 
@@ -232,7 +234,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
                     currentPendingConsensus = null;
                     break;
                 case STATUS_VERIFIED:
-                    applyCurrentConsensus(currentPendingConsensus);
+                    applyCurrentConsensus(Consensus.fromConsensusDocument(currentPendingConsensus));
                     storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, currentPendingConsensus);
                     currentPendingConsensus = null;
                     break;
@@ -259,7 +261,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         isDownloadingCertificates = false;
     }
 
-    private void applyCurrentConsensus(ConsensusDocument consensus) {
+    private void applyCurrentConsensus(Consensus consensus) {
         if (consensus != null) {
             currentConsensus = consensus;
             consensusDownloadTime = chooseDownloadTimeForConsensus(consensus);
@@ -360,10 +362,10 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
      * one-hour interval is 45 minutes, and 7/8 of the remaining 75 minutes is
      * 65 minutes.]</p>
      */
-    private static Date chooseDownloadTimeForConsensus(ConsensusDocument consensus) {
-        final long va = consensus.getValidAfterTime().getDate().getTime();
-        final long fu = consensus.getFreshUntilTime().getDate().getTime();
-        final long vu = consensus.getValidUntilTime().getDate().getTime();
+    private static Date chooseDownloadTimeForConsensus(Consensus consensus) {
+        final long va = consensus.getValidAfter() * 1000L;
+        final long fu = consensus.getFreshUntil() * 1000L;
+        final long vu = consensus.getValidUntil() * 1000L;
         final long i1 = fu - va;
         final long start = fu + ((i1 * 3) / 4);
         final long i2 = ((vu - start) * 7) / 8;

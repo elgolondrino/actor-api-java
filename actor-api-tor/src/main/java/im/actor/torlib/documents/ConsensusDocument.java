@@ -65,6 +65,10 @@ public class ConsensusDocument implements Document {
         parameters = new HashMap<String, Integer>();
     }
 
+    public Map<String, Integer> getBandwidthWeights() {
+        return bandwidthWeights;
+    }
+
     public void setValidAfter(Timestamp ts) {
         validAfter = ts;
     }
