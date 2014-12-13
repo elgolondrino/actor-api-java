@@ -21,6 +21,7 @@ import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
 import im.actor.torlib.errors.OpenFailedException;
+import im.actor.torlib.utils.SafeFileWriter;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
@@ -68,23 +69,30 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
     private final CircuitManager circuitManager;
 
+    private SafeFileWriter safeFileWriter;
+
     public ConsensusSyncActor(NewDirectory directory, CircuitManager circuitManager) {
         super(ConsensusSyncInt.class);
         this.directory = directory;
         this.storage = directory.getStore();
         this.circuitManager = circuitManager;
+        this.safeFileWriter = new SafeFileWriter(directory.getConfig().getDataDirectory().getPath(), "consensus-mobile.bin");
     }
 
 
-    private ConsensusDocument loadConsensus() {
+    private Consensus loadConsensus() {
         ByteBuffer byteBuffer = storage.loadCacheFile(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC);
         final DocumentParser<ConsensusDocument> parser = PARSER_FACTORY.createConsensusDocumentParser(byteBuffer);
         final DocumentParsingResult<ConsensusDocument> result = parser.parse();
         if (result.isOkay() && result.getDocument().isValidDocument()) {
-            return result.getDocument();
+            return Consensus.fromConsensusDocument(result.getDocument());
         } else {
             return null;
         }
+    }
+
+    private void saveConsensus(ConsensusDocument consensus) {
+        storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
     }
 
     private void loadCertificates() {
@@ -102,10 +110,10 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     @Override
     public void startSync() {
         LOG.info("Loading consensus...");
-        ConsensusDocument consensusDocument = loadConsensus();
+        Consensus consensusDocument = loadConsensus();
         if (consensusDocument != null) {
             LOG.info("Consensus loaded.");
-            applyCurrentConsensus(Consensus.fromConsensusDocument(consensusDocument));
+            applyCurrentConsensus(consensusDocument);
         } else {
             LOG.info("Consensus NOT loaded.");
             applyCurrentConsensus(null);
@@ -175,7 +183,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     private void onConsensusDownloaded(ConsensusDocument consensus) {
         isDownloadingConsensus = false;
 
-        if (currentConsensus != null && consensus.getValidAfterTime().getTime() > currentConsensus.getValidAfter() * 1000L) {
+        if (currentConsensus != null && consensus.getValidAfterTime().getTime() < currentConsensus.getValidAfter() * 1000L) {
             LOG.warning("New consensus document is older than current consensus document");
             return;
         }
@@ -198,7 +206,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         Consensus consensus1 = Consensus.fromConsensusDocument(consensus);
         applyCurrentConsensus(consensus1);
-        storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
+        saveConsensus(consensus);
     }
 
     private void onConsensusDownloadFailed() {

@@ -1,7 +1,7 @@
 package im.actor.torlib.directory.parsing.consensus;
 
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.documents.RouterStatus;
+import im.actor.torlib.documents.RouterStatusDocument;
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.data.HexDigest;
@@ -9,7 +9,7 @@ import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
 
-    private RouterStatus currentEntry = null;
+    private RouterStatusDocument currentEntry = null;
 
     RouterStatusSectionParser(DocumentFieldParser parser, ConsensusDocument document) {
         super(parser, document);
@@ -57,7 +57,7 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
     private void parseFirstLine() {
         if (currentEntry != null)
             throw new TorParsingException("Unterminated router status entry.");
-        currentEntry = new RouterStatus();
+        currentEntry = new RouterStatusDocument();
         currentEntry.setNickname(fieldParser.parseNickname());
         currentEntry.setIdentity(parseBase64Digest());
         currentEntry.setPublicationTime(fieldParser.parseTimestamp());
@@ -89,10 +89,11 @@ public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {
     }
 
     private void parseBandwidthItem(String key, int value) {
-        if (key.equals("Bandwidth"))
+        if (key.equals("Bandwidth")) {
             currentEntry.setEstimatedBandwidth(value);
-        else if (key.equals("Measured"))
-            currentEntry.setMeasuredBandwidth(value);
+        }
+        //else if (key.equals("Measured"))
+        //currentEntry.setMeasuredBandwidth(value);
     }
 
     private void parsePortList() {

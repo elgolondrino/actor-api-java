@@ -12,7 +12,7 @@ import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingHandler;
-import im.actor.torlib.documents.RouterStatus;
+import im.actor.torlib.documents.RouterStatusDocument;
 
 /*
  * This class contains the hardcoded 'bootstrap' directory authority
@@ -81,8 +81,8 @@ public class TrustedAuthorities {
 
     private void processKeywordLine(DocumentFieldParser fieldParser) {
         final RouterStatus status = new RouterStatus();
-        status.addFlag("Authority");
-        status.addFlag("V2Dir");
+        status.setFlag(StatusFlag.AUTHORITY);
+        status.setFlag(StatusFlag.V2_DIR);
         status.setNickname(fieldParser.parseNickname());
         while (fieldParser.argumentsRemaining() > 0)
             processArgument(fieldParser, status);
@@ -113,16 +113,17 @@ public class TrustedAuthorities {
 
     private void parseFlag(DocumentFieldParser parser, String flag, RouterStatus status) {
         if (flag.equals("v1")) {
-            status.setV1Authority();
-            status.setHiddenServiceAuthority();
+            // status.setV1Authority();
+            status.setFlag(StatusFlag.HS_DIR);
         } else if (flag.equals("hs")) {
-            status.setHiddenServiceAuthority();
+            status.setFlag(StatusFlag.HS_DIR);
         } else if (flag.equals("no-hs")) {
-            status.unsetHiddenServiceAuthority();
+            status.unsetFlag(StatusFlag.HS_DIR);
         } else if (flag.equals("bridge")) {
-            status.setBridgeAuthority();
+            // status.setBridgeAuthority();
         } else if (flag.equals("no-v2")) {
-            status.unsetV2Authority();
+            // status.unsetV2Authority();
+            status.unsetFlag(StatusFlag.V2_DIR);
         } else if (flag.startsWith("orport=")) {
             status.setRouterPort(parser.parsePort(flag.substring(7)));
         } else if (flag.startsWith("v3ident=")) {

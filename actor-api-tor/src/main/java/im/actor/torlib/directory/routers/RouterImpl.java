@@ -3,7 +3,9 @@ package im.actor.torlib.directory.routers;
 import java.util.Collections;
 import java.util.Set;
 
-import im.actor.torlib.documents.RouterStatus;
+import im.actor.torlib.directory.RouterStatus;
+import im.actor.torlib.directory.StatusFlag;
+import im.actor.torlib.documents.RouterStatusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
@@ -46,7 +48,7 @@ public class RouterImpl implements Router {
         }
 
         final long now = System.currentTimeMillis();
-        final long diff = now - status.getPublicationTime().getDate().getTime();
+        final long diff = now - status.getPublicationTime() * 1000L;
         return diff > (1000 * 60 * 10);
     }
 
@@ -76,40 +78,40 @@ public class RouterImpl implements Router {
         return status.getMicrodescriptorDigest();
     }
 
-    public boolean hasFlag(String flag) {
+    public boolean hasFlag(StatusFlag flag) {
         return status.hasFlag(flag);
     }
 
     public boolean isRunning() {
-        return hasFlag("Running");
+        return hasFlag(StatusFlag.RUNNING);
     }
 
     public boolean isValid() {
-        return hasFlag("Valid");
+        return hasFlag(StatusFlag.VALID);
     }
 
     public boolean isBadExit() {
-        return hasFlag("BadExit");
+        return hasFlag(StatusFlag.BAD_EXIT);
     }
 
     public boolean isPossibleGuard() {
-        return hasFlag("Guard");
+        return hasFlag(StatusFlag.GUARD);
     }
 
     public boolean isExit() {
-        return hasFlag("Exit");
+        return hasFlag(StatusFlag.EXIT);
     }
 
     public boolean isFast() {
-        return hasFlag("Fast");
+        return hasFlag(StatusFlag.FAST);
     }
 
     public boolean isStable() {
-        return hasFlag("Stable");
+        return hasFlag(StatusFlag.STABLE);
     }
 
     public boolean isHSDirectory() {
-        return hasFlag("HSDir");
+        return hasFlag(StatusFlag.HS_DIR);
     }
 
     public int getDirectoryPort() {
@@ -147,11 +149,11 @@ public class RouterImpl implements Router {
     }
 
     public boolean hasBandwidth() {
-        return status.hasBandwidth();
+        return status.isHasBandwidth();
     }
 
     public int getEstimatedBandwidth() {
-        return status.getEstimatedBandwidth();
+        return status.getBandwidthEstimate();
     }
 
     public Set<String> getFamilyMembers() {

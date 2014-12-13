@@ -8,7 +8,7 @@ import im.actor.torlib.data.exitpolicy.ExitPorts;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RouterStatus {
+public class RouterStatusDocument {
     private String nickname;
     private HexDigest identity;
     private HexDigest microdescriptorDigest;
@@ -19,9 +19,7 @@ public class RouterStatus {
     private Set<String> flags = new HashSet<String>();
     private String version;
     private int bandwidthEstimate;
-    private int bandwidthMeasured;
     private boolean hasBandwidth;
-    private ExitPorts exitPorts;
     private HexDigest v3Ident;
 
     public void setNickname(String nickname) {
@@ -65,30 +63,12 @@ public class RouterStatus {
         hasBandwidth = true;
     }
 
-    public void setMeasuredBandwidth(int bandwidth) {
-        this.bandwidthMeasured = bandwidth;
-    }
-
-    public void setAcceptedPorts(String portList) {
-        this.exitPorts = ExitPorts.createAcceptExitPorts(portList);
-    }
-
-    public void setRejectedPorts(String portList) {
-        this.exitPorts = ExitPorts.createRejectExitPorts(portList);
-    }
-
-    public void setV1Authority() {
-    }
-
     public void setHiddenServiceAuthority() {
         addFlag("HSDir");
     }
 
     public void unsetHiddenServiceAuthority() {
         flags.remove("HSDir");
-    }
-
-    public void setBridgeAuthority() {
     }
 
     public void unsetV2Authority() {
@@ -135,7 +115,7 @@ public class RouterStatus {
         return flags.contains(flag);
     }
 
-    public String getVersion() {
+    public String getAppVersion() {
         return version;
     }
 
@@ -147,21 +127,17 @@ public class RouterStatus {
         return bandwidthEstimate;
     }
 
-    public int getMeasuredBandwidth() {
-        return bandwidthMeasured;
-    }
-
-    public ExitPorts getExitPorts() {
-        return exitPorts;
-    }
-
     public HexDigest getV3Ident() {
         return v3Ident;
     }
 
+    public Set<String> getFlags() {
+        return flags;
+    }
+
     public String toString() {
         return "Router: (" + nickname + " " + identity + " " + microdescriptorDigest + " " + address + " " + routerPort + " " + directoryPort
-                + " " + version + " " + exitPorts + ")";
+                + " " + version + ")";
     }
 
 

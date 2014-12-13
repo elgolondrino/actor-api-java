@@ -34,6 +34,10 @@ public class NewDirectory {
         this.guards = new Guards(this);
     }
 
+    public TorConfig getConfig() {
+        return config;
+    }
+
     public int getId() {
         return id;
     }

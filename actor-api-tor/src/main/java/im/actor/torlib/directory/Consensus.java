@@ -1,8 +1,12 @@
 package im.actor.torlib.directory;
 
+import com.droidkit.bser.BserObject;
+import com.droidkit.bser.BserValues;
+import com.droidkit.bser.BserWriter;
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.documents.RouterStatus;
+import im.actor.torlib.documents.RouterStatusDocument;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +14,34 @@ import java.util.List;
 /**
  * Created by ex3ndr on 13.12.14.
  */
-public class Consensus {
+public class Consensus extends BserObject {
     public static Consensus fromConsensusDocument(ConsensusDocument document) {
         Consensus consensus1 = new Consensus();
         consensus1.setValidUntil((int) (document.getValidUntilTime().getTime() / 1000));
         consensus1.setValidAfter((int) (document.getValidAfterTime().getTime() / 1000));
         consensus1.setFreshUntil((int) (document.getFreshUntilTime().getTime() / 1000));
-        consensus1.getRouters().addAll(document.getRouterStatusEntries());
+
+        for (RouterStatusDocument d : document.getRouterStatusEntries()) {
+            RouterStatus status = new RouterStatus();
+            status.setNickname(d.getNickname());
+            status.setIdentity(d.getIdentity());
+            status.setAddress(d.getAddress());
+            status.setRouterPort(d.getRouterPort());
+            status.setDirectoryPort(d.getDirectoryPort());
+            status.setMicrodescriptorDigest(d.getMicrodescriptorDigest());
+            status.setBandwidthEstimate(d.getEstimatedBandwidth());
+            status.setHasBandwidth(d.hasBandwidth());
+            status.setPublicationTime((int) (d.getPublicationTime().getTime() / 1000));
+            status.setVersion(d.getAppVersion());
+            for (String f : d.getFlags()) {
+                StatusFlag flag = StatusFlag.parse(f);
+                if (flag != null) {
+                    status.setFlag(flag);
+                }
+            }
+            status.setV3Ident(d.getV3Ident());
+            consensus1.getRouters().add(status);
+        }
         for (String key : document.getBandwidthWeights().keySet()) {
             consensus1.addBandwidthWeight(key, document.getBandwidthWeights().get(key));
         }
@@ -27,6 +52,10 @@ public class Consensus {
     private int freshUntil;
     private int validUntil;
 
+    private List<RouterStatus> routers = new ArrayList<RouterStatus>();
+
+    private HashMap<String, Integer> weights = new HashMap<String, Integer>();
+
     private Consensus() {
 
     }
@@ -34,10 +63,6 @@ public class Consensus {
     public boolean isLive() {
         return validUntil * 1000L >= System.currentTimeMillis();
     }
-
-    private List<RouterStatus> routers = new ArrayList<RouterStatus>();
-
-    private HashMap<String, Integer> weights = new HashMap<String, Integer>();
 
     public List<RouterStatus> getRouters() {
         return routers;
@@ -77,5 +102,24 @@ public class Consensus {
 
     public void addBandwidthWeight(String name, int value) {
         weights.put(name, value);
+    }
+
+    @Override
+    public void serialize(BserWriter writer) throws IOException {
+        writer.writeInt(1, validAfter);
+        writer.writeInt(2, freshUntil);
+        writer.writeInt(3, validUntil);
+        writer.writeRepeatedObj(4, routers);
+    }
+
+    @Override
+    public void parse(BserValues values) throws IOException {
+        validAfter = values.getInt(1);
+        freshUntil = values.getInt(2);
+        validUntil = values.getInt(3);
+
+        routers = values.getRepeatedObj(4, RouterStatus.class);
+
+        weights.clear();
     }
 }

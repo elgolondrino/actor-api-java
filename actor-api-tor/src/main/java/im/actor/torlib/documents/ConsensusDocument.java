@@ -49,7 +49,7 @@ public class ConsensusDocument implements Document {
     private HexDigest signingHash;
     private HexDigest signingHash256;
     private Map<HexDigest, VoteAuthorityEntry> voteAuthorityEntries;
-    private List<RouterStatus> routerStatusEntries;
+    private List<RouterStatusDocument> routerStatusEntries;
     private Map<String, Integer> bandwidthWeights;
     private Map<String, Integer> parameters;
     private int signatureCount;
@@ -60,7 +60,7 @@ public class ConsensusDocument implements Document {
     public ConsensusDocument() {
         knownFlags = new HashSet<String>();
         voteAuthorityEntries = new HashMap<HexDigest, VoteAuthorityEntry>();
-        routerStatusEntries = new ArrayList<RouterStatus>();
+        routerStatusEntries = new ArrayList<RouterStatusDocument>();
         bandwidthWeights = new HashMap<String, Integer>();
         parameters = new HashMap<String, Integer>();
     }
@@ -136,7 +136,7 @@ public class ConsensusDocument implements Document {
         voteAuthorityEntries.put(entry.getIdentity(), entry);
     }
 
-    public void addRouterStatusEntry(RouterStatus entry) {
+    public void addRouterStatusEntry(RouterStatusDocument entry) {
         routerStatusEntries.add(entry);
     }
 
@@ -160,7 +160,7 @@ public class ConsensusDocument implements Document {
         }
     }
 
-    public List<RouterStatus> getRouterStatusEntries() {
+    public List<RouterStatusDocument> getRouterStatusEntries() {
         return Collections.unmodifiableList(routerStatusEntries);
     }
 
