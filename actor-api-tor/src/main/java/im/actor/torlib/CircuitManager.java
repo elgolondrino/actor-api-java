@@ -59,9 +59,7 @@ public class CircuitManager implements DashboardRenderable {
         this.config = config;
         this.connectionCache = connectionCache;
         this.pathChooser = CircuitPathChooser.create(config, directory);
-//        if (config.getUseEntryGuards() || config.getUseBridges()) {
-//            this.pathChooser.enableEntryGuards(new EntryGuards(config, connectionCache, directoryDownloader, directory));
-//        }
+
         this.pendingExitStreams = new PendingExitStreams(config);
         this.circuitCreationTask = new CircuitCreationTask(config, directory, connectionCache, pathChooser, this, initializationTracker);
         this.activeCircuits = new HashSet<CircuitImpl>();
@@ -70,8 +68,6 @@ public class CircuitManager implements DashboardRenderable {
 
         this.initializationTracker = initializationTracker;
         this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
-
-        // directoryDownloader.setCircuitManager(this);
     }
 
     public void startBuildingCircuits() {

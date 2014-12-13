@@ -25,30 +25,12 @@ public class CircuitPathChooser {
     private final NewDirectory directory;
     private final CircuitNodeChooser nodeChooser;
 
-    private EntryGuards entryGuards;
-    private boolean useEntryGuards;
-
     public CircuitPathChooser(NewDirectory directory, CircuitNodeChooser nodeChooser) {
         this.directory = directory;
         this.nodeChooser = nodeChooser;
-        this.entryGuards = null;
-        this.useEntryGuards = false;
-    }
-
-    public void enableEntryGuards(EntryGuards entryGuards) {
-        this.entryGuards = entryGuards;
-        this.useEntryGuards = true;
     }
 
     public List<Router> chooseDirectoryPath() throws InterruptedException {
-        if (useEntryGuards && entryGuards.isUsingBridges()) {
-            final Set<Router> empty = Collections.emptySet();
-            final Router bridge = entryGuards.chooseRandomGuard(empty);
-            if (bridge == null) {
-                throw new IllegalStateException("Failed to choose bridge for directory request");
-            }
-            return Arrays.asList(bridge);
-        }
         final Router dir = nodeChooser.chooseDirectory();
         return Arrays.asList(dir);
     }
@@ -81,10 +63,6 @@ public class CircuitPathChooser {
     }
 
     public Router chooseEntryNode(final Set<Router> excludedRouters) throws InterruptedException {
-        if (useEntryGuards) {
-            return entryGuards.chooseRandomGuard(excludedRouters);
-        }
-
         return nodeChooser.chooseRandomNode(CircuitNodeChooser.WeightRule.WEIGHT_FOR_GUARD, new RouterFilter() {
             public boolean filter(Router router) {
                 return router.isPossibleGuard() && !excludedRouters.contains(router);
@@ -101,31 +79,21 @@ public class CircuitPathChooser {
     }
 
     public Router chooseExitNodeForTargets(List<ExitTarget> targets) {
-        final List<Router> routers = filterForExitTargets(
-                getUsableExitRouters(), targets);
+        final List<Router> routers = filterForExitTargets(directory.getUsableExitRouters(), targets);
         return nodeChooser.chooseExitNode(routers);
     }
 
-    private List<Router> getUsableExitRouters() {
-        final List<Router> result = new ArrayList<Router>();
-        for (Router r : nodeChooser.getUsableRouters(true)) {
-            if (r.isExit() && !r.isBadExit()) {
-                result.add(r);
-            }
-        }
-        return result;
-    }
 
     private void excludeChosenRouterAndRelated(Router router, Set<Router> excludedRouters) {
         excludedRouters.add(router);
-        for (Router r : directory.getObsoleteDirectory().getAllRouters()) {
+        for (Router r : directory.getAllRouters()) {
             if (areInSameSlash16(router, r)) {
                 excludedRouters.add(r);
             }
         }
 
         for (String s : router.getFamilyMembers()) {
-            Router r = directory.getObsoleteDirectory().getRouterByName(s);
+            Router r = directory.getRouterByName(s);
             if (r != null) {
                 // Is mutual?
                 if (isFamilyMember(r.getFamilyMembers(), router)) {
@@ -137,7 +105,7 @@ public class CircuitPathChooser {
 
     private boolean isFamilyMember(Collection<String> familyMemberNames, Router r) {
         for (String s : familyMemberNames) {
-            Router member = directory.getObsoleteDirectory().getRouterByName(s);
+            Router member = directory.getRouterByName(s);
             if (member != null && member.equals(r)) {
                 return true;
             }

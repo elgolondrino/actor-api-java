@@ -15,6 +15,7 @@ import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.NewDirectory;
+import im.actor.torlib.directory.storage.StateFile;
 import im.actor.torlib.sockets.OrchidSocketFactory;
 import im.actor.torlib.socks.SocksPortListener;
 import im.actor.torlib.state.TorInitializationListener;
@@ -48,6 +49,7 @@ public class TorClient {
         config = Tor.createConfig();
         directory = new Directory(config);
         newDirectory = new NewDirectory(directory, config);
+        directory.applyStateFile(new StateFile(directory.getStore(), newDirectory));
 
         initializationTracker = new TorInitializationTracker();
         initializationTracker.addListener(createReadyFlagInitializationListener());
@@ -81,7 +83,7 @@ public class TorClient {
             throw new IllegalStateException("Cannot restart a TorClient instance.  Create a new instance instead.");
         }
         logger.info("Starting Orchid (version: " + Tor.getFullVersion() + ")");
-        directoryDownloader.start(directory);
+        directoryDownloader.start(newDirectory);
         circuitManager.startBuildingCircuits();
         if (dashboard.isEnabledByProperty()) {
             dashboard.startListening();

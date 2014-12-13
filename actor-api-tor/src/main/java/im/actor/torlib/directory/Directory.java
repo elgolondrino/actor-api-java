@@ -28,15 +28,12 @@ import im.actor.torlib.documents.KeyCertificateDocument;
 public class Directory {
     private final static Logger LOG = Logger.getLogger(Directory.class.getName());
     private final static DocumentParserFactory PARSER_FACTORY = new DocumentParserFactoryImpl();
-    private final static AtomicInteger NEXT_ID = new AtomicInteger(1);
 
     private final Object loadLock = new Object();
     private boolean isLoaded = false;
 
-    private final int id;
-
     private final DirectoryStorage store;
-    private final StateFile stateFile;
+    private StateFile stateFile;
 
     private final Set<RequiredCertificate> requiredCertificates = new CopyOnWriteArraySet<RequiredCertificate>();
 
@@ -50,15 +47,22 @@ public class Directory {
     private Routers routers;
 
     public Directory(TorConfig config) {
-        this.id = NEXT_ID.getAndIncrement();
         this.store = new DirectoryStorage(config);
-        this.stateFile = new StateFile(store, this);
+        // this.stateFile = new StateFile(store, this);
         this.descriptors = new RouterDescriptors(store);
         this.routers = new Routers(descriptors);
     }
 
-    public int getId() {
-        return id;
+    public DirectoryStorage getStore() {
+        return store;
+    }
+
+    public void applyStateFile(StateFile stateFile) {
+        this.stateFile = stateFile;
+    }
+
+    public Routers getRouters() {
+        return routers;
     }
 
     public synchronized boolean haveMinimumRouterInfo() {
@@ -121,7 +125,7 @@ public class Directory {
         final long now = System.currentTimeMillis();
         final long elapsed = now - last;
         last = now;
-        LOG.fine("Loaded in " + elapsed + " ms.");
+        LOG.info("Loaded in " + elapsed + " ms.");
     }
 
     private void loadCertificates(ByteBuffer buffer) {
@@ -280,26 +284,6 @@ public class Directory {
         synchronized (TrustedAuthorities.getInstance()) {
             return consensusWaitingForCertificates != null;
         }
-    }
-
-    public Router getRouterByName(String name) {
-        waitUntilLoaded();
-        return routers.getRouterByName(name);
-    }
-
-    public List<Router> getAllRouters() {
-        waitUntilLoaded();
-        return routers.getAllRouters();
-    }
-
-    public synchronized List<Router> getRoutersWithDownloadableDescriptors() {
-        waitUntilLoaded();
-        return routers.getRoutersWithDownloadableDescriptors();
-    }
-
-    public Router getRouterByIdentity(HexDigest identity) {
-        waitUntilLoaded();
-        return routers.getRouterByIdentity(identity);
     }
 
     public GuardEntry createGuardEntryFor(Router router) {

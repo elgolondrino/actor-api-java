@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.Tor;
 import im.actor.torlib.data.HexDigest;
@@ -30,6 +31,8 @@ public class TrustedAuthorities {
             "authority Faravahar orport=443 no-v2 v3ident=EFCBE720AB3A82B99F9E953CD5BF50F7EEFC7B97 154.35.32.5:80 CF6D 0AAF B385 BE71 B8E1 11FC 5CFF 4B47 9237 33BC",
             "authority gabelmoo orport=443 no-v2 v3ident=ED03BB616EB2F60BEC80151114BB25CEF515B226 212.112.245.170:80 F204 4413 DAC2 E02E 3D6B CF47 35A1 9BCA 1DE9 7281",
     };
+
+    private static final TorRandom RANDOM = new TorRandom();
 
     private final List<DirectoryServer> directoryServers = new ArrayList<DirectoryServer>();
     private final int v3ServerCount;
@@ -132,6 +135,11 @@ public class TrustedAuthorities {
 
     public List<DirectoryServer> getAuthorityServers() {
         return directoryServers;
+    }
+
+    public DirectoryServer pickAuthority() {
+        final int idx = RANDOM.nextInt(directoryServers.size());
+        return directoryServers.get(idx);
     }
 
     public DirectoryServer getAuthorityServerByIdentity(HexDigest identity) {

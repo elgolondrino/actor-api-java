@@ -77,7 +77,7 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
     }
 
     private Circuit attemptOpenIntroductionCircuit(IntroductionPoint ip) {
-        final Router r = directory.getObsoleteDirectory().getRouterByIdentity(ip.getIdentity());
+        final Router r = directory.getRouterByIdentity(ip.getIdentity());
         if (r == null) {
             return null;
         }

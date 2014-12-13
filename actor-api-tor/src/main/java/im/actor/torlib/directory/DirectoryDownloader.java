@@ -30,7 +30,7 @@ public class DirectoryDownloader {
         this.circuitManager = circuitManager;
     }
 
-    public synchronized void start(Directory directory) {
+    public synchronized void start(NewDirectory directory) {
         if (isStarted) {
             logger.warning("Directory downloader already running");
             return;

@@ -7,7 +7,6 @@ import java.util.List;
 
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.Router;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.data.HexDigest;
@@ -84,11 +83,7 @@ public class HSDirectories {
         }
         currentConsensus = consensus;
         hsDirectories.clear();
-        for (Router r : directory.getObsoleteDirectory().getAllRouters()) {
-            if (r.isHSDirectory()) {
-                hsDirectories.add(r);
-            }
-        }
+        hsDirectories.addAll(directory.getHsDirectoryRouters());
 
         Collections.sort(hsDirectories, new Comparator<Router>() {
             public int compare(Router r1, Router r2) {

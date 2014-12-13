@@ -14,6 +14,7 @@ import im.actor.torlib.Router;
 import im.actor.torlib.Tor;
 import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.GuardEntryImpl;
+import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.torlib.crypto.TorRandom;
 
@@ -95,9 +96,9 @@ public class StateFile {
 	}
 
 	private final DirectoryStorage directoryStore;
-	private final Directory directory;
+	private final NewDirectory directory;
 	
-	public StateFile(DirectoryStorage store, Directory directory) {
+	public StateFile(DirectoryStorage store, NewDirectory directory) {
 		this.directoryStore = store;
 		this.directory = directory;
 	}

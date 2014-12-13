@@ -10,7 +10,7 @@ import im.actor.torlib.directory.storage.StateFile;
 public class GuardEntryImpl implements GuardEntry {
 	private final static String NL = System.getProperty("line.separator");
 	
-	private final Directory directory;
+	private final NewDirectory directory;
 	private final StateFile stateFile;
 	private final String nickname;
 	private final String identity;
@@ -23,7 +23,7 @@ public class GuardEntryImpl implements GuardEntry {
 	private Date downSince;
 	private Date lastConnect;
 	
-	public GuardEntryImpl(Directory directory, StateFile stateFile, String nickname, String identity) {
+	public GuardEntryImpl(NewDirectory directory, StateFile stateFile, String nickname, String identity) {
 		this.directory = directory;
 		this.stateFile = stateFile;
 		this.nickname = nickname;

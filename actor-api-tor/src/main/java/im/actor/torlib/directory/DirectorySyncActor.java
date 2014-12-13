@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements DirectorySyncInt {
 
-    public static DirectorySyncInt get(final Directory directory, final DirectoryDownloader directoryDownloader) {
+    public static DirectorySyncInt get(final NewDirectory directory, final DirectoryDownloader directoryDownloader) {
         return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(DirectorySyncActor.class, new ActorCreator<DirectorySyncActor>() {
             @Override
             public DirectorySyncActor create() {
@@ -39,7 +39,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
     private final TorRandom random = new TorRandom();
 
-    private Directory directory;
+    private NewDirectory directory;
 
     private ConsensusDocument currentConsensus;
     private Date consensusDownloadTime;
@@ -53,7 +53,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
     private final DirectoryDownloader downloader;
 
-    public DirectorySyncActor(Directory directory, DirectoryDownloader directoryDownloader) {
+    public DirectorySyncActor(NewDirectory directory, DirectoryDownloader directoryDownloader) {
         super(DirectorySyncInt.class);
         this.directory = directory;
         this.downloader = directoryDownloader;
@@ -62,8 +62,8 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
     @Override
     public void startDirectorySync() {
-        directory.loadFromStore();
-        setCurrentConsensus(directory.getCurrentConsensusDocument());
+        directory.getObsoleteDirectory().loadFromStore();
+        setCurrentConsensus(directory.getObsoleteDirectory().getCurrentConsensusDocument());
 
         while (true) {
             checkCertificates();
@@ -85,7 +85,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
     private void checkCertificates() {
         if (isDownloadingCertificates
-                || directory.getRequiredCertificates().isEmpty()) {
+                || directory.getObsoleteDirectory().getRequiredCertificates().isEmpty()) {
             return;
         }
 
@@ -117,7 +117,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
     }
 
     private boolean needConsensusDownload() {
-        if (directory.hasPendingConsensus()) {
+        if (directory.getObsoleteDirectory().hasPendingConsensus()) {
             return false;
         }
         if (currentConsensus == null || !currentConsensus.isLive()) {
@@ -180,7 +180,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
             try {
                 final ConsensusDocument consensus = downloader.downloadCurrentConsensus();
                 setCurrentConsensus(consensus);
-                directory.addConsensusDocument(consensus, false);
+                directory.getObsoleteDirectory().addConsensusDocument(consensus, false);
 
             } catch (DirectoryRequestFailedException e) {
                 logger.warning("Failed to download current consensus document: " + e.getMessage());
@@ -199,7 +199,7 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
 
         public void run() {
             try {
-                directory.addRouterDescriptors(downloader.downloadRouterDescriptors(fingerprints));
+                directory.getObsoleteDirectory().addRouterDescriptors(downloader.downloadRouterDescriptors(fingerprints));
             } catch (DirectoryRequestFailedException e) {
                 logger.warning("Failed to download router descriptors: " + e.getMessage());
             } finally {
@@ -211,10 +211,10 @@ public class DirectorySyncActor extends TypedActor<DirectorySyncInt> implements 
     private class DownloadCertificatesTask implements Runnable {
         public void run() {
             try {
-                for (KeyCertificateDocument c : downloader.downloadKeyCertificates(directory.getRequiredCertificates())) {
-                    directory.addCertificate(c);
+                for (KeyCertificateDocument c : downloader.downloadKeyCertificates(directory.getObsoleteDirectory().getRequiredCertificates())) {
+                    directory.getObsoleteDirectory().addCertificate(c);
                 }
-                directory.storeCertificates();
+                directory.getObsoleteDirectory().storeCertificates();
             } catch (DirectoryRequestFailedException e) {
                 logger.warning("Failed to download key certificates: " + e.getMessage());
             } finally {
