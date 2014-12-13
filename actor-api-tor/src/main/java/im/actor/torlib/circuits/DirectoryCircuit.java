@@ -1,6 +1,5 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits;
 
-import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 import java.util.concurrent.TimeoutException;

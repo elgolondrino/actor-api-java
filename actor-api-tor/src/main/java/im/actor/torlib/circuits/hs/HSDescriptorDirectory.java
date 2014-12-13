@@ -1,8 +1,6 @@
 package im.actor.torlib.circuits.hs;
 
-import im.actor.torlib.Router;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.data.HexDigest;
 
 public class HSDescriptorDirectory {

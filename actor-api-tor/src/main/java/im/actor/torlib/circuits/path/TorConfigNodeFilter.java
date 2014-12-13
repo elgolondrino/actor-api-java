@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import im.actor.torlib.Router;
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 
 public class TorConfigNodeFilter {

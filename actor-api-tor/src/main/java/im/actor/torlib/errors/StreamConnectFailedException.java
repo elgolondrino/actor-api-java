@@ -1,7 +1,7 @@
 package im.actor.torlib.errors;
 
 
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCell;
 
 public class StreamConnectFailedException extends Exception {
 

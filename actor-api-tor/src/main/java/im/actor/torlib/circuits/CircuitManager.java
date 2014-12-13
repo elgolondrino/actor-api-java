@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import im.actor.torlib.circuits.*;
+import im.actor.torlib.connections.ConnectionCache;
+import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.Connection;
@@ -18,6 +20,7 @@ import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.NewDirectory;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 

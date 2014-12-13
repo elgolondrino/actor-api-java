@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import im.actor.torlib.CircuitManager;
+import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
 

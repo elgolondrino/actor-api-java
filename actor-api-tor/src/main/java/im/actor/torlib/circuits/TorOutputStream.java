@@ -3,7 +3,7 @@ package im.actor.torlib.circuits;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 
 public class TorOutputStream extends OutputStream {

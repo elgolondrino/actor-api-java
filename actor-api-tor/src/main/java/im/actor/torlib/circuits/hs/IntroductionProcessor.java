@@ -3,16 +3,11 @@ package im.actor.torlib.circuits.hs;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.Circuit;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Router;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.crypto.HybridEncryption;
-import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.Cell;
-import im.actor.torlib.Circuit;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Router;
 import im.actor.torlib.crypto.TorPublicKey;
 
 public class IntroductionProcessor {

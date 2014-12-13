@@ -3,7 +3,6 @@ package im.actor.torlib.circuits;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import im.actor.torlib.ExitCircuit;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class OpenExitStreamTask implements Runnable {

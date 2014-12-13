@@ -9,10 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
-import im.actor.torlib.Tor;
-import im.actor.torlib.directory.routers.GuardEntryImpl;
+import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.utils.Tor;
+import im.actor.torlib.directory.routers.GuardEntry;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.torlib.crypto.TorRandom;
@@ -27,7 +26,7 @@ public class StateFile {
 	public final static String KEYWORD_ENTRY_GUARD_DOWN_SINCE = "EntryGuardDownSince";
 	public final static String KEYWORD_ENTRY_GUARD_UNLISTED_SINCE = "EntryGuardUnlistedSince";
 	
-	private final List<GuardEntryImpl> guardEntries = new ArrayList<GuardEntryImpl>();
+	private final List<GuardEntry> guardEntries = new ArrayList<GuardEntry>();
 	private final TorRandom random = new TorRandom();
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -103,7 +102,7 @@ public class StateFile {
 	}
 
 	public GuardEntry createGuardEntryFor(Router router) {
-		final GuardEntryImpl entry = new GuardEntryImpl(directory, this, router.getNickname(), router.getIdentityHash().toString());
+		final GuardEntry entry = new GuardEntry(directory, this, router.getNickname(), router.getIdentityHash().toString());
 		final String version = Tor.getImplementation() + "-" + Tor.getVersion();
 		entry.setVersion(version);
 		
@@ -139,7 +138,7 @@ public class StateFile {
 			if(guardEntries.contains(entry)) {
 				return;
 			}
-			final GuardEntryImpl impl = (GuardEntryImpl) entry;
+			final GuardEntry impl = (GuardEntry) entry;
 			guardEntries.add(impl);
 			synchronized (impl) {
 				impl.setAddedFlag();
@@ -157,7 +156,7 @@ public class StateFile {
 	public ByteBuffer getFileContents() {
 		final StringBuilder sb = new StringBuilder();
 		synchronized (guardEntries) {
-			for(GuardEntryImpl entry: guardEntries) {
+			for(GuardEntry entry: guardEntries) {
 				sb.append(entry.writeToString());
 			}
 		}
@@ -172,7 +171,7 @@ public class StateFile {
 	}
 
 	private void loadGuardEntries(ByteBuffer buffer) {
-		GuardEntryImpl currentEntry = null;
+		GuardEntry currentEntry = null;
 		while(true) {
 			Line line = readLine(buffer);
 			if(line == null) {
@@ -183,13 +182,13 @@ public class StateFile {
 		}
 	}
 
-	private GuardEntryImpl processLine(Line line, GuardEntryImpl current) {
+	private GuardEntry processLine(Line line, GuardEntry current) {
 		final String keyword = line.nextToken();
 		if(keyword == null) {
 			return current;
 		} else if(keyword.equals(KEYWORD_ENTRY_GUARD)) {
 			addEntryIfValid(current);
-			GuardEntryImpl newEntry = processEntryGuardLine(line);
+			GuardEntry newEntry = processEntryGuardLine(line);
 			if(newEntry == null) {
 				return current;
 			} else {
@@ -209,17 +208,17 @@ public class StateFile {
 		}
 	}
 	
-	private GuardEntryImpl processEntryGuardLine(Line line) {
+	private GuardEntry processEntryGuardLine(Line line) {
 		final String name = line.nextToken();
 		final String identity = line.nextToken();
 		if(name == null || name.isEmpty() || identity == null || identity.isEmpty()) {
 			logger.warning("Failed to parse EntryGuard line: "+ line.line);
 			return null;
 		}
-		return new GuardEntryImpl(directory, this, name, identity);
+		return new GuardEntry(directory, this, name, identity);
 	}
 	
-	private void processEntryGuardAddedBy(Line line, GuardEntryImpl current) {
+	private void processEntryGuardAddedBy(Line line, GuardEntry current) {
 		if(current == null) {
 			logger.warning("EntryGuardAddedBy line seen before EntryGuard in state file");
 			return;
@@ -235,7 +234,7 @@ public class StateFile {
 		current.setCreatedTime(created);
 	}
 	
-	private void processEntryGuardDownSince(Line line, GuardEntryImpl current) {
+	private void processEntryGuardDownSince(Line line, GuardEntry current) {
 		if(current == null) {
 			logger.warning("EntryGuardDownSince line seen before EntryGuard in state file");
 			return;
@@ -250,7 +249,7 @@ public class StateFile {
 		current.setDownSince(downSince, lastTried);
 	}
 	
-	private void processEntryGuardUnlistedSince(Line line, GuardEntryImpl current) {
+	private void processEntryGuardUnlistedSince(Line line, GuardEntry current) {
 		if(current == null) {
 			logger.warning("EntryGuardUnlistedSince line seen before EntryGuard in state file");
 			return;
@@ -263,13 +262,13 @@ public class StateFile {
 		current.setUnlistedSince(unlistedSince);
 	}
 
-	private void addEntryIfValid(GuardEntryImpl entry) {
+	private void addEntryIfValid(GuardEntry entry) {
 		if(isValidEntry(entry)) {
 			addGuardEntry(entry, false);
 		}
 	}
 
-	private boolean isValidEntry(GuardEntryImpl entry) {
+	private boolean isValidEntry(GuardEntry entry) {
 		return entry != null &&
 				entry.getNickname() != null && 
 				entry.getIdentity() != null && 

@@ -11,11 +11,11 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocket;
 
-import im.actor.torlib.BridgeRouter;
-import im.actor.torlib.Cell;
+import im.actor.torlib.directory.routers.BridgeRouter;
+import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.crypto.TorPublicKey;

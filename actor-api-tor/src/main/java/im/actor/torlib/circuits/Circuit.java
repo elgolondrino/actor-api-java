@@ -1,6 +1,7 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits;
 
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.connections.Connection;
 
 import java.util.List;

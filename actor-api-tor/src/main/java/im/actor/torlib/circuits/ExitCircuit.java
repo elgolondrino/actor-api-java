@@ -1,8 +1,7 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits;
 
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
 import im.actor.torlib.errors.StreamConnectFailedException;

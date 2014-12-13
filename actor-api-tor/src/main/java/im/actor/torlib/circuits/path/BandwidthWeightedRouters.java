@@ -3,8 +3,7 @@ package im.actor.torlib.circuits.path;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.torlib.Router;
-import im.actor.torlib.crypto.TorRandom;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.crypto.TorRandom;
 
 public class BandwidthWeightedRouters {

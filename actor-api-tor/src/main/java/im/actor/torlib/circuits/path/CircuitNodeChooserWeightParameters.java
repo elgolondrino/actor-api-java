@@ -1,7 +1,7 @@
 package im.actor.torlib.circuits.path;
 
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 
 class CircuitNodeChooserWeightParameters {
 	private final static int VAR_WG = 0;

@@ -3,9 +3,13 @@ package im.actor.torlib.circuits.hs;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import im.actor.torlib.*;
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.CircuitManager;
+import im.actor.torlib.circuits.HiddenServiceCircuit;
+import im.actor.torlib.circuits.InternalCircuit;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
 import im.actor.torlib.directory.NewDirectory;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
 public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> {

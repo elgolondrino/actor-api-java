@@ -1,15 +1,18 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits;
 
 
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.directory.routers.Router;
 
 /**
  * Represents the state of a single onion router hop in a connected or connecting {@link Circuit}
  */
 public interface CircuitNode {
 	/**
-	 * Return the {@link Router} associated with this node.
+	 * Return the {@link im.actor.torlib.directory.routers.Router} associated with this node.
 	 *
-	 * @return The {@link Router} for this hop of the circuit chain.
+	 * @return The {@link im.actor.torlib.directory.routers.Router} for this hop of the circuit chain.
 	 */
 	Router getRouter();
 
@@ -17,7 +20,7 @@ public interface CircuitNode {
 	 * Update the 'forward' cryptographic digest state for this
 	 * node with the contents of <code>cell</code>
 	 * 
-	 * @param cell The {@link RelayCell} to add to the digest.
+	 * @param cell The {@link im.actor.torlib.circuits.cells.RelayCell} to add to the digest.
 	 */
 	void updateForwardDigest(RelayCell cell);
 

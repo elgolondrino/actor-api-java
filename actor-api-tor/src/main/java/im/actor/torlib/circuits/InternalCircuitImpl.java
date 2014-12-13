@@ -3,16 +3,10 @@ package im.actor.torlib.circuits;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.Circuit;
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.DirectoryCircuit;
-import im.actor.torlib.HiddenServiceCircuit;
-import im.actor.torlib.InternalCircuit;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
-import im.actor.torlib.*;
 
 public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit, DirectoryCircuit, HiddenServiceCircuit {
 

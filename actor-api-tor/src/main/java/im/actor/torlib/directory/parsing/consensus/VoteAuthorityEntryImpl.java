@@ -3,7 +3,6 @@ package im.actor.torlib.directory.parsing.consensus;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.torlib.VoteAuthorityEntry;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 

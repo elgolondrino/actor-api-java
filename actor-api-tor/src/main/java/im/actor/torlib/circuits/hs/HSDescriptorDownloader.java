@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import im.actor.torlib.DirectoryCircuit;
-import im.actor.torlib.InternalCircuit;
-import im.actor.torlib.OpenFailedException;
-import im.actor.torlib.Router;
+import im.actor.torlib.circuits.CircuitManager;
+import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.circuits.InternalCircuit;
+import im.actor.torlib.errors.OpenFailedException;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
@@ -17,7 +18,6 @@ import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 import im.actor.torlib.documents.downloader.TorHttpConnection;
 import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
-import im.actor.torlib.*;
 
 public class HSDescriptorDownloader {
 	private final static Logger logger = Logger.getLogger(HSDescriptorDirectory.class.getName());

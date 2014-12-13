@@ -1,16 +1,15 @@
-package im.actor.torlib.circuits.guards;
+package im.actor.torlib.directory.routers;
 
 import java.util.Collections;
 import java.util.Set;
 
-import im.actor.torlib.BridgeRouter;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.geoip.CountryCodeService;
 
-public class BridgeRouterImpl implements BridgeRouter {
+public class BridgeRouter implements Router {
 	private final IPv4Address address;
 	private final int port;
 	
@@ -18,8 +17,8 @@ public class BridgeRouterImpl implements BridgeRouter {
 	private DescriptorDocument descriptorDocument;
 	
 	private volatile String cachedCountryCode;
-	
-	BridgeRouterImpl(IPv4Address address, int port) {
+
+	public BridgeRouter(IPv4Address address, int port) {
 		this.address = address;
 		this.port = port;
 	}
@@ -60,7 +59,7 @@ public class BridgeRouterImpl implements BridgeRouter {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		BridgeRouterImpl other = (BridgeRouterImpl) obj;
+		BridgeRouter other = (BridgeRouter) obj;
 		if (address == null) {
 			if (other.address != null) {
 				return false;

@@ -1,7 +1,5 @@
 package im.actor.torlib.directory.routers;
 
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.directory.storage.StateFile;

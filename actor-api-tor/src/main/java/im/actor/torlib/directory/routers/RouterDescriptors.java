@@ -7,6 +7,7 @@ import im.actor.torlib.directory.parsing.DocumentParserFactory;
 import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.documents.RouterStatus;
 
 import java.nio.ByteBuffer;
 import java.util.List;

@@ -1,6 +1,6 @@
 package im.actor.torlib.documents;
 
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;

@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 import im.actor.torlib.*;
 import im.actor.torlib.config.TorConfigBridgeLine;
 import im.actor.torlib.crypto.TorRandom;
+import im.actor.torlib.directory.routers.BridgeRouter;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
@@ -20,9 +22,9 @@ public class Bridges {
 	
 	private class DescriptorDownloader implements Runnable {
 
-		private final BridgeRouterImpl target;
+		private final BridgeRouter target;
 		
-		DescriptorDownloader(BridgeRouterImpl target) {
+		DescriptorDownloader(BridgeRouter target) {
 			this.target = target;
 		}
 	
@@ -65,7 +67,7 @@ public class Bridges {
 	private final TorConfig config;
 	private final DirectoryDownloader directoryDownloader;
 	
-	private final Set<BridgeRouterImpl> bridgeRouters;
+	private final Set<BridgeRouter> bridgeRouters;
 	private final TorRandom random;
 	private final Object lock;
 	
@@ -79,7 +81,7 @@ public class Bridges {
 	Bridges(TorConfig config, DirectoryDownloader directoryDownloader) {
 		this.config = config;
 		this.directoryDownloader = directoryDownloader;
-		this.bridgeRouters = new HashSet<BridgeRouterImpl>();
+		this.bridgeRouters = new HashSet<BridgeRouter>();
 		this.random = new TorRandom();
 		this.lock = new Object();
 		this.outstandingDownloadTasks = new AtomicInteger();
@@ -151,8 +153,8 @@ public class Bridges {
 		}
 	}
 	
-	private BridgeRouterImpl createBridgeFromLine(TorConfigBridgeLine line) {
-		final BridgeRouterImpl bridge = new BridgeRouterImpl(line.getAddress(), line.getPort());
+	private BridgeRouter createBridgeFromLine(TorConfigBridgeLine line) {
+		final BridgeRouter bridge = new BridgeRouter(line.getAddress(), line.getPort());
 		if(line.getFingerprint() != null) {
 			bridge.setIdentity(line.getFingerprint());
 		}

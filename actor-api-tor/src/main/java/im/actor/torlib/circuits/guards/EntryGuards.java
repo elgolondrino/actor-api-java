@@ -9,11 +9,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import im.actor.torlib.ConnectionCache;
+import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.DirectoryDownloader;
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.directory.NewDirectory;
+import im.actor.torlib.directory.routers.GuardEntry;
 import im.actor.utils.Threading;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.path.CircuitNodeChooser;

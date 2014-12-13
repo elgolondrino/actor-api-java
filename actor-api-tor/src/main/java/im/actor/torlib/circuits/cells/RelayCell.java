@@ -1,4 +1,6 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits.cells;
+
+import im.actor.torlib.circuits.CircuitNode;
 
 import java.nio.ByteBuffer;
 

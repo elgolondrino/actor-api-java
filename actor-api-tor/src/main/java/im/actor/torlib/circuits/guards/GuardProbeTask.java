@@ -3,10 +3,10 @@ package im.actor.torlib.circuits.guards;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import im.actor.torlib.ConnectionCache;
+import im.actor.torlib.connections.ConnectionCache;
+import im.actor.torlib.directory.routers.GuardEntry;
 import im.actor.torlib.errors.ConnectionIOException;
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 
 public class GuardProbeTask implements Runnable{
 	private final static Logger logger = Logger.getLogger(GuardProbeTask.class.getName());

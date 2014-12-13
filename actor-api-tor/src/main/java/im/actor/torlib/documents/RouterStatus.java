@@ -1,4 +1,4 @@
-package im.actor.torlib.directory.routers;
+package im.actor.torlib.documents;
 
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.data.IPv4Address;

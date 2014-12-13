@@ -1,9 +1,8 @@
 package im.actor.torlib.circuits;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Router;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
 public class CircuitNodeImpl implements CircuitNode {

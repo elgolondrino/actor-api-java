@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.documents.RouterStatus;
 import im.actor.torlib.documents.KeyCertificateDocument;
 
 /**

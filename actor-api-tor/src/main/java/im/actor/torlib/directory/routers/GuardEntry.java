@@ -2,13 +2,11 @@ package im.actor.torlib.directory.routers;
 
 import java.util.Date;
 
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.StateFile;
 
-public class GuardEntryImpl implements GuardEntry {
+public class GuardEntry {
 	private final static String NL = System.getProperty("line.separator");
 	
 	private final NewDirectory directory;
@@ -24,7 +22,7 @@ public class GuardEntryImpl implements GuardEntry {
 	private Date downSince;
 	private Date lastConnect;
 	
-	public GuardEntryImpl(NewDirectory directory, StateFile stateFile, String nickname, String identity) {
+	public GuardEntry(NewDirectory directory, StateFile stateFile, String nickname, String identity) {
 		this.directory = directory;
 		this.stateFile = stateFile;
 		this.nickname = nickname;
@@ -259,7 +257,7 @@ public class GuardEntryImpl implements GuardEntry {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GuardEntryImpl other = (GuardEntryImpl) obj;
+		GuardEntry other = (GuardEntry) obj;
 		if (identity == null) {
 			if (other.identity != null)
 				return false;

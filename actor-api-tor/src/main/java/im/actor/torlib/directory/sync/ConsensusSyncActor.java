@@ -5,6 +5,8 @@ import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
+import im.actor.torlib.circuits.CircuitManager;
+import im.actor.torlib.circuits.DirectoryCircuit;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.NewDirectory;
@@ -16,6 +18,8 @@ import im.actor.torlib.directory.parsing.DocumentParsingResult;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
+import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
@@ -30,11 +34,11 @@ import java.util.logging.Logger;
  */
 public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements ConsensusSyncInt {
 
-    public static ConsensusSyncInt get(final NewDirectory directory, final DirectoryDownloader directoryDownloader) {
+    public static ConsensusSyncInt get(final NewDirectory directory, final CircuitManager circuitManager) {
         return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(ConsensusSyncActor.class, new ActorCreator<ConsensusSyncActor>() {
             @Override
             public ConsensusSyncActor create() {
-                return new ConsensusSyncActor(directory, directoryDownloader);
+                return new ConsensusSyncActor(directory, circuitManager);
             }
         }), "directories/" + directory.getId() + "/sync/consensus"), ConsensusSyncInt.class);
     }
@@ -61,13 +65,13 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     private volatile boolean isDownloadingCertificates;
     private volatile boolean isDownloadingConsensus;
 
-    private final DirectoryDownloader downloader;
+    private final CircuitManager circuitManager;
 
-    public ConsensusSyncActor(NewDirectory directory, DirectoryDownloader directoryDownloader) {
+    public ConsensusSyncActor(NewDirectory directory, CircuitManager circuitManager) {
         super(ConsensusSyncInt.class);
         this.directory = directory;
         this.storage = directory.getStore();
-        this.downloader = directoryDownloader;
+        this.circuitManager = circuitManager;
     }
 
 
@@ -271,10 +275,19 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         context().stopSelf();
     }
 
+    private DirectoryCircuit openCircuit() throws DirectoryRequestFailedException {
+        try {
+            return circuitManager.openDirectoryCircuit();
+        } catch (OpenFailedException e) {
+            throw new DirectoryRequestFailedException("Failed to open directory circuit", e);
+        }
+    }
+
     private class DownloadConsensusTask implements Runnable {
         public void run() {
             try {
-                ConsensusDocument consensus = downloader.downloadCurrentConsensus();
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), null);
+                ConsensusDocument consensus = requestor.downloadCurrentConsensus();
                 self().send(new ConsensusDownloaded(consensus));
             } catch (DirectoryRequestFailedException e) {
                 LOG.warning("Failed to download current consensus document: " + e.getMessage());
@@ -293,7 +306,8 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         public void run() {
             try {
-                List<KeyCertificateDocument> certificates = downloader.downloadKeyCertificates(requiredCertificates);
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), null);
+                List<KeyCertificateDocument> certificates = requestor.downloadKeyCertificates(requiredCertificates);
                 self().send(new CertificatesDownloaded(certificates));
             } catch (DirectoryRequestFailedException e) {
                 LOG.warning("Failed to download key certificates: " + e.getMessage());

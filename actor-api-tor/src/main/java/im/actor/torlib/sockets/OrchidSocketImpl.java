@@ -1,6 +1,6 @@
 package im.actor.torlib.sockets;
 
-import im.actor.torlib.OpenFailedException;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.utils.Threading;
 import im.actor.torlib.TorClient;

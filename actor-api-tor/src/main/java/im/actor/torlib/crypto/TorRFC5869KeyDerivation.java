@@ -7,8 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import im.actor.torlib.Tor;
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 
 public class TorRFC5869KeyDerivation {
 	private final static String PROTOID = "ntor-curve25519-sha256-1";

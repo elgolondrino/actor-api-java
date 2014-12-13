@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import im.actor.torlib.*;
+import im.actor.torlib.circuits.CircuitManager;
+import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.directory.sync.ConsensusSyncActor;
 import im.actor.torlib.directory.sync.ConsensusSyncInt;
 import im.actor.torlib.directory.sync.DescriptorsSyncActor;
 import im.actor.torlib.directory.sync.DescriptorsSyncInt;
-import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.documents.ConsensusDocument.RequiredCertificate;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 import im.actor.torlib.documents.DescriptorDocument;
-import im.actor.torlib.documents.KeyCertificateDocument;
 
 public class DirectoryDownloader {
     private final static Logger logger = Logger.getLogger(DirectoryDownloader.class.getName());
@@ -42,7 +42,7 @@ public class DirectoryDownloader {
             return;
         }
 
-        directorySync = ConsensusSyncActor.get(directory, this);
+        directorySync = ConsensusSyncActor.get(directory, circuitManager);
         directorySync.startSync();
 
         descriptorsSync = DescriptorsSyncActor.get(directory, this);
@@ -64,20 +64,6 @@ public class DirectoryDownloader {
     public DescriptorDocument downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
         final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openBridgeCircuit(bridge));
         return requestor.downloadBridgeDescriptor();
-    }
-
-    public ConsensusDocument downloadCurrentConsensus() throws DirectoryRequestFailedException {
-        final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), initializationTracker);
-        return requestor.downloadCurrentConsensus();
-    }
-
-    public List<KeyCertificateDocument> downloadKeyCertificates(List<RequiredCertificate> required) throws DirectoryRequestFailedException {
-        return downloadKeyCertificates(required, openCircuit());
-    }
-
-    public List<KeyCertificateDocument> downloadKeyCertificates(List<RequiredCertificate> required, DirectoryCircuit circuit) throws DirectoryRequestFailedException {
-        final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(circuit, initializationTracker);
-        return requestor.downloadKeyCertificates(required);
     }
 
     public List<DescriptorDocument> downloadRouterDescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {

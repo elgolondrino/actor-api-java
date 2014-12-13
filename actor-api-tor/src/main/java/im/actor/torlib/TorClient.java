@@ -1,24 +1,26 @@
 package im.actor.torlib;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.SocketFactory;
 
+import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.connections.ConnectionCacheImpl;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.directory.storage.StateFile;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.sockets.OrchidSocketFactory;
 import im.actor.torlib.socks.SocksPortListener;
 import im.actor.torlib.state.TorInitializationListener;
 import im.actor.torlib.state.TorInitializationTracker;
+import im.actor.torlib.utils.Tor;
 
 /**
  * This class is the main entry-point for running a Tor proxy

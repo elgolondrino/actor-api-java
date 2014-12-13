@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.utils.misc.GuardedBy;
 import im.actor.utils.misc.ThreadSafe;

@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.directory.parsing.consensus;
 
 import java.util.List;
 

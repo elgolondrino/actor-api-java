@@ -12,8 +12,10 @@ import java.util.logging.Logger;
 import im.actor.torlib.*;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
+import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 

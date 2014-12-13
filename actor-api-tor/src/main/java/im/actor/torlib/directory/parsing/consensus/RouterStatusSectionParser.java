@@ -1,7 +1,7 @@
 package im.actor.torlib.directory.parsing.consensus;
 
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.directory.routers.RouterStatus;
+import im.actor.torlib.documents.RouterStatus;
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.data.HexDigest;

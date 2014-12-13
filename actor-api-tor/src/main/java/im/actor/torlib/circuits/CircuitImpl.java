@@ -8,22 +8,16 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.Circuit;
-import im.actor.torlib.CircuitNode;
+import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.connections.Connection;
-import im.actor.torlib.DirectoryCircuit;
-import im.actor.torlib.ExitCircuit;
-import im.actor.torlib.InternalCircuit;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.Router;
+import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
-import im.actor.torlib.*;
 
 /**
  * This class represents an established circuit through the Tor network.

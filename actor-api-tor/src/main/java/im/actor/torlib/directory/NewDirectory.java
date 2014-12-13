@@ -1,12 +1,8 @@
 package im.actor.torlib.directory;
 
-import im.actor.torlib.GuardEntry;
-import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.directory.routers.DirectoryServer;
-import im.actor.torlib.directory.routers.Guards;
-import im.actor.torlib.directory.routers.Routers;
+import im.actor.torlib.directory.routers.*;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;

@@ -3,7 +3,7 @@ package im.actor.torlib.data;
 import java.util.Arrays;
 import java.util.List;
 
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.utils.Base64;

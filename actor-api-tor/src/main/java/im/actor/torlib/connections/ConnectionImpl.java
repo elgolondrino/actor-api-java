@@ -20,15 +20,15 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocket;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.Circuit;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.utils.Threading;
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.state.TorInitializationTracker;

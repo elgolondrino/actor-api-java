@@ -18,11 +18,10 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocket;
 
-import im.actor.torlib.ConnectionCache;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.dashboard.DashboardRenderable;

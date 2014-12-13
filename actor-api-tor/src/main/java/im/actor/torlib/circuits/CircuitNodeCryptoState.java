@@ -1,12 +1,7 @@
 package im.actor.torlib.circuits;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.RelayCell;
-import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.crypto.TorStreamCipher;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.Cell;
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorStreamCipher;
 import im.actor.torlib.data.HexDigest;

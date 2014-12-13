@@ -1,8 +1,6 @@
 package im.actor.torlib.circuits;
 
-import im.actor.torlib.Circuit;
-import im.actor.torlib.CircuitNode;
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;

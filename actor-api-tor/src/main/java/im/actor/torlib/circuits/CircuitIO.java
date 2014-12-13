@@ -13,11 +13,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.CircuitNode;
+import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.errors.ConnectionIOException;
-import im.actor.torlib.RelayCell;
+import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.utils.Threading;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.cells.CellImpl;

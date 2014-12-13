@@ -1,9 +1,10 @@
-package im.actor.torlib;
+package im.actor.torlib.utils;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
+import im.actor.torlib.TorConfig;
 import im.actor.torlib.config.TorConfigProxy;
 
 /**
@@ -74,7 +75,7 @@ public class Tor {
      * Create and return a new <code>TorConfig</code> instance.
      *
      * @return A new <code>TorConfig</code> instance.
-     * @see TorConfig
+     * @see im.actor.torlib.TorConfig
      */
     static public TorConfig createConfig() {
         final TorConfig config = (TorConfig) Proxy.newProxyInstance(TorConfigProxy.class.getClassLoader(), new Class[]{TorConfig.class}, new TorConfigProxy());

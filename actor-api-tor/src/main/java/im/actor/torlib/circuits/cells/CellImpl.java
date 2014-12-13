@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.Cell;
-
 public class CellImpl implements Cell {
 
 	public static CellImpl createCell(int circuitId, int command) {

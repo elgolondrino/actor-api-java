@@ -1,4 +1,4 @@
-package im.actor.torlib;
+package im.actor.torlib.circuits.cells;
 
 
 public interface Cell {

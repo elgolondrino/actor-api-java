@@ -10,9 +10,7 @@ import java.net.UnknownHostException;
 
 import javax.net.SocketFactory;
 
-import im.actor.torlib.Tor;
-import im.actor.torlib.TorClient;
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 import im.actor.torlib.TorClient;
 
 public class OrchidSocketFactory extends SocketFactory {

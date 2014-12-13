@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.OpenFailedException;
+import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.IPv4Address;

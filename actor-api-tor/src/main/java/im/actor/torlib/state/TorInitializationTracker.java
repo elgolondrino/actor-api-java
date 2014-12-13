@@ -1,6 +1,6 @@
 package im.actor.torlib.state;
 
-import im.actor.torlib.Tor;
+import im.actor.torlib.utils.Tor;
 
 import java.util.ArrayList;
 import java.util.HashMap;

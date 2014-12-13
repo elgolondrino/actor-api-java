@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import im.actor.torlib.Router;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 

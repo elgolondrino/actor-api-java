@@ -3,14 +3,16 @@ package im.actor.torlib.circuits;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import im.actor.torlib.*;
 import im.actor.torlib.connections.Connection;
+import im.actor.torlib.connections.ConnectionCache;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.state.TorInitializationTracker;
+import im.actor.torlib.utils.Tor;
 
 public class CircuitBuildTask implements Runnable {
 	private final static Logger logger = Logger.getLogger(CircuitBuildTask.class.getName());

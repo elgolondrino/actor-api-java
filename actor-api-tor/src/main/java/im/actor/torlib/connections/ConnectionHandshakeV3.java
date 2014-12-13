@@ -15,7 +15,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
-import im.actor.torlib.Cell;
+import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;
 

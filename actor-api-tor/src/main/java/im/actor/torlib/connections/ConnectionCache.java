@@ -1,7 +1,7 @@
-package im.actor.torlib;
+package im.actor.torlib.connections;
 
 
-import im.actor.torlib.connections.Connection;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;

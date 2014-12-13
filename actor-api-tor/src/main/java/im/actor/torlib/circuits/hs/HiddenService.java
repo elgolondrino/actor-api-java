@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import im.actor.torlib.HiddenServiceCircuit;
+import im.actor.torlib.circuits.HiddenServiceCircuit;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.hs.HSDescriptorCookie.CookieType;
 import im.actor.torlib.crypto.TorMessageDigest;

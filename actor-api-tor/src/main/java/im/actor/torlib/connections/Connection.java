@@ -1,9 +1,9 @@
 package im.actor.torlib.connections;
 
 
-import im.actor.torlib.Cell;
-import im.actor.torlib.Circuit;
-import im.actor.torlib.Router;
+import im.actor.torlib.circuits.cells.Cell;
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.ConnectionIOException;
 
 /**
@@ -11,7 +11,7 @@ import im.actor.torlib.errors.ConnectionIOException;
  */
 public interface Connection {
 	/**
-	 * Return the {@link im.actor.torlib.Router} associated with this connection.
+	 * Return the {@link im.actor.torlib.directory.routers.Router} associated with this connection.
 	 * 
 	 * @return The entry router this connection represents.
 	 */
@@ -24,16 +24,16 @@ public interface Connection {
 	 */
 	boolean isClosed();
 	/**
-	 * Send a protocol {@link im.actor.torlib.Cell} on this connection.
+	 * Send a protocol {@link im.actor.torlib.circuits.cells.Cell} on this connection.
 	 * 
-	 * @param cell The {@link im.actor.torlib.Cell} to transfer.
+	 * @param cell The {@link im.actor.torlib.circuits.cells.Cell} to transfer.
 	 * @throws im.actor.torlib.errors.ConnectionIOException If the cell could not be send because the connection is not connected
 	 *                                   or if an error occured while sending the cell data.
 	 */
 	void sendCell(Cell cell) throws ConnectionIOException;
 	
 	/**
-	 * Remove a Circuit which has been bound to this Connection by a previous call to {@link #bindCircuit(im.actor.torlib.Circuit) bindCircuit}.
+	 * Remove a Circuit which has been bound to this Connection by a previous call to {@link #bindCircuit(im.actor.torlib.circuits.Circuit) bindCircuit}.
 	 * After removing a Circuit, any further received incoming cells for the Circuit will be discarded.
 	 * 
 	 * @param circuit The Circuit to remove.
