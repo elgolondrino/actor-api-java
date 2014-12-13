@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.*;
 import im.actor.torlib.circuits.TorStream;
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;

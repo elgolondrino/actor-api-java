@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.routers;
 
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.directory.cache.DescriptorCache;

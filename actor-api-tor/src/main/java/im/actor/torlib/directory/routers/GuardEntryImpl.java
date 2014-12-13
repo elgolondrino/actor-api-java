@@ -1,10 +1,11 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.routers;
 
 import java.util.Date;
 
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.StateFile;
 
 public class GuardEntryImpl implements GuardEntry {

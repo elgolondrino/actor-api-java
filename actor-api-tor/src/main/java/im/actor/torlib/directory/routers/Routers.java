@@ -1,7 +1,8 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.routers;
 
 import im.actor.torlib.Router;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 
@@ -25,17 +26,17 @@ public class Routers {
     private boolean haveMinimumRouterInfo;
     private boolean needRecalculateMinimumRouterInfo;
 
-    public Routers(RouterDescriptors descriptors) {
-        this.descriptors = descriptors;
+    public Routers(DirectoryStorage store) {
+        this.descriptors = new RouterDescriptors(store);
     }
 
-    public RouterDescriptors getDescriptors() {
-        return descriptors;
-    }
-
-    public void load(){
+    public void load() {
         descriptors.load();
         needRecalculateMinimumRouterInfo = true;
+    }
+
+    public void close() {
+        descriptors.close();
     }
 
     public int getRoutersCount() {

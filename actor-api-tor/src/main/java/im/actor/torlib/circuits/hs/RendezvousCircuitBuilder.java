@@ -4,7 +4,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.TorException;

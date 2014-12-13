@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import im.actor.torlib.ConnectionCache;
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
@@ -118,7 +117,7 @@ public class EntryGuards {
 
     private void initialProbeSucceeded(GuardEntry entry) {
         logger.fine("Probe connection to " + entry.getRouterForEntry() + " succeeded.  Adding it as a new entry guard.");
-        newDirectory.getObsoleteDirectory().addGuardEntry(entry);
+        newDirectory.addGuardEntry(entry);
         retestAllUnreachable();
     }
 
@@ -135,7 +134,7 @@ public class EntryGuards {
 
      */
     private void retestAllUnreachable() {
-        for (GuardEntry e : newDirectory.getObsoleteDirectory().getGuardEntries()) {
+        for (GuardEntry e : newDirectory.getGuardEntries()) {
             if (e.getDownSince() != null) {
                 launchEntryProbe(e);
             }
@@ -143,9 +142,9 @@ public class EntryGuards {
     }
 
     private void testStatusOfAllGuards() {
-        for (GuardEntry entry : newDirectory.getObsoleteDirectory().getGuardEntries()) {
+        for (GuardEntry entry : newDirectory.getGuardEntries()) {
             if (isPermanentlyUnlisted(entry) || isExpired(entry)) {
-                newDirectory.getObsoleteDirectory().removeGuardEntry(entry);
+                newDirectory.removeGuardEntry(entry);
             } else if (needsUnreachableTest(entry)) {
                 launchEntryProbe(entry);
             }
@@ -154,7 +153,7 @@ public class EntryGuards {
 
     private List<Router> getUsableGuardRouters(Set<Router> excluded) {
         List<Router> usableRouters = new ArrayList<Router>();
-        for (GuardEntry entry : newDirectory.getObsoleteDirectory().getGuardEntries()) {
+        for (GuardEntry entry : newDirectory.getGuardEntries()) {
             addRouterIfUsableAndNotExcluded(entry, excluded, usableRouters);
         }
         return usableRouters;
@@ -197,7 +196,7 @@ public class EntryGuards {
                 return;
             }
             logger.fine("Testing " + newGuard + " as a new guard since we only have " + usableSize + " usable guards");
-            final GuardEntry entry = newDirectory.getObsoleteDirectory().createGuardEntryFor(newGuard);
+            final GuardEntry entry = newDirectory.createGuardEntryFor(newGuard);
             launchEntryProbe(entry);
             sz += 1;
         }
@@ -286,7 +285,7 @@ public class EntryGuards {
         return TimeUnit.MILLISECONDS.convert(n, TimeUnit.DAYS);
     }
     /*
-	 * path-spec 5.
+     * path-spec 5.
 	 * 
 	 * If Tor fails to connect to an otherwise usable guard, it retries
 	 * periodically: every hour for six hours, every 4 hours for 3 days, every

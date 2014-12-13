@@ -1,4 +1,4 @@
-package im.actor.torlib.directory;
+package im.actor.torlib.directory.routers;
 
 import java.util.Collections;
 import java.util.Set;

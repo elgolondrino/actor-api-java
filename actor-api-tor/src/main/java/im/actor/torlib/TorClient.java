@@ -12,7 +12,6 @@ import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.connections.ConnectionCacheImpl;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.StateFile;
@@ -28,7 +27,6 @@ import im.actor.torlib.state.TorInitializationTracker;
 public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
     private final TorConfig config;
-    private final Directory directory;
     private final NewDirectory newDirectory;
     private final TorInitializationTracker initializationTracker;
     private final ConnectionCache connectionCache;
@@ -47,9 +45,7 @@ public class TorClient {
             PRNGFixes.apply();
         }
         config = Tor.createConfig();
-        directory = new Directory(config);
-        newDirectory = new NewDirectory(directory, config);
-        directory.applyStateFile(new StateFile(directory.getStore(), newDirectory));
+        newDirectory = new NewDirectory(config);
 
         initializationTracker = new TorInitializationTracker();
         initializationTracker.addListener(createReadyFlagInitializationListener());
@@ -102,17 +98,13 @@ public class TorClient {
             }
             directoryDownloader.stop();
             circuitManager.stopBuildingCircuits(true);
-            directory.close();
+            newDirectory.close();
             connectionCache.close();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unexpected exception while shutting down TorClient instance: " + e, e);
         } finally {
             isStopped = true;
         }
-    }
-
-    public Directory getDirectory() {
-        return directory;
     }
 
     public ConnectionCache getConnectionCache() {

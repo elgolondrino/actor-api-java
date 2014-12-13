@@ -10,7 +10,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import im.actor.torlib.circuits.*;
-import im.actor.torlib.circuits.guards.EntryGuards;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.Connection;
@@ -18,8 +17,6 @@ import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.directory.Directory;
-import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;

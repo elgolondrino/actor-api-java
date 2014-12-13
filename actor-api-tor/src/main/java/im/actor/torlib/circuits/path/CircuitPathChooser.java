@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import im.actor.torlib.directory.Directory;
 import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.guards.EntryGuards;

@@ -1,8 +1,13 @@
 package im.actor.torlib.directory;
 
+import im.actor.torlib.GuardEntry;
 import im.actor.torlib.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.data.HexDigest;
+import im.actor.torlib.directory.routers.DirectoryServer;
+import im.actor.torlib.directory.routers.Guards;
+import im.actor.torlib.directory.routers.Routers;
+import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 
@@ -17,37 +22,52 @@ public class NewDirectory {
 
     private final int id;
     private final TorConfig config;
-
-    private final Directory obsoleteDirectory;
+    private final DirectoryStorage store;
 
     private ConsensusDocument currentConsensus;
 
-    public NewDirectory(Directory obsoleteDirectory, TorConfig config) {
+    private Routers routers;
+
+    private Guards guards;
+
+    public NewDirectory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
-        this.obsoleteDirectory = obsoleteDirectory;
         this.config = config;
+        this.store = new DirectoryStorage(config);
+        this.routers = new Routers(store);
+        this.guards = new Guards(this);
     }
 
     public int getId() {
         return id;
     }
 
+    public DirectoryStorage getStore() {
+        return store;
+    }
+
     public ConsensusDocument getCurrentConsensus() {
         return currentConsensus;
     }
 
-    public Directory getObsoleteDirectory() {
-        return obsoleteDirectory;
+    public void loadFromStore() {
+        routers.load();
+        guards.load();
     }
 
     // Updating
     public void applyConsensusDocument(ConsensusDocument consensus) {
-        obsoleteDirectory.getRouters().applyNewConsensus(consensus);
+        routers.applyNewConsensus(consensus);
         this.currentConsensus = consensus;
     }
 
     public void applyRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
-        obsoleteDirectory.getRouters().addRouterDescriptors(descriptorDocuments);
+        routers.addRouterDescriptors(descriptorDocuments);
+    }
+
+
+    public void close() {
+        routers.close();
     }
 
     // Picking paths
@@ -67,38 +87,56 @@ public class NewDirectory {
     // Routers in directory
 
     public boolean haveMinimumRouterInfo() {
-        return obsoleteDirectory.getRouters().haveMinimumRouterInfo();
+        return routers.haveMinimumRouterInfo();
     }
 
     public List<Router> getAllRouters() {
-        return obsoleteDirectory.getRouters().getAllRouters();
+        return routers.getAllRouters();
     }
 
     public Router getRouterByName(String name) {
-        return obsoleteDirectory.getRouters().getRouterByName(name);
+        return routers.getRouterByName(name);
     }
 
     public Router getRouterByIdentity(HexDigest identity) {
-        return obsoleteDirectory.getRouters().getRouterByIdentity(identity);
+        return routers.getRouterByIdentity(identity);
     }
 
     public List<Router> getUsableRouters(boolean needDescriptor) {
-        return obsoleteDirectory.getRouters().getUsableRouters(needDescriptor);
+        return routers.getUsableRouters(needDescriptor);
     }
 
     public List<Router> getUsableExitRouters() {
-        return obsoleteDirectory.getRouters().getUsableExitRouters();
+        return routers.getUsableExitRouters();
     }
 
     public List<Router> getDirectoryRouters() {
-        return obsoleteDirectory.getRouters().getDirectoryRouters();
+        return routers.getDirectoryRouters();
     }
 
     public List<Router> getHsDirectoryRouters() {
-        return obsoleteDirectory.getRouters().getHsDirectoryRouters();
+        return routers.getHsDirectoryRouters();
     }
 
     public List<Router> getRoutersWithDownloadableDescriptors() {
-        return obsoleteDirectory.getRouters().getRoutersWithDownloadableDescriptors();
+        return routers.getRoutersWithDownloadableDescriptors();
+    }
+
+    // Guards
+
+    public GuardEntry createGuardEntryFor(Router router) {
+        return guards.createGuardEntryFor(router);
+    }
+
+    public List<GuardEntry> getGuardEntries() {
+        return guards.getGuardEntries();
+    }
+
+    public void removeGuardEntry(GuardEntry entry) {
+        guards.removeGuardEntry(entry);
+    }
+
+    public void addGuardEntry(GuardEntry entry) {
+        guards.addGuardEntry(entry);
     }
 }

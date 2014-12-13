@@ -5,9 +5,8 @@ import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
-import im.actor.torlib.KeyCertificate;
 import im.actor.torlib.directory.DirectoryDownloader;
-import im.actor.torlib.directory.DirectoryServer;
+import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.TrustedAuthorities;
 import im.actor.torlib.directory.parsing.DocumentParser;
@@ -19,7 +18,6 @@ import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
-import im.actor.torlib.data.Timestamp;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 import java.nio.ByteBuffer;
@@ -68,7 +66,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     public ConsensusSyncActor(NewDirectory directory, DirectoryDownloader directoryDownloader) {
         super(ConsensusSyncInt.class);
         this.directory = directory;
-        this.storage = directory.getObsoleteDirectory().getStore();
+        this.storage = directory.getStore();
         this.downloader = directoryDownloader;
     }
 
@@ -110,7 +108,8 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         LOG.info("Loading certificates...");
         loadCertificates();
         LOG.info("Loading directory state...");
-        directory.getObsoleteDirectory().loadFromStore();
+        // OBSOLETE
+        directory.loadFromStore();
 
         self().sendOnce(new CheckConsensus());
     }
