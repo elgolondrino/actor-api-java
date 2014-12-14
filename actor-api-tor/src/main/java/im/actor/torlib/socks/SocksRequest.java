@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import im.actor.torlib.TorConfig;
 import im.actor.utils.IPv4Address;
 
 public abstract class SocksRequest {
-	private final static Logger logger = Logger.getLogger(SocksRequest.class.getName());
+	// private final static Logger logger = Logger.getLogger(SocksRequest.class.getName());
 	
-	private final TorConfig config;
+	// private final TorConfig config;
 	private final Socket socket;
 	
 	private byte[] addressData;
@@ -20,8 +19,8 @@ public abstract class SocksRequest {
 	
 	private long lastWarningTimestamp = 0;
 	
-	protected SocksRequest(TorConfig config, Socket socket) {
-		this.config = config;
+	protected SocksRequest(Socket socket) {
+		// this.config = config;
 		this.socket = socket;
 	}
 	
@@ -49,9 +48,9 @@ public abstract class SocksRequest {
 	}
 	
 	public String getTarget() {
-		if(config.getSafeLogging()) {
-			return "[scrubbed]:"+ port;
-		}
+//		if(config.getSafeLogging()) {
+//			return "[scrubbed]:"+ port;
+//		}
 		if(hostname != null) {
 			return hostname + ":" + port;
 		} else {
@@ -66,7 +65,7 @@ public abstract class SocksRequest {
 	}
 	
 	protected void setIPv4AddressData(byte[] data) throws SocksRequestException {
-		logUnsafeSOCKS();
+		// logUnsafeSOCKS();
 
 		if(data.length != 4)
 			throw new SocksRequestException();
@@ -87,19 +86,19 @@ public abstract class SocksRequest {
 		return diff > 5000;
 	}
 	
-	private void logUnsafeSOCKS() throws SocksRequestException {
-		if((config.getWarnUnsafeSocks() || config.getSafeSocks()) && testRateLimit()) {
-			logger.warning("Your application is giving Orchid only "+
-							"an IP address.  Applications that do DNS "+
-							"resolves themselves may leak information. "+
-							"Consider using Socks4a (e.g. via privoxy or socat) "+ 
-							"instead.  For more information please see "+
-							"https://wiki.torproject.org/TheOnionRouter/TorFAQ#SOCKSAndDNS");
-		}
-		if(config.getSafeSocks()) {
-			throw new SocksRequestException("Rejecting unsafe SOCKS request");
-		}		
-	}
+//	private void logUnsafeSOCKS() throws SocksRequestException {
+//		if((config.getWarnUnsafeSocks() || config.getSafeSocks()) && testRateLimit()) {
+//			logger.warning("Your application is giving Orchid only "+
+//							"an IP address.  Applications that do DNS "+
+//							"resolves themselves may leak information. "+
+//							"Consider using Socks4a (e.g. via privoxy or socat) "+
+//							"instead.  For more information please see "+
+//							"https://wiki.torproject.org/TheOnionRouter/TorFAQ#SOCKSAndDNS");
+//		}
+//		if(config.getSafeSocks()) {
+//			throw new SocksRequestException("Rejecting unsafe SOCKS request");
+//		}
+//	}
 
 	protected void setHostname(String name) {
 		hostname = name;

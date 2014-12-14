@@ -6,8 +6,6 @@ import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.circuits.cells.CellImpl;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.torlib.crypto.TorCreateFastKeyAgreement;
 import im.actor.torlib.crypto.TorKeyAgreement;
 import im.actor.torlib.crypto.TorMessageDigest;
@@ -38,7 +36,7 @@ public class CircuitExtender {
     }
 
     private void sendCreateFastCell(TorCreateFastKeyAgreement kex) {
-        final Cell cell = CellImpl.createCell(circuit.getCircuitId(), Cell.CREATE_FAST);
+        final Cell cell = Cell.createCell(circuit.getCircuitId(), Cell.CREATE_FAST);
         cell.putByteArray(kex.createOnionSkin());
         circuit.sendCell(cell);
     }
@@ -103,15 +101,15 @@ public class CircuitExtender {
         final int command = cell.getRelayCommand();
         if (command == RelayCell.RELAY_TRUNCATED) {
             final int code = cell.getByte() & 0xFF;
-            final String msg = CellImpl.errorToDescription(code);
+            final String msg = Cell.errorToDescription(code);
             final String source = nodeToName(cell.getCircuitNode());
             if (code == Cell.ERROR_PROTOCOL) {
                 logProtocolViolation(source, extendTarget);
             }
             throw new TorException("Error from (" + source + ") while extending to (" + extendTarget.getNickname() + "): " + msg);
         } else if (command != expectedCommand) {
-            final String expected = RelayCellImpl.commandToDescription(expectedCommand);
-            final String received = RelayCellImpl.commandToDescription(command);
+            final String expected = RelayCell.commandToDescription(expectedCommand);
+            final String received = RelayCell.commandToDescription(command);
             throw new TorException("Received incorrect extend response, expecting " + expected + " but received " + received);
         } else {
             return cell;
@@ -128,7 +126,7 @@ public class CircuitExtender {
     }
 
     public RelayCell createRelayCell(int command) {
-        return new RelayCellImpl(circuit.getFinalCircuitNode(), circuit.getCircuitId(), 0, command, true);
+        return new RelayCell(circuit.getFinalCircuitNode(), circuit.getCircuitId(), 0, command, true);
     }
 
     Router getFinalRouter() {

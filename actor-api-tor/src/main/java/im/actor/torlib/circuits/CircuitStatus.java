@@ -1,115 +1,119 @@
 package im.actor.torlib.circuits;
 
-import im.actor.torlib.crypto.TorRandom;
-
 public class CircuitStatus {
 
-	enum CircuitState {
-		UNCONNECTED("Unconnected"),
-		BUILDING("Building"),
-		FAILED("Failed"),
-		OPEN("Open"),
-		DESTROYED("Destroyed");
-		String name;
-		CircuitState(String name) { this.name = name; }
-		public String toString() { return name; }
-	}
+    enum CircuitState {
+        UNCONNECTED("Unconnected"),
+        BUILDING("Building"),
+        FAILED("Failed"),
+        OPEN("Open"),
+        DESTROYED("Destroyed");
+        String name;
 
-	private long timestampCreated;
-	private long timestampDirty;
-	private int currentStreamId;
-	private Object streamIdLock = new Object();
-	private volatile CircuitState state = CircuitState.UNCONNECTED;
+        CircuitState(String name) {
+            this.name = name;
+        }
 
-	CircuitStatus() {
-		initializeCurrentStreamId();
-	}
+        public String toString() {
+            return name;
+        }
+    }
 
-	private void initializeCurrentStreamId() {
-		final TorRandom random = new TorRandom();
-		currentStreamId = random.nextInt(0xFFFF) + 1;
-	}
+    private long timestampCreated;
+    private long timestampDirty;
+    //	private int currentStreamId;
+//	private Object streamIdLock = new Object();
+    private volatile CircuitState state = CircuitState.UNCONNECTED;
 
-	synchronized void updateCreatedTimestamp() {
-		timestampCreated = System.currentTimeMillis();
-		timestampDirty = 0;
-	}
+    CircuitStatus() {
+        initializeCurrentStreamId();
+    }
 
-	synchronized void updateDirtyTimestamp() {
-		if(timestampDirty == 0 && state != CircuitState.BUILDING) {
-			timestampDirty = System.currentTimeMillis();
-		}
-	}
+    private void initializeCurrentStreamId() {
+        // final TorRandom random = new TorRandom();
+        // currentStreamId = random.nextInt(0xFFFF) + 1;
+    }
 
-	synchronized long getMillisecondsElapsedSinceCreated() {
-		return millisecondsElapsedSince(timestampCreated);
-	}
+    synchronized void updateCreatedTimestamp() {
+        timestampCreated = System.currentTimeMillis();
+        timestampDirty = 0;
+    }
 
-	synchronized long getMillisecondsDirty() {
-		return millisecondsElapsedSince(timestampDirty);
-	}
+    synchronized void updateDirtyTimestamp() {
+        if (timestampDirty == 0 && state != CircuitState.BUILDING) {
+            timestampDirty = System.currentTimeMillis();
+        }
+    }
 
-	private static long millisecondsElapsedSince(long then) {
-		if(then == 0) {
-			return 0;
-		}
-		final long now = System.currentTimeMillis();
-		return now - then;
-	}
+    synchronized long getMillisecondsElapsedSinceCreated() {
+        return millisecondsElapsedSince(timestampCreated);
+    }
 
-	synchronized boolean isDirty() {
-		return timestampDirty != 0;
-	}
+    synchronized long getMillisecondsDirty() {
+        return millisecondsElapsedSince(timestampDirty);
+    }
 
-	void setStateBuilding() {
-		state = CircuitState.BUILDING;
-	}
+    private static long millisecondsElapsedSince(long then) {
+        if (then == 0) {
+            return 0;
+        }
+        final long now = System.currentTimeMillis();
+        return now - then;
+    }
 
-	void setStateFailed() {
-		state = CircuitState.FAILED;
-	}
+    synchronized boolean isDirty() {
+        return timestampDirty != 0;
+    }
 
-	void setStateOpen() {
-		state = CircuitState.OPEN;
-	}
+    void setStateBuilding() {
+        state = CircuitState.BUILDING;
+    }
 
-	void setStateDestroyed() {
-		state = CircuitState.DESTROYED;
-	}
+    void setStateFailed() {
+        state = CircuitState.FAILED;
+    }
 
-	boolean isBuilding() {
-		return state == CircuitState.BUILDING;
-	}
+    void setStateOpen() {
+        state = CircuitState.OPEN;
+    }
 
-	boolean isConnected() {
-		return state == CircuitState.OPEN;
-	}
+    void setStateDestroyed() {
+        state = CircuitState.DESTROYED;
+    }
 
-	boolean isUnconnected() {
-		return state == CircuitState.UNCONNECTED;
-	}
+    boolean isBuilding() {
+        return state == CircuitState.BUILDING;
+    }
 
-	String getStateAsString() {
-		if(state == CircuitState.OPEN) {
-			return state.toString() + " ["+ getDirtyString() + "]";
-		}
-		return state.toString();
-	}
+    boolean isConnected() {
+        return state == CircuitState.OPEN;
+    }
 
-	private String getDirtyString() {
-		if(!isDirty()) {
-			return "Clean";
-		} else {
-			return "Dirty "+ (getMillisecondsDirty() / 1000) +"s"; 
-		}
-	}
-	int nextStreamId() {
-		synchronized(streamIdLock) {
-			currentStreamId++;
-			if(currentStreamId > 0xFFFF)
-				currentStreamId = 1;
-			return currentStreamId;
-		}
-	}
+    boolean isUnconnected() {
+        return state == CircuitState.UNCONNECTED;
+    }
+
+    String getStateAsString() {
+        if (state == CircuitState.OPEN) {
+            return state.toString() + " [" + getDirtyString() + "]";
+        }
+        return state.toString();
+    }
+
+    private String getDirtyString() {
+        if (!isDirty()) {
+            return "Clean";
+        } else {
+            return "Dirty " + (getMillisecondsDirty() / 1000) + "s";
+        }
+    }
+//	int nextStreamId() {
+//		synchronized(streamIdLock) {
+//			currentStreamId++;
+//			if(currentStreamId > 0xFFFF)
+//				currentStreamId = 1;
+//			return currentStreamId;
+//		}
+//	}
 
 }

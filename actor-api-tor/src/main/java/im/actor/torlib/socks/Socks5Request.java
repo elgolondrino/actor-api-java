@@ -2,7 +2,6 @@ package im.actor.torlib.socks;
 
 import java.net.Socket;
 
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
 
 public class Socks5Request extends SocksRequest {
@@ -24,8 +23,8 @@ public class Socks5Request extends SocksRequest {
 	private byte[] addressBytes = new byte[0];
 	private byte[] portBytes = new byte[0];
 	
-	Socks5Request(TorConfig config, Socket socket) {
-		super(config, socket);
+	Socks5Request(Socket socket) {
+		super(socket);
 	}
 	
 	public boolean isConnectRequest() {

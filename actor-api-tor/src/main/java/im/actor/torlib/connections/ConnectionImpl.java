@@ -30,7 +30,6 @@ import im.actor.torlib.directory.routers.Router;
 import im.actor.utils.Threading;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
@@ -43,7 +42,7 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
     private final static Logger logger = Logger.getLogger(ConnectionImpl.class.getName());
     private final static int CONNECTION_IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     private final static int DEFAULT_CONNECT_TIMEOUT = 5000;
-    private final static Cell connectionClosedSentinel = CellImpl.createCell(0, 0);
+    private final static Cell connectionClosedSentinel = Cell.createCell(0, 0);
 
     private final TorConfig config;
     private final SSLSocket socket;
@@ -175,7 +174,7 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
 
     private Cell recvCell() throws ConnectionIOException {
         try {
-            return CellImpl.readFromInputStream(input);
+            return Cell.readFromInputStream(input);
         } catch (EOFException e) {
             closeSocket();
             throw new ConnectionIOException();

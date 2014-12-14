@@ -9,114 +9,97 @@ import java.util.logging.Logger;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.circuits.TorStream;
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.errors.TorException;
+import im.actor.torlib.socks.utils.ProxyConnectionActor;
 
 public class SocksClientTask implements Runnable {
-	private final static Logger logger = Logger.getLogger(SocksClientTask.class.getName());
-	
-	private final TorConfig config;
-	private final Socket socket;
-	private final CircuitManager circuitManager;
+    private final static Logger LOG = Logger.getLogger(SocksClientTask.class.getName());
 
-	SocksClientTask(TorConfig config, Socket socket, CircuitManager circuitManager) {
-		this.config = config;
-		this.socket = socket;
-		this.circuitManager = circuitManager;
-	}
+    private final Socket socket;
 
-	public void run() {
-		final int version = readByte();
-		dispatchRequest(version);
-		closeSocket();
-	}
+    private final CircuitManager circuitManager;
 
-	private int readByte() {
-		try {
-			return socket.getInputStream().read();
-		} catch (IOException e) {
-			logger.warning("IO error reading version byte: "+ e.getMessage());
-			return -1;
-		}
-	}
-	
-	private void dispatchRequest(int versionByte) {
-		switch(versionByte) {
-		case 'H':
-		case 'G':
-		case 'P':
-			sendHttpPage();
-			break;
-		case 4:
-			processRequest(new Socks4Request(config, socket));
-			break;
-		case 5:
-			processRequest(new Socks5Request(config, socket));
-			break;
-		default:
-			// fall through, do nothing
-			break;
-		}	
-	}
-	
-	private void processRequest(SocksRequest request) {
-		try {
-			request.readRequest();
-			if(!request.isConnectRequest()) {
-				logger.warning("Non connect command ("+ request.getCommandCode() + ")");
-				request.sendError(true);
-				return;
-			}
-			
-			try {
-				final TorStream torStream = openConnectStream(request);
-				logger.fine("SOCKS CONNECT to "+ request.getTarget()+ " completed");
-				request.sendSuccess();
-				runOpenConnection(torStream);
-			} catch (InterruptedException e) {
-				logger.info("SOCKS CONNECT to "+ request.getTarget() + " was thread interrupted");
-				Thread.currentThread().interrupt();
-				request.sendError(false);
-			} catch (TimeoutException e) {
-				logger.info("SOCKS CONNECT to "+ request.getTarget() + " timed out");
-				request.sendError(false);
-			} catch (OpenFailedException e) {
-				logger.info("SOCKS CONNECT to "+ request.getTarget() + " failed: "+ e.getMessage());
-				request.sendConnectionRefused();
-			}
-		} catch (SocksRequestException e) {
-			logger.log(Level.WARNING, "Failure reading SOCKS request: "+ e.getMessage());
-			try {
-				request.sendError(false);
-				socket.close();
-			} catch (Exception ignore) { }
-		} 
-	}
-		
+    public SocksClientTask(Socket socket, CircuitManager circuitManager) {
+        this.socket = socket;
+        this.circuitManager = circuitManager;
+    }
 
-	private void runOpenConnection(TorStream torStream) {
-		SocksStreamConnection.runConnection(socket, torStream);
-	}
+    public void run() {
+        final int version = readByte();
+        if (!dispatchRequest(version)) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warning("Error closing SOCKS socket: " + e.getMessage());
+            }
+        }
+    }
 
-	private TorStream openConnectStream(SocksRequest request) throws InterruptedException, TimeoutException, OpenFailedException {
-		if(request.hasHostname()) {
-			logger.fine("SOCKS CONNECT request to "+ request.getHostname() +":"+ request.getPort());
-			return circuitManager.openExitStreamTo(request.getHostname(), request.getPort());
-		} else {
-			logger.fine("SOCKS CONNECT request to "+ request.getAddress() +":"+ request.getPort());
-			return circuitManager.openExitStreamTo(request.getAddress(), request.getPort());
-		}
-	}
+    private int readByte() {
+        try {
+            return socket.getInputStream().read();
+        } catch (IOException e) {
+            LOG.warning("IO error reading version byte: " + e.getMessage());
+            return -1;
+        }
+    }
 
-	private void sendHttpPage() {
-		throw new TorException("Returning HTTP page not implemented");
-	}
+    private boolean dispatchRequest(int versionByte) {
+        switch (versionByte) {
+            case 4:
+                return processRequest(new Socks4Request(socket));
+            case 5:
+                return processRequest(new Socks5Request(socket));
+            default:
+                // fall through, do nothing
+                // Closing connection
+                return false;
+        }
+    }
 
-	private void closeSocket() {
-		try {
-			socket.close();
-		} catch (IOException e) {
-			logger.warning("Error closing SOCKS socket: "+ e.getMessage());
-		}
-	}
+    private boolean processRequest(SocksRequest request) {
+        try {
+            request.readRequest();
+            if (!request.isConnectRequest()) {
+                LOG.warning("Non connect command (" + request.getCommandCode() + ")");
+                request.sendError(true);
+                return false;
+            }
+
+            try {
+                final TorStream torStream = openConnectStream(request);
+                LOG.fine("SOCKS CONNECT to " + request.getTarget() + " completed");
+                request.sendSuccess();
+                ProxyConnectionActor.runConnection(socket, torStream);
+                return true;
+            } catch (InterruptedException e) {
+                LOG.info("SOCKS CONNECT to " + request.getTarget() + " was thread interrupted");
+                Thread.currentThread().interrupt();
+                request.sendError(false);
+            } catch (TimeoutException e) {
+                LOG.info("SOCKS CONNECT to " + request.getTarget() + " timed out");
+                request.sendError(false);
+            } catch (OpenFailedException e) {
+                LOG.info("SOCKS CONNECT to " + request.getTarget() + " failed: " + e.getMessage());
+                request.sendConnectionRefused();
+            }
+        } catch (SocksRequestException e) {
+            LOG.log(Level.WARNING, "Failure reading SOCKS request: " + e.getMessage());
+            try {
+                request.sendError(false);
+                socket.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return false;
+    }
+
+    private TorStream openConnectStream(SocksRequest request) throws InterruptedException, TimeoutException, OpenFailedException {
+        if (request.hasHostname()) {
+            LOG.fine("SOCKS CONNECT request to " + request.getHostname() + ":" + request.getPort());
+            return circuitManager.openExitStreamTo(request.getHostname(), request.getPort());
+        } else {
+            LOG.fine("SOCKS CONNECT request to " + request.getAddress() + ":" + request.getPort());
+            return circuitManager.openExitStreamTo(request.getAddress(), request.getPort());
+        }
+    }
 }

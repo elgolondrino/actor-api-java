@@ -17,7 +17,6 @@ import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.IPv4Address;
 
@@ -76,7 +75,7 @@ public abstract class ConnectionHandshake {
 	}
 
 	protected  void sendVersions(int... versions) throws ConnectionIOException {
-		final Cell cell = CellImpl.createVarCell(0, Cell.VERSIONS, versions.length * 2);
+		final Cell cell = Cell.createVarCell(0, Cell.VERSIONS, versions.length * 2);
 		for(int v: versions) {
 			cell.putShort(v);
 		}
@@ -91,7 +90,7 @@ public abstract class ConnectionHandshake {
 	}
 
 	protected void sendNetinfo() throws ConnectionIOException {
-		final Cell cell = CellImpl.createCell(0, Cell.NETINFO);
+		final Cell cell = Cell.createCell(0, Cell.NETINFO);
 		putTimestamp(cell);
 		putIPv4Address(cell, connection.getRouter().getAddress());
 		putMyAddresses(cell);

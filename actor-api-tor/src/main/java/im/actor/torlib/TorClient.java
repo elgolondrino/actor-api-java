@@ -10,7 +10,7 @@ import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.socks.SocksPortListener;
+import im.actor.torlib.socks.SocksTorProxy;
 import im.actor.torlib.utils.Tor;
 
 /**
@@ -23,7 +23,7 @@ public class TorClient {
     private final NewDirectory newDirectory;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
-    private final SocksPortListener socksListener;
+    private final SocksTorProxy socksListener;
     private final DirectoryManager directoryManager;
     private final Dashboard dashboard;
 
@@ -42,7 +42,8 @@ public class TorClient {
         circuitManager = new CircuitManager(config, newDirectory, connectionCache);
         directoryManager = new DirectoryManager(circuitManager);
 
-        socksListener = new SocksPortListener(config, circuitManager);
+        socksListener = new SocksTorProxy(circuitManager);
+
         dashboard = new Dashboard();
         dashboard.addRenderables(circuitManager, directoryManager, socksListener);
     }

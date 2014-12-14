@@ -7,14 +7,13 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import im.actor.torlib.circuits.cells.RelayCell;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
 import im.actor.utils.misc.GuardedBy;
 import im.actor.utils.misc.ThreadSafe;
 
 @ThreadSafe
 public class TorInputStream extends InputStream {
 
-	private final static RelayCell CLOSE_SENTINEL = new RelayCellImpl(null, 0, 0, 0);
+	private final static RelayCell CLOSE_SENTINEL = new RelayCell(null, 0, 0, 0);
 	private final static ByteBuffer EMPTY_BUFFER  = ByteBuffer.allocate(0);
 	
 	private final TorStream torStream;

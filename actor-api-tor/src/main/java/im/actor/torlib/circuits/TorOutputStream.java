@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import im.actor.torlib.circuits.cells.RelayCell;
-import im.actor.torlib.circuits.cells.RelayCellImpl;
 
 public class TorOutputStream extends OutputStream {
 
@@ -27,7 +26,7 @@ public class TorOutputStream extends OutputStream {
             }
         }
 
-        currentOutputCell = new RelayCellImpl(torStream.getTargetNode(), torStream.getCircuit().getCircuitId(),
+        currentOutputCell = new RelayCell(torStream.getTargetNode(), torStream.getCircuit().getCircuitId(),
                 torStream.getStreamId(), RelayCell.RELAY_DATA);
     }
 
