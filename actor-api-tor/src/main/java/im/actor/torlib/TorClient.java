@@ -5,8 +5,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.SocketFactory;
-
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.connections.ConnectionCache;
@@ -16,10 +14,7 @@ import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.DirectoryDownloader;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.OpenFailedException;
-import im.actor.torlib.sockets.OrchidSocketFactory;
 import im.actor.torlib.socks.SocksPortListener;
-import im.actor.torlib.state.TorInitializationListener;
-import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.utils.Tor;
 
 /**
@@ -30,7 +25,6 @@ public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
     private final TorConfig config;
     private final NewDirectory newDirectory;
-    private final TorInitializationTracker initializationTracker;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final SocksPortListener socksListener;
@@ -49,11 +43,9 @@ public class TorClient {
         config = Tor.createConfig();
         newDirectory = new NewDirectory(config);
 
-        initializationTracker = new TorInitializationTracker();
-        initializationTracker.addListener(createReadyFlagInitializationListener());
-        connectionCache = new ConnectionCacheImpl(config, initializationTracker);
+        connectionCache = new ConnectionCacheImpl(config);
 
-        circuitManager = new CircuitManager(config, newDirectory, connectionCache, initializationTracker);
+        circuitManager = new CircuitManager(config, newDirectory, connectionCache);
         directoryDownloader = new DirectoryDownloader(circuitManager);
 
         socksListener = new SocksPortListener(config, circuitManager);
@@ -64,10 +56,6 @@ public class TorClient {
 
     public TorConfig getConfig() {
         return config;
-    }
-
-    public SocketFactory getSocketFactory() {
-        return new OrchidSocketFactory(this);
     }
 
     /**
@@ -151,24 +139,5 @@ public class TorClient {
         if (dashboard.isListening()) {
             dashboard.stopListening();
         }
-    }
-
-    public void addInitializationListener(TorInitializationListener listener) {
-        initializationTracker.addListener(listener);
-    }
-
-    public void removeInitializationListener(TorInitializationListener listener) {
-        initializationTracker.removeListener(listener);
-    }
-
-    private TorInitializationListener createReadyFlagInitializationListener() {
-        return new TorInitializationListener() {
-            public void initializationProgress(String message, int percent) {
-            }
-
-            public void initializationCompleted() {
-                readyLatch.countDown();
-            }
-        };
     }
 }

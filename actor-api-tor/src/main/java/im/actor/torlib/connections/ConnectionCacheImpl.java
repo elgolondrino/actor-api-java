@@ -23,7 +23,6 @@ import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 
@@ -42,7 +41,7 @@ public class ConnectionCacheImpl implements ConnectionCache, DashboardRenderable
 
 		public ConnectionImpl call() throws Exception {
 			final SSLSocket socket = factory.createSocket();
-			final ConnectionImpl conn = new ConnectionImpl(config, socket, router, initializationTracker, isDirectoryConnection);
+			final ConnectionImpl conn = new ConnectionImpl(config, socket, router, isDirectoryConnection);
 			conn.connect();
 			return conn;
 		}
@@ -66,13 +65,11 @@ public class ConnectionCacheImpl implements ConnectionCache, DashboardRenderable
 	private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
 	private final TorConfig config;
-	private final TorInitializationTracker initializationTracker;
 	private volatile boolean isClosed;
 
 	
-	public ConnectionCacheImpl(TorConfig config, TorInitializationTracker tracker) {
+	public ConnectionCacheImpl(TorConfig config) {
 		this.config = config;
-		this.initializationTracker = tracker;
 		scheduledExecutor.scheduleAtFixedRate(new CloseIdleConnectionCheckTask(), 5000, 5000, TimeUnit.MILLISECONDS);
 	}
 

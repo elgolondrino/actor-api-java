@@ -102,7 +102,7 @@ public class DescriptorsSyncActor extends TypedActor<DescriptorsSyncInt> impleme
 
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), null);
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
                 final List<DescriptorDocument> ds = requestor.downloadRouterDescriptors(fingerprints);
                 directory.applyRouterDescriptors(removeUnrequestedDescriptors(fingerprints, ds));
             } catch (DirectoryRequestFailedException e) {

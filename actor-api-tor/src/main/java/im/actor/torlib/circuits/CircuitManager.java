@@ -21,7 +21,6 @@ import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.data.IPv4Address;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.OpenFailedException;
-import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 
 
@@ -44,25 +43,23 @@ public class CircuitManager implements DashboardRenderable {
     private final PendingExitStreams pendingExitStreams;
     private final ScheduledExecutorService scheduledExecutor = Threading.newSingleThreadScheduledPool("CircuitManager worker");
     private final CircuitCreationTask circuitCreationTask;
-    private final TorInitializationTracker initializationTracker;
     private final CircuitPathChooser pathChooser;
     private final HiddenServiceManager hiddenServiceManager;
     private final ReentrantLock lock = Threading.lock("circuitManager");
 
     private boolean isBuilding = false;
 
-    public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache, TorInitializationTracker initializationTracker) {
+    public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache) {
         this.config = config;
         this.connectionCache = connectionCache;
         this.pathChooser = CircuitPathChooser.create(config, directory);
 
         this.pendingExitStreams = new PendingExitStreams(config);
-        this.circuitCreationTask = new CircuitCreationTask(config, directory, connectionCache, pathChooser, this, initializationTracker);
+        this.circuitCreationTask = new CircuitCreationTask(config, directory, connectionCache, pathChooser, this);
         this.activeCircuits = new HashSet<CircuitImpl>();
         this.cleanInternalCircuits = new LinkedList<InternalCircuit>();
         this.random = new TorRandom();
 
-        this.initializationTracker = initializationTracker;
         this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
     }
 
@@ -358,7 +355,7 @@ public class CircuitManager implements DashboardRenderable {
     private boolean tryOpenCircuit(Circuit circuit, boolean isDirectory, boolean trackInitialization) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
         final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result, isDirectory);
-        final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache, (trackInitialization) ? (initializationTracker) : (null));
+        final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache);
         task.run();
         return result.isSuccessful();
     }

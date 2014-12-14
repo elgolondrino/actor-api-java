@@ -5,17 +5,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.DirectoryCircuit;
-import im.actor.torlib.circuits.TorStream;
-import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.torlib.data.HexDigest;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
-import im.actor.torlib.utils.Tor;
 
 /**
  * Synchronously downloads directory documents.

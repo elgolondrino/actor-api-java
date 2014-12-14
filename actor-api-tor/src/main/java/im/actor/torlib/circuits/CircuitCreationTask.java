@@ -16,7 +16,6 @@ import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.data.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.state.TorInitializationTracker;
 import im.actor.utils.Threading;
 
 public class CircuitCreationTask implements Runnable {
@@ -28,7 +27,6 @@ public class CircuitCreationTask implements Runnable {
     private final NewDirectory directory;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
-    private final TorInitializationTracker initializationTracker;
     private final CircuitPathChooser pathChooser;
     private final Executor executor;
     private final CircuitBuildHandler buildHandler;
@@ -40,12 +38,12 @@ public class CircuitCreationTask implements Runnable {
 
     private final AtomicLong lastNewCircuit;
 
-    public CircuitCreationTask(TorConfig config, NewDirectory directory, ConnectionCache connectionCache, CircuitPathChooser pathChooser, CircuitManager circuitManager, TorInitializationTracker initializationTracker) {
+    public CircuitCreationTask(TorConfig config, NewDirectory directory, ConnectionCache connectionCache,
+                               CircuitPathChooser pathChooser, CircuitManager circuitManager) {
         this.config = config;
         this.directory = directory;
         this.connectionCache = connectionCache;
         this.circuitManager = circuitManager;
-        this.initializationTracker = initializationTracker;
         this.pathChooser = pathChooser;
         this.executor = Threading.newPool("CircuitCreationTask worker");
         this.buildHandler = createCircuitBuildHandler();
@@ -216,7 +214,7 @@ public class CircuitCreationTask implements Runnable {
 
         final Circuit circuit = circuitManager.createNewExitCircuit(exitRouter);
         final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler, false);
-        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache, initializationTracker);
+        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
         executor.execute(task);
     }
 
