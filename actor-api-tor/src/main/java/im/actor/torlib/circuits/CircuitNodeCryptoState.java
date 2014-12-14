@@ -4,7 +4,7 @@ import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorStreamCipher;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 
 public class CircuitNodeCryptoState {
 	public final static int KEY_MATERIAL_SIZE = TorMessageDigest.TOR_DIGEST_SIZE * 2 + TorStreamCipher.KEY_LEN * 2;

@@ -19,7 +19,7 @@ import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.cells.CellImpl;
 import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public abstract class ConnectionHandshake {
 	private final static Logger logger = Logger.getLogger(ConnectionHandshake.class.getName());

@@ -7,7 +7,7 @@ import java.util.List;
 
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 
 public class DescriptorProcessor {
     private final static int MAX_DL_PER_REQUEST = 96;

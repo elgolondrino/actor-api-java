@@ -1,10 +1,9 @@
 package im.actor.torlib.directory;
 
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.routers.*;
 import im.actor.torlib.directory.storage.DirectoryStorage;
-import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 
 import java.util.List;

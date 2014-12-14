@@ -6,8 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 /**
  * Implements configuration options:

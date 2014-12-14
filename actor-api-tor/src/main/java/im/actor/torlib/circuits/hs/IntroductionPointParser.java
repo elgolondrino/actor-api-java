@@ -1,7 +1,7 @@
 package im.actor.torlib.circuits.hs;
 
 import im.actor.torlib.errors.TorParsingException;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentParser;

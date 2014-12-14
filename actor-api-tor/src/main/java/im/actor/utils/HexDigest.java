@@ -1,4 +1,4 @@
-package im.actor.torlib.data;
+package im.actor.utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,8 +6,6 @@ import java.util.List;
 import im.actor.torlib.utils.Tor;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.utils.Base64;
-import im.actor.utils.Hex;
 
 /**
  * This class represents both digests and fingerprints that appear in directory

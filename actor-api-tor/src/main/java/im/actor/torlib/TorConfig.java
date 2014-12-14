@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import im.actor.torlib.circuits.hs.HSDescriptorCookie;
 import im.actor.torlib.config.TorConfigBridgeLine;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 
 public interface TorConfig {

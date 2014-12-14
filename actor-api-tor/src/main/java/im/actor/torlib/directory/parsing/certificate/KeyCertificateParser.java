@@ -4,7 +4,7 @@ import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentParser;

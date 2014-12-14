@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 
 /**
  * This class wraps the default cryptographic message digest algorithm
@@ -84,7 +84,7 @@ public class TorMessageDigest {
 	 * Calculate the digest value of all data processed up until this point and convert
 	 * the digest into a <code>HexDigest</code> object.
 	 * @return A new <code>HexDigest</code> object representing the current digest value.
-	 * @see im.actor.torlib.data.HexDigest
+	 * @see im.actor.utils.HexDigest
 	 */
 	public HexDigest getHexDigest() {
 		return HexDigest.createFromDigestBytes(getDigestBytes());

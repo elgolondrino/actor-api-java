@@ -1,9 +1,8 @@
 package im.actor.torlib.documents;
 
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.data.Timestamp;
-import im.actor.torlib.data.exitpolicy.ExitPorts;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
+import im.actor.utils.Timestamp;
 
 import java.util.HashSet;
 import java.util.Set;

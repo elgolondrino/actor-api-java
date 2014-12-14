@@ -13,7 +13,7 @@ import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 
 public class RendezvousProcessor {
 	private final static Logger logger = Logger.getLogger(RendezvousProcessor.class.getName());

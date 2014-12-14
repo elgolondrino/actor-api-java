@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import im.actor.torlib.documents.DescriptorDocument;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentParser;
 
 public class DescriptorFetcher extends DocumentFetcher<DescriptorDocument> {

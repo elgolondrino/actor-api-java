@@ -18,7 +18,7 @@ import im.actor.torlib.connections.Connection;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.Threading;

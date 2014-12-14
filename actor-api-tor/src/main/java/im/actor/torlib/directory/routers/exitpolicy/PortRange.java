@@ -1,4 +1,4 @@
-package im.actor.torlib.data.exitpolicy;
+package im.actor.torlib.directory.routers.exitpolicy;
 
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.errors.TorParsingException;

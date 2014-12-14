@@ -14,7 +14,7 @@ import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.directory.routers.BridgeRouter;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.documents.DescriptorDocument;
-import im.actor.torlib.directory.DirectoryDownloader;
+import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 public class Bridges {
@@ -39,7 +39,7 @@ public class Bridges {
 		private void downloadDescriptor() {
 			logger.fine("Downloading descriptor for bridge: "+ target);
 			try {
-				final DescriptorDocument descriptorDocument = directoryDownloader.downloadBridgeDescriptor(target);
+				final DescriptorDocument descriptorDocument = directoryManager.downloadBridgeDescriptor(target);
 				if(descriptorDocument != null) {
 					logger.fine("Descriptor received for bridge "+ target +". Adding to list of usable bridges");
 					target.setDescriptorDocument(descriptorDocument);
@@ -65,7 +65,7 @@ public class Bridges {
 	}
 
 	private final TorConfig config;
-	private final DirectoryDownloader directoryDownloader;
+	private final DirectoryManager directoryManager;
 	
 	private final Set<BridgeRouter> bridgeRouters;
 	private final TorRandom random;
@@ -78,9 +78,9 @@ public class Bridges {
 
 	private AtomicInteger outstandingDownloadTasks;
 	
-	Bridges(TorConfig config, DirectoryDownloader directoryDownloader) {
+	Bridges(TorConfig config, DirectoryManager directoryManager) {
 		this.config = config;
-		this.directoryDownloader = directoryDownloader;
+		this.directoryManager = directoryManager;
 		this.bridgeRouters = new HashSet<BridgeRouter>();
 		this.random = new TorRandom();
 		this.lock = new Object();
@@ -128,7 +128,7 @@ public class Bridges {
 			if(bridgesInitializing || bridgesInitialized) {
 				return;
 			}
-			if(directoryDownloader == null) {
+			if(directoryManager == null) {
 				throw new IllegalStateException("Cannot download bridge descriptors because DirectoryDownload instance not initialized");
 			}
 			bridgesInitializing = true;

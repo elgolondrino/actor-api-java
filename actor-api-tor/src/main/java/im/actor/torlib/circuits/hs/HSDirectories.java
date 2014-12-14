@@ -8,7 +8,7 @@ import java.util.List;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.crypto.TorRandom;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 
 public class HSDirectories {
     private final static int DIR_CLUSTER_SZ = 3;

@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public class CountryCodeService {
 	private final static Logger logger = Logger.getLogger(CountryCodeService.class.getName());

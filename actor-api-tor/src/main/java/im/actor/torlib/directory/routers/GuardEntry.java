@@ -2,7 +2,7 @@ package im.actor.torlib.directory.routers;
 
 import java.util.Date;
 
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.storage.StateFile;
 

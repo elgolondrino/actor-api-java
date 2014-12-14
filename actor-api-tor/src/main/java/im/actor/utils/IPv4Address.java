@@ -1,4 +1,4 @@
-package im.actor.torlib.data;
+package im.actor.utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.Timestamp;
+import im.actor.utils.HexDigest;
+import im.actor.utils.Timestamp;
 import im.actor.torlib.directory.parsing.consensus.VoteAuthorityEntry;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.TrustedAuthorities;

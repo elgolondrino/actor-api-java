@@ -7,8 +7,8 @@ import java.util.concurrent.TimeoutException;
 
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.utils.IPv4Address;
+import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
 

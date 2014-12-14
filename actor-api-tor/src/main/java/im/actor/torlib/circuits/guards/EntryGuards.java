@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import im.actor.torlib.connections.ConnectionCache;
-import im.actor.torlib.directory.DirectoryDownloader;
+import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.GuardEntry;
@@ -38,14 +38,14 @@ public class EntryGuards {
     private final Object lock;
     private final Executor executor;
 
-    public EntryGuards(TorConfig config, ConnectionCache connectionCache, DirectoryDownloader directoryDownloader, NewDirectory newDirectory) {
+    public EntryGuards(TorConfig config, ConnectionCache connectionCache, DirectoryManager directoryManager, NewDirectory newDirectory) {
         this.config = config;
         this.random = new TorRandom();
         this.newDirectory = newDirectory;
         this.nodeChooser = new CircuitNodeChooser(config, newDirectory);
         this.connectionCache = connectionCache;
         this.pendingProbes = new HashSet<GuardEntry>();
-        this.bridges = new Bridges(config, directoryDownloader);
+        this.bridges = new Bridges(config, directoryManager);
         this.lock = new Object();
         this.executor = Threading.newPool("EntryGuards worker");
     }

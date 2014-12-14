@@ -8,8 +8,8 @@ import im.actor.torlib.circuits.HiddenServiceCircuit;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.hs.HSDescriptorCookie.CookieType;
 import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.data.Base32;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.Base32;
+import im.actor.utils.HexDigest;
 
 public class HiddenService {
 	

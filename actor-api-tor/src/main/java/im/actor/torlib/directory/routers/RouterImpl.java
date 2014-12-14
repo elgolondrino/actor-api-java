@@ -5,12 +5,11 @@ import java.util.Set;
 
 import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.directory.StatusFlag;
-import im.actor.torlib.documents.RouterStatusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 import im.actor.torlib.geoip.CountryCodeService;
 
 public class RouterImpl implements Router {

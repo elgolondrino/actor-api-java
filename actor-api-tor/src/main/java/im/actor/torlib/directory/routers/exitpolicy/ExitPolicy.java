@@ -1,9 +1,9 @@
-package im.actor.torlib.data.exitpolicy;
+package im.actor.torlib.directory.routers.exitpolicy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public class ExitPolicy {
 	private final List<PolicyRule> rules = new ArrayList<PolicyRule>();

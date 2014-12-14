@@ -1,4 +1,4 @@
-package im.actor.torlib.utils;
+package im.actor.utils;
 
 import java.io.*;
 import java.util.Random;

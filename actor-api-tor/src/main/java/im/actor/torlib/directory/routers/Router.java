@@ -3,8 +3,8 @@ package im.actor.torlib.directory.routers;
 import java.util.Set;
 
 import im.actor.torlib.crypto.TorPublicKey;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 import im.actor.torlib.documents.DescriptorDocument;
 
 public interface Router {

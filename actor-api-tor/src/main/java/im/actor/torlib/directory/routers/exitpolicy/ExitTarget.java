@@ -1,6 +1,6 @@
-package im.actor.torlib.data.exitpolicy;
+package im.actor.torlib.directory.routers.exitpolicy;
 
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public interface ExitTarget {
 	boolean isAddressTarget();

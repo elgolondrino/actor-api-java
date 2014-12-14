@@ -3,8 +3,8 @@ package im.actor.torlib.directory;
 import com.droidkit.bser.BserObject;
 import com.droidkit.bser.BserValues;
 import com.droidkit.bser.BserWriter;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,12 +1,11 @@
 package im.actor.torlib.directory.routers;
 
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.directory.StatusFlag;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
-import im.actor.torlib.documents.RouterStatusDocument;
 
 import java.util.*;
 import java.util.logging.Logger;

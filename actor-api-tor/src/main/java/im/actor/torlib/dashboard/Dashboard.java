@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import im.actor.utils.Threading;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 import im.actor.utils.misc.GuardedBy;
 
 /**

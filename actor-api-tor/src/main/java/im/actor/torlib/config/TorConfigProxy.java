@@ -9,12 +9,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.TorConfig.ConfigVar;
-import im.actor.torlib.TorConfig.ConfigVarType;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 public class TorConfigProxy implements InvocationHandler {
 	

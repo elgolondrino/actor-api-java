@@ -3,8 +3,8 @@ package im.actor.torlib.directory.parsing.consensus;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 public class VoteAuthorityEntryImpl implements VoteAuthorityEntry {
 	private String nickname;

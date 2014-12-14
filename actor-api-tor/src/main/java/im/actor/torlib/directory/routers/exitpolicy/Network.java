@@ -1,7 +1,7 @@
-package im.actor.torlib.data.exitpolicy;
+package im.actor.torlib.directory.routers.exitpolicy;
 
 import im.actor.torlib.errors.TorParsingException;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public class Network {
 	public static final Network ALL_ADDRESSES = new Network(IPv4Address.createFromString("0.0.0.0"), 0, "*");

@@ -5,8 +5,8 @@ import java.util.List;
 
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorRandom;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.Timestamp;
+import im.actor.utils.HexDigest;
+import im.actor.utils.Timestamp;
 
 public class HSDescriptor {
 	private final static long MS_24_HOURS = (24 * 60 * 60 * 1000);

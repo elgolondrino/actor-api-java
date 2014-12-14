@@ -4,7 +4,7 @@ import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.RouterStatusDocument;
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorMessageDigest;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 
 public class RouterStatusSectionParser extends ConsensusDocumentSectionParser {

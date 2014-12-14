@@ -2,9 +2,8 @@ package im.actor.torlib.directory.parsing.consensus;
 
 import java.util.List;
 
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.directory.parsing.consensus.DirectorySignature;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 
 public interface VoteAuthorityEntry {
 	String getNickname();

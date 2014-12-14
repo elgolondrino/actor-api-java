@@ -1,4 +1,4 @@
-package im.actor.torlib.data.exitpolicy;
+package im.actor.torlib.directory.routers.exitpolicy;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,19 +1,15 @@
 package im.actor.torlib;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.connections.ConnectionCacheImpl;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
-import im.actor.torlib.directory.DirectoryDownloader;
+import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.socks.SocksPortListener;
 import im.actor.torlib.utils.Tor;
 
@@ -28,13 +24,11 @@ public class TorClient {
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final SocksPortListener socksListener;
-    private final DirectoryDownloader directoryDownloader;
+    private final DirectoryManager directoryManager;
     private final Dashboard dashboard;
 
     private boolean isStarted = false;
     private boolean isStopped = false;
-
-    private final CountDownLatch readyLatch;
 
     public TorClient() {
         if (Tor.isAndroidRuntime()) {
@@ -46,12 +40,11 @@ public class TorClient {
         connectionCache = new ConnectionCacheImpl(config);
 
         circuitManager = new CircuitManager(config, newDirectory, connectionCache);
-        directoryDownloader = new DirectoryDownloader(circuitManager);
+        directoryManager = new DirectoryManager(circuitManager);
 
         socksListener = new SocksPortListener(config, circuitManager);
-        readyLatch = new CountDownLatch(1);
         dashboard = new Dashboard();
-        dashboard.addRenderables(circuitManager, directoryDownloader, socksListener);
+        dashboard.addRenderables(circuitManager, directoryManager, socksListener);
     }
 
     public TorConfig getConfig() {
@@ -69,11 +62,8 @@ public class TorClient {
             throw new IllegalStateException("Cannot restart a TorClient instance.  Create a new instance instead.");
         }
         logger.info("Starting Orchid (version: " + Tor.getFullVersion() + ")");
-        directoryDownloader.start(newDirectory);
+        directoryManager.start(newDirectory);
         circuitManager.startBuildingCircuits();
-        if (dashboard.isEnabledByProperty()) {
-            dashboard.startListening();
-        }
         isStarted = true;
     }
 
@@ -86,7 +76,7 @@ public class TorClient {
             if (dashboard.isListening()) {
                 dashboard.stopListening();
             }
-            directoryDownloader.stop();
+            directoryManager.stop();
             circuitManager.stopBuildingCircuits(true);
             newDirectory.close();
             connectionCache.close();
@@ -97,44 +87,30 @@ public class TorClient {
         }
     }
 
-    public ConnectionCache getConnectionCache() {
-        return connectionCache;
-    }
-
-    public CircuitManager getCircuitManager() {
-        return circuitManager;
-    }
-
-    public TorStream openExitStreamTo(String hostname, int port) throws InterruptedException, TimeoutException, OpenFailedException {
-        ensureStarted();
-        return circuitManager.openExitStreamTo(hostname, port);
-    }
-
-    private synchronized void ensureStarted() {
-        if (!isStarted) {
-            throw new IllegalStateException("Must call start() first");
-        }
-    }
-
+    @Deprecated
     public void enableSocksListener(int port) {
         socksListener.addListeningPort(port);
     }
 
+    @Deprecated
     public void enableSocksListener() {
         enableSocksListener(9150);
     }
 
+    @Deprecated
     public void enableDashboard() {
         if (!dashboard.isListening()) {
             dashboard.startListening();
         }
     }
 
+    @Deprecated
     public void enableDashboard(int port) {
         dashboard.setListeningPort(port);
         enableDashboard();
     }
 
+    @Deprecated
     public void disableDashboard() {
         if (dashboard.isListening()) {
             dashboard.stopListening();

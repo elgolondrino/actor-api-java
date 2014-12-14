@@ -5,9 +5,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public abstract class SocksRequest {
 	private final static Logger logger = Logger.getLogger(SocksRequest.class.getName());

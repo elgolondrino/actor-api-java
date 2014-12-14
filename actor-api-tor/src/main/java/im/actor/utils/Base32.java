@@ -1,4 +1,4 @@
-package im.actor.torlib.data;
+package im.actor.utils;
 
 import im.actor.torlib.errors.TorException;
 

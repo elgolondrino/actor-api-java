@@ -7,12 +7,11 @@ import java.util.List;
 import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.utils.Tor;
-import im.actor.torlib.data.HexDigest;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.HexDigest;
+import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;
 import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.directory.parsing.DocumentParsingHandler;
-import im.actor.torlib.documents.RouterStatusDocument;
 
 /*
  * This class contains the hardcoded 'bootstrap' directory authority

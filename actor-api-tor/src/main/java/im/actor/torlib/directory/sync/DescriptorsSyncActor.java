@@ -7,7 +7,7 @@ import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.DirectoryCircuit;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.documents.downloader.DescriptorProcessor;

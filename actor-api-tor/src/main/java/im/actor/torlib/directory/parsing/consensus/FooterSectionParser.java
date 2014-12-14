@@ -2,7 +2,7 @@ package im.actor.torlib.directory.parsing.consensus;
 
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorSignature;
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.parsing.consensus.ConsensusDocumentParser.DocumentSection;
 import im.actor.torlib.directory.parsing.DocumentFieldParser;

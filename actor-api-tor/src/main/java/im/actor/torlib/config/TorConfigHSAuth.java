@@ -6,7 +6,7 @@ import java.util.Map;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.circuits.hs.HSDescriptorCookie;
 import im.actor.torlib.circuits.hs.HSDescriptorCookie.CookieType;
-import im.actor.torlib.data.Base32;
+import im.actor.utils.Base32;
 import im.actor.utils.Base64;
 
 public class TorConfigHSAuth {

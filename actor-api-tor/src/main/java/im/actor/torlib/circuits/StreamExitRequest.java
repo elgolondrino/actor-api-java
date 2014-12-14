@@ -4,8 +4,8 @@ import java.util.concurrent.TimeoutException;
 
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
-import im.actor.torlib.data.IPv4Address;
-import im.actor.torlib.data.exitpolicy.ExitTarget;
+import im.actor.utils.IPv4Address;
+import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.utils.misc.GuardedBy;
 
 public class StreamExitRequest implements ExitTarget {

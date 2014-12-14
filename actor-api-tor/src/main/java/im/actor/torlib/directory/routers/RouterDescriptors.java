@@ -1,6 +1,6 @@
 package im.actor.torlib.directory.routers;
 
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.directory.cache.DescriptorCache;
 import im.actor.torlib.directory.parsing.DocumentParser;
@@ -8,7 +8,6 @@ import im.actor.torlib.directory.parsing.DocumentParserFactory;
 import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
-import im.actor.torlib.documents.RouterStatusDocument;
 
 import java.nio.ByteBuffer;
 import java.util.List;

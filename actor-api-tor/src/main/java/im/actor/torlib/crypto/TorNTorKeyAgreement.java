@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import im.actor.torlib.data.HexDigest;
+import im.actor.utils.HexDigest;
 import im.actor.utils.misc.Utils;
 
 public class TorNTorKeyAgreement implements TorKeyAgreement {

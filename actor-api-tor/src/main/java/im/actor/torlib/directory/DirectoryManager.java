@@ -15,8 +15,8 @@ import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 import im.actor.torlib.documents.DescriptorDocument;
 
-public class DirectoryDownloader {
-    private final static Logger logger = Logger.getLogger(DirectoryDownloader.class.getName());
+public class DirectoryManager {
+    private final static Logger logger = Logger.getLogger(DirectoryManager.class.getName());
 
     private CircuitManager circuitManager;
     private boolean isStarted;
@@ -25,7 +25,7 @@ public class DirectoryDownloader {
     private ConsensusSyncInt directorySync;
     private DescriptorsSyncInt descriptorsSync;
 
-    public DirectoryDownloader(CircuitManager circuitManager) {
+    public DirectoryManager(CircuitManager circuitManager) {
         this.circuitManager = circuitManager;
     }
 

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeoutException;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.data.IPv4Address;
+import im.actor.utils.IPv4Address;
 
 public class PendingExitStreams {
 	
