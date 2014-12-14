@@ -62,7 +62,7 @@ public class TorClient {
         if (isStopped) {
             throw new IllegalStateException("Cannot restart a TorClient instance.  Create a new instance instead.");
         }
-        logger.info("Starting Orchid (version: " + Tor.getFullVersion() + ")");
+        logger.info("Starting AcTOR (version: " + Tor.getFullVersion() + ")");
         directoryManager.start(newDirectory);
         circuitManager.startBuildingCircuits();
         isStarted = true;

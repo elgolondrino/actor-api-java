@@ -1,8 +1,7 @@
-package im.actor.torlib.socks;
+package im.actor.torlib.socks.actors;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 import im.actor.utils.IPv4Address;
 

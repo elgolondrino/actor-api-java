@@ -12,26 +12,8 @@ import im.actor.torlib.config.TorConfigProxy;
  * various subsystem modules.
  */
 public class Tor {
-    private final static Logger logger = Logger.getLogger(Tor.class.getName());
-
-    public final static int BOOTSTRAP_STATUS_STARTING = 0;
-    public final static int BOOTSTRAP_STATUS_CONN_DIR = 5;
-    public final static int BOOTSTRAP_STATUS_HANDSHAKE_DIR = 10;
-    public final static int BOOTSTRAP_STATUS_ONEHOP_CREATE = 15;
-    public final static int BOOTSTRAP_STATUS_REQUESTING_STATUS = 20;
-    public final static int BOOTSTRAP_STATUS_LOADING_STATUS = 25;
-    public final static int BOOTSTRAP_STATUS_REQUESTING_KEYS = 35;
-    public final static int BOOTSTRAP_STATUS_LOADING_KEYS = 40;
-    public final static int BOOTSTRAP_STATUS_REQUESTING_DESCRIPTORS = 45;
-    public final static int BOOTSTRAP_STATUS_LOADING_DESCRIPTORS = 50;
-    public final static int BOOTSTRAP_STATUS_CONN_OR = 80;
-    public final static int BOOTSTRAP_STATUS_HANDSHAKE_OR = 85;
-    public final static int BOOTSTRAP_STATUS_CIRCUIT_CREATE = 90;
-    public final static int BOOTSTRAP_STATUS_DONE = 100;
-
-
-    private final static String implementation = "Orchid";
-    private final static String version = "1.0.0";
+    private final static String implementation = "AcTOR";
+    private final static String version = "0.0.1";
 
     private final static Charset defaultCharset = createDefaultCharset();
 
@@ -80,7 +62,6 @@ public class Tor {
     static public TorConfig createConfig() {
         final TorConfig config = (TorConfig) Proxy.newProxyInstance(TorConfigProxy.class.getClassLoader(), new Class[]{TorConfig.class}, new TorConfigProxy());
         if (isAndroidRuntime()) {
-            logger.warning("Android Runtime detected, disabling V2 Link protocol");
             config.setHandshakeV2Enabled(false);
         }
         return config;

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.errors.TorException;
+import im.actor.torlib.socks.actors.ProxyAcceptActor;
 
 public class SocksTorProxy {
     private final static Logger logger = Logger.getLogger(SocksTorProxy.class.getName());
@@ -23,7 +24,7 @@ public class SocksTorProxy {
 
     public SocksTorProxy(CircuitManager circuitManager) {
         this.circuitManager = circuitManager;
-        executor = Executors.newCachedThreadPool();
+        this.executor = Executors.newCachedThreadPool();
     }
 
     public void addListeningPort(int port) {
@@ -78,7 +79,7 @@ public class SocksTorProxy {
         public void run() {
             try {
                 while (!Thread.interrupted() && !stopped) {
-                    executor.execute(new SocksClientTask(socket.accept(), circuitManager));
+                    ProxyAcceptActor.acceptConnection(socket.accept(), circuitManager);
                 }
             } catch (IOException e) {
                 if (!stopped) {

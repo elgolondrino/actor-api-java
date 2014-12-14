@@ -1,4 +1,4 @@
-package im.actor.torlib.socks;
+package im.actor.torlib.socks.actors;
 
 public class SocksRequestException extends Exception {
 	

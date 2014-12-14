@@ -1,10 +1,9 @@
-package im.actor.torlib.socks.utils;
+package im.actor.torlib.socks.actors;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import com.droidkit.actors.Actor;
@@ -15,15 +14,13 @@ import im.actor.torlib.circuits.TorStream;
 
 public class ProxyConnectionActor extends Actor {
 
-    private static final AtomicInteger NEXT_CONNECTION_ID = new AtomicInteger(1);
-
-    public static void runConnection(final Socket socket, final TorStream torStream) {
+    public static void runConnection(int connectionId, final Socket socket, final TorStream torStream) {
         ActorSystem.system().actorOf(Props.create(ProxyConnectionActor.class, new ActorCreator<ProxyConnectionActor>() {
             @Override
             public ProxyConnectionActor create() {
                 return new ProxyConnectionActor(socket, torStream);
             }
-        }), "/tor/proxy/connection_" + NEXT_CONNECTION_ID.getAndIncrement());
+        }), "/tor/proxy/" + connectionId + "/run");
     }
 
     private final static Logger LOG = Logger.getLogger(ProxyConnectionActor.class.getName());
