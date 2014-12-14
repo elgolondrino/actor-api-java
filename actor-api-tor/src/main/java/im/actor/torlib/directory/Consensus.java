@@ -125,7 +125,6 @@ public class Consensus extends BserObject {
 
         routers = values.getRepeatedObj(4, RouterStatus.class);
 
-
         List<String> keys = values.getRepeatedString(5);
         List<Integer> vals = values.getRepeatedInt(6);
         weights.clear();

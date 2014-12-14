@@ -103,9 +103,9 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         return null;
     }
 
-    private void saveConsensus(Consensus consensus) {
-        safeFileWriter.saveData(consensus.toByteArray());
-        // storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
+    private void saveConsensus(ConsensusDocument consensus) {
+        safeFileWriter.saveData(Consensus.fromConsensusDocument(consensus).toByteArray());
+        //storage.writeDocument(DirectoryStorage.CacheFile.CONSENSUS_MICRODESC, consensus);
     }
 
     private void loadCertificates() {
@@ -224,7 +224,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         Consensus consensus1 = Consensus.fromConsensusDocument(consensus);
         applyCurrentConsensus(consensus1);
-        saveConsensus(consensus1);
+        saveConsensus(consensus);
     }
 
     private void onConsensusDownloadFailed() {
@@ -314,7 +314,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
     private class DownloadConsensusTask implements Runnable {
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), null);
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
                 ConsensusDocument consensus = requestor.downloadCurrentConsensus();
                 self().send(new ConsensusDownloaded(consensus));
             } catch (DirectoryRequestFailedException e) {
@@ -334,7 +334,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit(), null);
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
                 List<KeyCertificateDocument> certificates = requestor.downloadKeyCertificates(requiredCertificates);
                 self().send(new CertificatesDownloaded(certificates));
             } catch (DirectoryRequestFailedException e) {

@@ -24,16 +24,9 @@ public class DirectoryDocumentRequestor {
     private final static int OPEN_DIRECTORY_STREAM_TIMEOUT = 10 * 1000;
 
     private final DirectoryCircuit circuit;
-    private final TorInitializationTracker initializationTracker;
-
 
     public DirectoryDocumentRequestor(DirectoryCircuit circuit) {
-        this(circuit, null);
-    }
-
-    public DirectoryDocumentRequestor(DirectoryCircuit circuit, TorInitializationTracker initializationTracker) {
         this.circuit = circuit;
-        this.initializationTracker = initializationTracker;
     }
 
     public DescriptorDocument downloadBridgeDescriptor() throws DirectoryRequestFailedException {
@@ -41,32 +34,28 @@ public class DirectoryDocumentRequestor {
     }
 
     public ConsensusDocument downloadCurrentConsensus() throws DirectoryRequestFailedException {
-        return fetchSingleDocument(new ConsensusFetcher(), CircuitManager.DIRECTORY_PURPOSE_CONSENSUS);
+        return fetchSingleDocument(new ConsensusFetcher());
     }
 
     public List<KeyCertificateDocument> downloadKeyCertificates(List<ConsensusDocument.RequiredCertificate> required) throws DirectoryRequestFailedException {
-        return fetchDocuments(new CertificateFetcher(required), CircuitManager.DIRECTORY_PURPOSE_CERTIFICATES);
+        return fetchDocuments(new CertificateFetcher(required));
     }
 
     public List<DescriptorDocument> downloadRouterDescriptors(Set<HexDigest> fingerprints) throws DirectoryRequestFailedException {
-        return fetchDocuments(new DescriptorFetcher(fingerprints), CircuitManager.DIRECTORY_PURPOSE_DESCRIPTORS);
+        return fetchDocuments(new DescriptorFetcher(fingerprints));
     }
 
     private <T> T fetchSingleDocument(DocumentFetcher<T> fetcher) throws DirectoryRequestFailedException {
-        return fetchSingleDocument(fetcher, 0);
-    }
-
-    private <T> T fetchSingleDocument(DocumentFetcher<T> fetcher, int purpose) throws DirectoryRequestFailedException {
-        final List<T> result = fetchDocuments(fetcher, purpose);
+        final List<T> result = fetchDocuments(fetcher);
         if (result.size() == 1) {
             return result.get(0);
         }
         return null;
     }
 
-    private <T> List<T> fetchDocuments(DocumentFetcher<T> fetcher, int purpose) throws DirectoryRequestFailedException {
+    private <T> List<T> fetchDocuments(DocumentFetcher<T> fetcher) throws DirectoryRequestFailedException {
         try {
-            final TorHttpConnection http = createHttpConnection(purpose);
+            final TorHttpConnection http = createHttpConnection();
             try {
                 return fetcher.requestDocuments(http);
             } finally {
@@ -83,37 +72,7 @@ public class DirectoryDocumentRequestor {
         }
     }
 
-    private TorHttpConnection createHttpConnection(int purpose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-        return new TorHttpConnection(openDirectoryStream(purpose));
-    }
-
-    private TorStream openDirectoryStream(int purpose) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-        final int requestEventCode = purposeToEventCode(purpose, false);
-        final int loadingEventCode = purposeToEventCode(purpose, true);
-
-        notifyInitialization(requestEventCode);
-
-        final TorStream torStream = circuit.openDirectoryStream(OPEN_DIRECTORY_STREAM_TIMEOUT, true);
-        notifyInitialization(loadingEventCode);
-        return torStream;
-    }
-
-    private int purposeToEventCode(int purpose, boolean getLoadingEvent) {
-        switch (purpose) {
-            case CircuitManager.DIRECTORY_PURPOSE_CONSENSUS:
-                return getLoadingEvent ? Tor.BOOTSTRAP_STATUS_LOADING_STATUS : Tor.BOOTSTRAP_STATUS_REQUESTING_STATUS;
-            case CircuitManager.DIRECTORY_PURPOSE_CERTIFICATES:
-                return getLoadingEvent ? Tor.BOOTSTRAP_STATUS_LOADING_KEYS : Tor.BOOTSTRAP_STATUS_REQUESTING_KEYS;
-            case CircuitManager.DIRECTORY_PURPOSE_DESCRIPTORS:
-                return getLoadingEvent ? Tor.BOOTSTRAP_STATUS_LOADING_DESCRIPTORS : Tor.BOOTSTRAP_STATUS_REQUESTING_DESCRIPTORS;
-            default:
-                return 0;
-        }
-    }
-
-    private void notifyInitialization(int code) {
-        if (code > 0 && initializationTracker != null) {
-            initializationTracker.notifyEvent(code);
-        }
+    private TorHttpConnection createHttpConnection() throws InterruptedException, TimeoutException, StreamConnectFailedException {
+        return new TorHttpConnection(circuit.openDirectoryStream(OPEN_DIRECTORY_STREAM_TIMEOUT, true));
     }
 }

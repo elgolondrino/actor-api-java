@@ -30,9 +30,9 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 		return new ExitCircuitImpl(circuitManager, exitRouter);
 	}
 	
-	public static ExitCircuit createExitCircuitTo(CircuitManager circuitManager, List<Router> prechosenPath) {
-		return new ExitCircuitImpl(circuitManager, prechosenPath);
-	}
+//	public static ExitCircuit createExitCircuitTo(CircuitManager circuitManager, List<Router> prechosenPath) {
+//		return new ExitCircuitImpl(circuitManager, prechosenPath);
+//	}
 	
 	public static DirectoryCircuit createDirectoryCircuit(CircuitManager circuitManager) {
 		return new DirectoryCircuitImpl(circuitManager, null);
@@ -42,9 +42,9 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 		return new DirectoryCircuitImpl(circuitManager, prechosenPath);
 	}
 	
-	public static InternalCircuit createInternalCircuitTo(CircuitManager circuitManager, List<Router> prechosenPath) {
-		return new InternalCircuitImpl(circuitManager, prechosenPath);
-	}
+//	public static InternalCircuit createInternalCircuitTo(CircuitManager circuitManager, List<Router> prechosenPath) {
+//		return new InternalCircuitImpl(circuitManager, prechosenPath);
+//	}
 
 	private final CircuitManager circuitManager;
 	protected final List<Router> prechosenPath;

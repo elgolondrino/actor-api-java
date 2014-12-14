@@ -27,10 +27,6 @@ import im.actor.utils.Threading;
 
 public class CircuitManager implements DashboardRenderable {
 
-    public static final int DIRECTORY_PURPOSE_CONSENSUS = 1;
-    public static final int DIRECTORY_PURPOSE_CERTIFICATES = 2;
-    public static final int DIRECTORY_PURPOSE_DESCRIPTORS = 3;
-
     private final static int OPEN_DIRECTORY_STREAM_RETRY_COUNT = 5;
     private final static int OPEN_DIRECTORY_STREAM_TIMEOUT = 10 * 1000;
 
@@ -343,21 +339,21 @@ public class CircuitManager implements DashboardRenderable {
         return circuit;
     }
 
-    public ExitCircuit openExitCircuitTo(List<Router> path) throws OpenFailedException {
-        final ExitCircuit circuit = CircuitImpl.createExitCircuitTo(this, path);
-        if (!tryOpenCircuit(circuit, false, false)) {
-            throw new OpenFailedException("Could not create exit circuit for path");
-        }
-        return circuit;
-    }
-
-    public InternalCircuit openInternalCircuitTo(List<Router> path) throws OpenFailedException {
-        final InternalCircuit circuit = CircuitImpl.createInternalCircuitTo(this, path);
-        if (!tryOpenCircuit(circuit, false, false)) {
-            throw new OpenFailedException("Could not create internal circuit for path");
-        }
-        return circuit;
-    }
+//    public ExitCircuit openExitCircuitTo(List<Router> path) throws OpenFailedException {
+//        final ExitCircuit circuit = CircuitImpl.createExitCircuitTo(this, path);
+//        if (!tryOpenCircuit(circuit, false, false)) {
+//            throw new OpenFailedException("Could not create exit circuit for path");
+//        }
+//        return circuit;
+//    }
+//
+//    public InternalCircuit openInternalCircuitTo(List<Router> path) throws OpenFailedException {
+//        final InternalCircuit circuit = CircuitImpl.createInternalCircuitTo(this, path);
+//        if (!tryOpenCircuit(circuit, false, false)) {
+//            throw new OpenFailedException("Could not create internal circuit for path");
+//        }
+//        return circuit;
+//    }
 
     private boolean tryOpenCircuit(Circuit circuit, boolean isDirectory, boolean trackInitialization) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
