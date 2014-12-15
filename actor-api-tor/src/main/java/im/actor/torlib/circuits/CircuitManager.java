@@ -2,18 +2,19 @@ package im.actor.torlib.circuits;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.droidkit.actors.concurrency.Future;
+import com.droidkit.actors.concurrency.FutureCallback;
 import im.actor.torlib.circuits.build.CircuitCreationActor;
 import im.actor.torlib.circuits.build.CircuitCreationInt;
+import im.actor.torlib.circuits.build.InternalCircuitsActor;
+import im.actor.torlib.circuits.build.InternalCircuitsInt;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.crypto.TorRandom;
@@ -33,39 +34,58 @@ public class CircuitManager implements DashboardRenderable {
         boolean filter(Circuit circuit);
     }
 
+    private final TorConfig config;
+    private final NewDirectory directory;
     private final ConnectionCache connectionCache;
-    private final Set<CircuitImpl> activeCircuits;
-    private final Queue<InternalCircuit> cleanInternalCircuits;
-    private int requestedInternalCircuitCount = 0;
-    private int pendingInternalCircuitCount = 0;
-    private final TorRandom random;
-    // private final PendingExitStreams pendingExitStreams;
-    private final CircuitCreationInt circuitCreationActor;
     private final CircuitPathChooser pathChooser;
-    private final HiddenServiceManager hiddenServiceManager;
+
+    private final Set<CircuitImpl> activeCircuits;
+
+    private final TorRandom random;
+    private final InternalCircuitsInt circuitsInt;
+    private final CircuitCreationInt circuitCreationActor;
+
     private final ReentrantLock lock = Threading.lock("circuitManager");
 
     private boolean isBuilding = false;
 
     public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache) {
-
+        this.config = config;
+        this.directory = directory;
         this.connectionCache = connectionCache;
         this.pathChooser = CircuitPathChooser.create(config, directory);
 
-        this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
-        this.circuitCreationActor = CircuitCreationActor.get(config, directory, connectionCache, pathChooser, this,
-                hiddenServiceManager);
-        this.activeCircuits = new HashSet<CircuitImpl>();
-        this.cleanInternalCircuits = new LinkedList<InternalCircuit>();
-        this.random = new TorRandom();
+        this.circuitCreationActor = CircuitCreationActor.get(this);
+        this.circuitsInt = InternalCircuitsActor.get(this);
 
+        this.activeCircuits = new HashSet<CircuitImpl>();
+
+        this.random = new TorRandom();
     }
+
+    public TorConfig getConfig() {
+        return config;
+    }
+
+    public NewDirectory getDirectory() {
+        return directory;
+    }
+
+    public ConnectionCache getConnectionCache() {
+        return connectionCache;
+    }
+
+    public CircuitPathChooser getPathChooser() {
+        return pathChooser;
+    }
+
 
     public void startBuildingCircuits() {
         lock.lock();
         try {
             isBuilding = true;
             circuitCreationActor.start();
+            circuitsInt.start();
         } finally {
             lock.unlock();
         }
@@ -76,6 +96,7 @@ public class CircuitManager implements DashboardRenderable {
         try {
             isBuilding = false;
             circuitCreationActor.stop();
+            circuitsInt.stop();
         } finally {
             lock.unlock();
         }
@@ -191,52 +212,38 @@ public class CircuitManager implements DashboardRenderable {
         return circuitCreationActor.openExitStream(address, port, 15000);
     }
 
-    public InternalCircuit getCleanInternalCircuit() throws InterruptedException {
-        synchronized (cleanInternalCircuits) {
-            try {
-                requestedInternalCircuitCount += 1;
-                while (cleanInternalCircuits.isEmpty()) {
-                    cleanInternalCircuits.wait();
+    public InternalCircuit pickInternalCircuit() throws InterruptedException {
+        final Future<InternalCircuit> future = circuitsInt.pickInternalCircuit();
+        final InternalCircuit[] res = new InternalCircuit[1];
+        future.addListener(new FutureCallback<InternalCircuit>() {
+            @Override
+            public void onResult(InternalCircuit result) {
+                synchronized (res) {
+                    res[0] = result;
+                    res.notifyAll();
                 }
-                return cleanInternalCircuits.remove();
-            } finally {
-                requestedInternalCircuitCount -= 1;
             }
-        }
-    }
 
-    public int getNeededCleanCircuitCount(boolean isPredicted) {
-        synchronized (cleanInternalCircuits) {
-            final int predictedCount = (isPredicted) ? 2 : 0;
-            final int needed = Math.max(requestedInternalCircuitCount, predictedCount) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
-            if (needed < 0) {
-                return 0;
-            } else {
-                return needed;
+            @Override
+            public void onError(Throwable throwable) {
+                synchronized (res) {
+                    res[0] = null;
+                    res.notifyAll();
+                }
             }
+        });
+        synchronized (res) {
+            if (res[0] != null) {
+                return res[0];
+            }
+            res.wait();
         }
-    }
 
-    public void incrementPendingInternalCircuitCount() {
-        synchronized (cleanInternalCircuits) {
-            pendingInternalCircuitCount += 1;
+        if (res[0] == null) {
+            throw new InterruptedException();
         }
+        return res[0];
     }
-
-    public void decrementPendingInternalCircuitCount() {
-        synchronized (cleanInternalCircuits) {
-            pendingInternalCircuitCount -= 1;
-        }
-    }
-
-    public void addCleanInternalCircuit(InternalCircuit circuit) {
-        synchronized (cleanInternalCircuits) {
-            pendingInternalCircuitCount -= 1;
-            cleanInternalCircuits.add(circuit);
-            cleanInternalCircuits.notifyAll();
-        }
-    }
-
 
     public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
         if ((flags & DASHBOARD_CIRCUITS) == 0) {

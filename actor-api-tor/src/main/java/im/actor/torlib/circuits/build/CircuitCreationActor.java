@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,23 +33,20 @@ import im.actor.utils.Threading;
 public class CircuitCreationActor extends TypedActor<CircuitCreationInt> implements CircuitCreationInt {
 
 
-    public static CircuitCreationInt get(final TorConfig config, final NewDirectory directory, final ConnectionCache connectionCache,
-                                         final CircuitPathChooser pathChooser, final CircuitManager circuitManager,
-                                         final HiddenServiceManager hiddenServiceManager) {
-        return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(CircuitCreationActor.class, new ActorCreator<CircuitCreationActor>() {
-            @Override
-            public CircuitCreationActor create() {
-                return new CircuitCreationActor(config, directory, connectionCache, pathChooser, circuitManager,
-                        hiddenServiceManager);
-            }
-        }), "/tor/circuit/build"), CircuitCreationInt.class);
+    public static CircuitCreationInt get(final CircuitManager circuitManager) {
+        return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(CircuitCreationActor.class,
+                new ActorCreator<CircuitCreationActor>() {
+                    @Override
+                    public CircuitCreationActor create() {
+                        return new CircuitCreationActor(circuitManager);
+                    }
+                }), "/tor/circuit/build"), CircuitCreationInt.class);
     }
 
     private final static Logger logger = Logger.getLogger(CircuitCreationActor.class.getName());
     private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
     private final static int MAX_PENDING_CIRCUITS = 4;
 
-    private final TorConfig config;
     private final NewDirectory directory;
     private final HiddenServiceManager hiddenServiceManager;
     private final ConnectionCache connectionCache;
@@ -58,33 +54,26 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     private final CircuitPathChooser pathChooser;
     private final Executor executor;
     private final CircuitBuildHandler buildHandler;
-    private final CircuitBuildHandler internalBuildHandler;
     // To avoid obnoxiously printing a warning every second
     private int notEnoughDirectoryInformationWarningCounter = 0;
 
     private final CircuitPredictor predictor;
 
-    private final AtomicLong lastNewCircuit;
-
     private final Set<StreamExitRequest> pendingRequests;
 
-    public CircuitCreationActor(TorConfig config, NewDirectory directory, ConnectionCache connectionCache,
-                                CircuitPathChooser pathChooser, CircuitManager circuitManager,
-                                HiddenServiceManager hiddenServiceManager) {
+    public CircuitCreationActor(CircuitManager circuitManager) {
         super(CircuitCreationInt.class);
 
-        this.config = config;
-        this.directory = directory;
-        this.connectionCache = connectionCache;
         this.circuitManager = circuitManager;
-        this.pathChooser = pathChooser;
-        this.hiddenServiceManager = hiddenServiceManager;
+        this.directory = circuitManager.getDirectory();
+        this.connectionCache = circuitManager.getConnectionCache();
+        this.pathChooser = circuitManager.getPathChooser();
+
+        this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), directory, circuitManager);
         this.pendingRequests = new CopyOnWriteArraySet<StreamExitRequest>();
         this.executor = Threading.newPool("CircuitCreationTask worker");
         this.buildHandler = createCircuitBuildHandler();
-        this.internalBuildHandler = createInternalCircuitBuildHandler();
         this.predictor = new CircuitPredictor();
-        this.lastNewCircuit = new AtomicLong();
 
     }
 
@@ -142,7 +131,6 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         if (message instanceof Iterate) {
             expireOldCircuits();
             assignPendingStreamsToActiveCircuits();
-            checkExpiredPendingCircuits();
             checkCircuitsForCreation();
             self().sendOnce(new Iterate(), 5000);
         }
@@ -192,9 +180,6 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         }
     }
 
-    private void checkExpiredPendingCircuits() {
-        // TODO Auto-generated method stub
-    }
 
     private void checkCircuitsForCreation() {
 
@@ -205,16 +190,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
             return;
         }
 
-
-        if (lastNewCircuit.get() != 0) {
-            final long now = System.currentTimeMillis();
-            if ((now - lastNewCircuit.get()) < config.getNewCircuitPeriod()) {
-                // return;
-            }
-        }
-
         buildCircuitIfNeeded();
-        maybeBuildInternalCircuit();
     }
 
     private void buildCircuitIfNeeded() {
@@ -238,22 +214,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         buildCircuitToHandleExitTargets(exitTargets);
     }
 
-    private void maybeBuildInternalCircuit() {
-        final int needed = circuitManager.getNeededCleanCircuitCount(predictor.isInternalPredicted());
 
-        if (needed > 0) {
-            launchBuildTaskForInternalCircuit();
-        }
-    }
-
-    private void launchBuildTaskForInternalCircuit() {
-        logger.fine("Launching new internal circuit");
-        final InternalCircuitImpl circuit = new InternalCircuitImpl(circuitManager);
-        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, internalBuildHandler, false);
-        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
-        executor.execute(task);
-        circuitManager.incrementPendingInternalCircuitCount();
-    }
 
     private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
         final CircuitManager.CircuitFilter filter = new CircuitManager.CircuitFilter() {
@@ -305,7 +266,6 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
             public void circuitBuildCompleted(Circuit circuit) {
                 logger.fine("Circuit completed to: " + circuit);
                 circuitOpenedHandler(circuit);
-                lastNewCircuit.set(System.currentTimeMillis());
             }
 
             public void circuitBuildFailed(String reason) {
@@ -338,35 +298,6 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
                 launchExitStreamTask(ec, req);
             }
         }
-    }
-
-    private CircuitBuildHandler createInternalCircuitBuildHandler() {
-        return new CircuitBuildHandler() {
-
-            public void nodeAdded(CircuitNode node) {
-                logger.finer("Node added to internal circuit: " + node);
-            }
-
-            public void connectionFailed(String reason) {
-                logger.fine("Circuit connection failed: " + reason);
-                circuitManager.decrementPendingInternalCircuitCount();
-            }
-
-            public void connectionCompleted(Connection connection) {
-                logger.finer("Circuit connection completed to " + connection);
-            }
-
-            public void circuitBuildFailed(String reason) {
-                logger.fine("Circuit build failed: " + reason);
-                circuitManager.decrementPendingInternalCircuitCount();
-            }
-
-            public void circuitBuildCompleted(Circuit circuit) {
-                logger.fine("Internal circuit build completed: " + circuit);
-                lastNewCircuit.set(System.currentTimeMillis());
-                circuitManager.addCleanInternalCircuit((InternalCircuit) circuit);
-            }
-        };
     }
 
 

@@ -87,7 +87,7 @@ public class HSDescriptorDownloader {
 	
 	private TorStream openHSDirectoryStream(Router directory) throws TimeoutException, InterruptedException, OpenFailedException {
 
-		final InternalCircuit circuit = circuitManager.getCleanInternalCircuit();
+		final InternalCircuit circuit = circuitManager.pickInternalCircuit();
 		
 		try {
 			final DirectoryCircuit dc = circuit.cannibalizeToDirectory(directory);

@@ -13,73 +13,68 @@ import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
-	
-	private final Router exitRouter;
-	private final Set<ExitTarget> failedExitRequests;
 
-	public ExitCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
-		super(circuitManager, prechosenPath);
-		this.exitRouter = prechosenPath.get(prechosenPath.size() - 1);
-		this.failedExitRequests = new HashSet<ExitTarget>();
-	}
+    private final Router exitRouter;
+    private final Set<ExitTarget> failedExitRequests;
 
-	public ExitCircuitImpl(CircuitManager circuitManager, Router exitRouter) {
-		super(circuitManager);
-		this.exitRouter = exitRouter;
-		this.failedExitRequests = new HashSet<ExitTarget>();
-	}
-	
-	public TorStream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-		return openExitStream(address.toString(), port, timeout);
-	}
+    public ExitCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
+        super(circuitManager, prechosenPath);
+        this.exitRouter = prechosenPath.get(prechosenPath.size() - 1);
+        this.failedExitRequests = new HashSet<ExitTarget>();
+    }
 
-	public TorStream openExitStream(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
-		final TorStream torStream = createNewStream();
-		try {
-			torStream.openExit(target, port, timeout);
-			return torStream;
-		} catch (Exception e) {
-			removeStream(torStream);
-			return processStreamOpenException(e);
-		}
-	}
-	
-	public void recordFailedExitTarget(ExitTarget target) {
-		synchronized(failedExitRequests) {
-			failedExitRequests.add(target);
-		}
-	}
+    public ExitCircuitImpl(CircuitManager circuitManager, Router exitRouter) {
+        super(circuitManager);
+        this.exitRouter = exitRouter;
+        this.failedExitRequests = new HashSet<ExitTarget>();
+    }
 
-	public boolean canHandleExitTo(ExitTarget target) {
-		synchronized(failedExitRequests) {
-			if(failedExitRequests.contains(target)) {
-				return false;
-			}
-		}
-		
-		if(isMarkedForClose()) {
-			return false;
-		}
+    public TorStream openExitStream(IPv4Address address, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+        return openExitStream(address.toString(), port, timeout);
+    }
 
-		if(target.isAddressTarget()) {
-			return exitRouter.exitPolicyAccepts(target.getAddress(), target.getPort());
-		} else {
-			return exitRouter.exitPolicyAccepts(target.getPort());
-		}
-	}
-	
-	public boolean canHandleExitToPort(int port) {
-		return exitRouter.exitPolicyAccepts(port);
-	}
+    public TorStream openExitStream(String target, int port, long timeout) throws InterruptedException, TimeoutException, StreamConnectFailedException {
+        final TorStream torStream = createNewStream();
+        try {
+            torStream.openExit(target, port, timeout);
+            return torStream;
+        } catch (Exception e) {
+            removeStream(torStream);
+            return processStreamOpenException(e);
+        }
+    }
 
-	
-	@Override
-	protected List<Router> choosePathForCircuit(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
-		return pathChooser.choosePathWithExit(exitRouter);
-	}
-	
-	@Override
-	protected String getCircuitTypeLabel() {
-		return "Exit";
-	}
+    public void recordFailedExitTarget(ExitTarget target) {
+        synchronized (failedExitRequests) {
+            failedExitRequests.add(target);
+        }
+    }
+
+    public boolean canHandleExitTo(ExitTarget target) {
+        synchronized (failedExitRequests) {
+            if (failedExitRequests.contains(target)) {
+                return false;
+            }
+        }
+
+        if (isMarkedForClose()) {
+            return false;
+        }
+
+        if (target.isAddressTarget()) {
+            return exitRouter.exitPolicyAccepts(target.getAddress(), target.getPort());
+        } else {
+            return exitRouter.exitPolicyAccepts(target.getPort());
+        }
+    }
+
+    @Override
+    protected List<Router> choosePathForCircuit(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
+        return pathChooser.choosePathWithExit(exitRouter);
+    }
+
+    @Override
+    protected String getCircuitTypeLabel() {
+        return "Exit";
+    }
 }

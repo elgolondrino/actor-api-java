@@ -32,7 +32,7 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
 
         logger.fine("Opening rendezvous circuit for " + logServiceName());
 
-        final InternalCircuit rendezvous = circuitManager.getCleanInternalCircuit();
+        final InternalCircuit rendezvous = circuitManager.pickInternalCircuit();
         logger.fine("Establishing rendezvous for " + logServiceName());
         RendezvousProcessor rp = new RendezvousProcessor(rendezvous);
         if (!rp.establishRendezvous()) {
@@ -86,7 +86,7 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
         }
 
         try {
-            final InternalCircuit circuit = circuitManager.getCleanInternalCircuit();
+            final InternalCircuit circuit = circuitManager.pickInternalCircuit();
             return circuit.cannibalizeToIntroductionPoint(r);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
