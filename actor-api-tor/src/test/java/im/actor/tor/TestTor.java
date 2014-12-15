@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 public class TestTor extends TestCase {
     // private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.TLS_TCP, "mtproto-api.actor.im", 443);
     private static final MTProtoEndpoint ENDPOINT = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.PLAIN_TCP, "mtproto-api.actor.im", 8080);
+    private static final MTProtoEndpoint ENDPOINT_HS = new MTProtoEndpoint(MTProtoEndpoint.EndpointType.PLAIN_TCP, "tzzgvbbgwtgtaxg2.onion", 8080);
 
     private static final int APP_ID = 42;
     private static final String APP_KEY = "b815c437facc0f41157633d13221336b4d8484d9ff2289acc6bba4079e994d04";
@@ -20,7 +21,7 @@ public class TestTor extends TestCase {
 
     public void testTor() throws Exception {
         ActorTorHelper helper = new ActorTorHelper("/Users/ex3ndr/Develop/tor_junit/");
-        helper.start();
+        helper.start(9152);
 
         ActorApiConfig config = new ActorApiConfig.Builder()
                 .setApiCallback(new EmptyApiCallback())
@@ -34,5 +35,28 @@ public class TestTor extends TestCase {
 
         // Request code
         ResponseSendAuthCode requestCode = requests.sendAuthCodeSync(PHONE_NUMBER, APP_ID, APP_KEY, 1000000L);
+
+        helper.getTorClient().stop();
     }
+
+//    public void testHiddenTor() throws Exception {
+//
+//        ActorTorHelper helper = new ActorTorHelper("/Users/ex3ndr/Develop/tor_junit/");
+//        helper.start(9153);
+//
+//        ActorApiConfig config = new ActorApiConfig.Builder()
+//                .setApiCallback(new EmptyApiCallback())
+//                .setStorage(new MemoryApiStorage())
+//                .addEndpoint(ENDPOINT_HS)
+//                .setLog(new SysOutLog())
+//                .setProxy(new ActorApiProxy("127.0.0.1", 9153))
+//                .build();
+//        ActorApi actorApi = new ActorApi(config);
+//        ApiRequests requests = actorApi.getRequests();
+//
+//        // Request code
+//        ResponseSendAuthCode requestCode = requests.sendAuthCodeSync(PHONE_NUMBER, APP_ID, APP_KEY, 1000000L);
+//
+//        helper.getTorClient().stop();
+//    }
 }

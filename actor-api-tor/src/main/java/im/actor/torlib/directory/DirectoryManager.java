@@ -1,6 +1,5 @@
 package im.actor.torlib.directory;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
@@ -61,7 +60,7 @@ public class DirectoryManager {
 
     private DirectoryCircuit openBridgeCircuit(Router bridge) throws DirectoryRequestFailedException {
         try {
-            return circuitManager.openDirectoryCircuitTo(Arrays.asList(bridge));
+            return circuitManager.openDirectoryCircuitTo(bridge);
         } catch (OpenFailedException e) {
             throw new DirectoryRequestFailedException("Failed to open directory circuit to bridge " + bridge, e);
         }

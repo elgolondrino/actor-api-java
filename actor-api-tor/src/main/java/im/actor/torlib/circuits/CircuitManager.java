@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.droidkit.actors.concurrency.Future;
+import im.actor.torlib.circuits.build.CircuitCreationActor;
+import im.actor.torlib.circuits.build.CircuitCreationInt;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
@@ -27,22 +28,19 @@ import im.actor.utils.Threading;
 public class CircuitManager implements DashboardRenderable {
 
     private final static int OPEN_DIRECTORY_STREAM_RETRY_COUNT = 5;
-    private final static int OPEN_DIRECTORY_STREAM_TIMEOUT = 10 * 1000;
 
     public interface CircuitFilter {
         boolean filter(Circuit circuit);
     }
 
-    private final TorConfig config;
     private final ConnectionCache connectionCache;
     private final Set<CircuitImpl> activeCircuits;
     private final Queue<InternalCircuit> cleanInternalCircuits;
     private int requestedInternalCircuitCount = 0;
     private int pendingInternalCircuitCount = 0;
     private final TorRandom random;
-    private final PendingExitStreams pendingExitStreams;
-    private final ScheduledExecutorService scheduledExecutor = Threading.newSingleThreadScheduledPool("CircuitManager worker");
-    private final CircuitCreationTask circuitCreationTask;
+    // private final PendingExitStreams pendingExitStreams;
+    private final CircuitCreationInt circuitCreationActor;
     private final CircuitPathChooser pathChooser;
     private final HiddenServiceManager hiddenServiceManager;
     private final ReentrantLock lock = Threading.lock("circuitManager");
@@ -50,24 +48,24 @@ public class CircuitManager implements DashboardRenderable {
     private boolean isBuilding = false;
 
     public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache) {
-        this.config = config;
+
         this.connectionCache = connectionCache;
         this.pathChooser = CircuitPathChooser.create(config, directory);
 
-        this.pendingExitStreams = new PendingExitStreams(config);
-        this.circuitCreationTask = new CircuitCreationTask(config, directory, connectionCache, pathChooser, this);
+        this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
+        this.circuitCreationActor = CircuitCreationActor.get(config, directory, connectionCache, pathChooser, this,
+                hiddenServiceManager);
         this.activeCircuits = new HashSet<CircuitImpl>();
         this.cleanInternalCircuits = new LinkedList<InternalCircuit>();
         this.random = new TorRandom();
 
-        this.hiddenServiceManager = new HiddenServiceManager(config, directory, this);
     }
 
     public void startBuildingCircuits() {
         lock.lock();
         try {
             isBuilding = true;
-            scheduledExecutor.scheduleAtFixedRate(circuitCreationTask, 0, 1000, TimeUnit.MILLISECONDS);
+            circuitCreationActor.start();
         } finally {
             lock.unlock();
         }
@@ -77,7 +75,7 @@ public class CircuitManager implements DashboardRenderable {
         lock.lock();
         try {
             isBuilding = false;
-            scheduledExecutor.shutdownNow();
+            circuitCreationActor.stop();
         } finally {
             lock.unlock();
         }
@@ -93,9 +91,6 @@ public class CircuitManager implements DashboardRenderable {
         }
     }
 
-    public ExitCircuit createNewExitCircuit(Router exitRouter) {
-        return CircuitImpl.createExitCircuit(this, exitRouter);
-    }
 
     public void addActiveCircuit(CircuitImpl circuit) {
         synchronized (activeCircuits) {
@@ -188,98 +183,12 @@ public class CircuitManager implements DashboardRenderable {
         return ac;
     }
 
-    public TorStream openExitStreamTo(String hostname, int port)
-            throws InterruptedException, TimeoutException, OpenFailedException {
-        if (hostname.endsWith(".onion")) {
-            return hiddenServiceManager.getStreamTo(hostname, port);
-        }
-        validateHostname(hostname);
-        circuitCreationTask.predictPort(port);
-        return pendingExitStreams.openExitStream(hostname, port);
+    public Future<TorStream> openExitStreamTo(String hostname, int port) {
+        return circuitCreationActor.openExitStream(hostname, port, 15000);
     }
 
-    private void validateHostname(String hostname) throws OpenFailedException {
-        maybeRejectInternalAddress(hostname);
-        if (hostname.toLowerCase().endsWith(".onion")) {
-            throw new OpenFailedException("Hidden services not supported");
-        } else if (hostname.toLowerCase().endsWith(".exit")) {
-            throw new OpenFailedException(".exit addresses are not supported");
-        }
-    }
-
-    private void maybeRejectInternalAddress(String hostname) throws OpenFailedException {
-        if (IPv4Address.isValidIPv4AddressString(hostname)) {
-            maybeRejectInternalAddress(IPv4Address.createFromString(hostname));
-        }
-    }
-
-    private void maybeRejectInternalAddress(IPv4Address address) throws OpenFailedException {
-        final InetAddress inetAddress = address.toInetAddress();
-        if (inetAddress.isSiteLocalAddress() && config.getClientRejectInternalAddress()) {
-            throw new OpenFailedException("Rejecting stream target with internal address: " + address);
-        }
-    }
-
-    public TorStream openExitStreamTo(IPv4Address address, int port)
-            throws InterruptedException, TimeoutException, OpenFailedException {
-        maybeRejectInternalAddress(address);
-        circuitCreationTask.predictPort(port);
-        return pendingExitStreams.openExitStream(address, port);
-    }
-
-    public List<StreamExitRequest> getPendingExitStreams() {
-        return pendingExitStreams.getUnreservedPendingRequests();
-    }
-
-    public DirectoryCircuit openDirectoryCircuit() throws OpenFailedException {
-        int failCount = 0;
-        while (failCount < OPEN_DIRECTORY_STREAM_RETRY_COUNT) {
-            final DirectoryCircuit circuit = CircuitImpl.createDirectoryCircuit(this);
-            if (tryOpenCircuit(circuit, true, true)) {
-                return circuit;
-            }
-            failCount += 1;
-        }
-        throw new OpenFailedException("Could not create circuit for directory stream");
-    }
-
-    private static class DirectoryCircuitResult implements CircuitBuildHandler {
-
-        private boolean isFailed;
-
-        public void connectionCompleted(Connection connection) {
-        }
-
-        public void nodeAdded(CircuitNode node) {
-        }
-
-        public void circuitBuildCompleted(Circuit circuit) {
-        }
-
-        public void connectionFailed(String reason) {
-            isFailed = true;
-        }
-
-        public void circuitBuildFailed(String reason) {
-            isFailed = true;
-        }
-
-        boolean isSuccessful() {
-            return !isFailed;
-        }
-    }
-
-    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
-        if ((flags & DASHBOARD_CIRCUITS) == 0) {
-            return;
-        }
-        renderer.renderComponent(writer, flags, connectionCache);
-        renderer.renderComponent(writer, flags, circuitCreationTask.getCircuitPredictor());
-        writer.println("[Circuit Manager]");
-        writer.println();
-        for (Circuit c : getCircuitsByFilter(null)) {
-            renderer.renderComponent(writer, flags, c);
-        }
+    public Future<TorStream> openExitStreamTo(IPv4Address address, int port) {
+        return circuitCreationActor.openExitStream(address, port, 15000);
     }
 
     public InternalCircuit getCleanInternalCircuit() throws InterruptedException {
@@ -328,35 +237,76 @@ public class CircuitManager implements DashboardRenderable {
         }
     }
 
-    public DirectoryCircuit openDirectoryCircuitTo(List<Router> path) throws OpenFailedException {
-        final DirectoryCircuit circuit = CircuitImpl.createDirectoryCircuitTo(this, path);
-        if (!tryOpenCircuit(circuit, true, false)) {
+
+    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
+        if ((flags & DASHBOARD_CIRCUITS) == 0) {
+            return;
+        }
+        renderer.renderComponent(writer, flags, connectionCache);
+        // renderer.renderComponent(writer, flags, circuitCreationTask.getCircuitPredictor());
+        writer.println("[Circuit Manager]");
+        writer.println();
+        for (Circuit c : getCircuitsByFilter(null)) {
+            renderer.renderComponent(writer, flags, c);
+        }
+    }
+
+    // Obsolete directory circuits
+
+    @Deprecated
+    public DirectoryCircuit openDirectoryCircuit() throws OpenFailedException {
+        int failCount = 0;
+        while (failCount < OPEN_DIRECTORY_STREAM_RETRY_COUNT) {
+            final DirectoryCircuit circuit = new DirectoryCircuitImpl(this, null);
+            if (tryOpenDirectoryCircuit(circuit)) {
+                return circuit;
+            }
+            failCount += 1;
+        }
+        throw new OpenFailedException("Could not create circuit for directory stream");
+    }
+
+    @Deprecated
+    public DirectoryCircuit openDirectoryCircuitTo(Router destRouter) throws OpenFailedException {
+        final DirectoryCircuit circuit = new DirectoryCircuitImpl(this, Arrays.asList(destRouter));
+        if (!tryOpenDirectoryCircuit(circuit)) {
             throw new OpenFailedException("Could not create directory circuit for path");
         }
         return circuit;
     }
 
-//    public ExitCircuit openExitCircuitTo(List<Router> path) throws OpenFailedException {
-//        final ExitCircuit circuit = CircuitImpl.createExitCircuitTo(this, path);
-//        if (!tryOpenCircuit(circuit, false, false)) {
-//            throw new OpenFailedException("Could not create exit circuit for path");
-//        }
-//        return circuit;
-//    }
-//
-//    public InternalCircuit openInternalCircuitTo(List<Router> path) throws OpenFailedException {
-//        final InternalCircuit circuit = CircuitImpl.createInternalCircuitTo(this, path);
-//        if (!tryOpenCircuit(circuit, false, false)) {
-//            throw new OpenFailedException("Could not create internal circuit for path");
-//        }
-//        return circuit;
-//    }
-
-    private boolean tryOpenCircuit(Circuit circuit, boolean isDirectory, boolean trackInitialization) {
+    @Deprecated
+    private boolean tryOpenDirectoryCircuit(Circuit circuit) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
-        final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result, isDirectory);
+        final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result, true);
         final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache);
         task.run();
         return result.isSuccessful();
+    }
+
+    private static class DirectoryCircuitResult implements CircuitBuildHandler {
+
+        private boolean isFailed;
+
+        public void connectionCompleted(Connection connection) {
+        }
+
+        public void nodeAdded(CircuitNode node) {
+        }
+
+        public void circuitBuildCompleted(Circuit circuit) {
+        }
+
+        public void connectionFailed(String reason) {
+            isFailed = true;
+        }
+
+        public void circuitBuildFailed(String reason) {
+            isFailed = true;
+        }
+
+        boolean isSuccessful() {
+            return !isFailed;
+        }
     }
 }

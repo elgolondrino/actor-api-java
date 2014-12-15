@@ -1,30 +1,58 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.droidkit.actors.ActorCreator;
+import com.droidkit.actors.ActorSystem;
+import com.droidkit.actors.Props;
+import com.droidkit.actors.concurrency.Future;
+import com.droidkit.actors.typed.TypedActor;
+import com.droidkit.actors.typed.TypedCreator;
+import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.*;
+import im.actor.torlib.circuits.*;
+import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.errors.OpenFailedException;
+import im.actor.utils.IPv4Address;
 import im.actor.utils.Threading;
 
-public class CircuitCreationTask implements Runnable {
-    private final static Logger logger = Logger.getLogger(CircuitCreationTask.class.getName());
+public class CircuitCreationActor extends TypedActor<CircuitCreationInt> implements CircuitCreationInt {
+
+
+    public static CircuitCreationInt get(final TorConfig config, final NewDirectory directory, final ConnectionCache connectionCache,
+                                         final CircuitPathChooser pathChooser, final CircuitManager circuitManager,
+                                         final HiddenServiceManager hiddenServiceManager) {
+        return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(CircuitCreationActor.class, new ActorCreator<CircuitCreationActor>() {
+            @Override
+            public CircuitCreationActor create() {
+                return new CircuitCreationActor(config, directory, connectionCache, pathChooser, circuitManager,
+                        hiddenServiceManager);
+            }
+        }), "/tor/circuit/build"), CircuitCreationInt.class);
+    }
+
+    private final static Logger logger = Logger.getLogger(CircuitCreationActor.class.getName());
     private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
     private final static int MAX_PENDING_CIRCUITS = 4;
 
     private final TorConfig config;
     private final NewDirectory directory;
+    private final HiddenServiceManager hiddenServiceManager;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final CircuitPathChooser pathChooser;
@@ -38,42 +66,94 @@ public class CircuitCreationTask implements Runnable {
 
     private final AtomicLong lastNewCircuit;
 
-    public CircuitCreationTask(TorConfig config, NewDirectory directory, ConnectionCache connectionCache,
-                               CircuitPathChooser pathChooser, CircuitManager circuitManager) {
+    private final Set<StreamExitRequest> pendingRequests;
+
+    public CircuitCreationActor(TorConfig config, NewDirectory directory, ConnectionCache connectionCache,
+                                CircuitPathChooser pathChooser, CircuitManager circuitManager,
+                                HiddenServiceManager hiddenServiceManager) {
+        super(CircuitCreationInt.class);
+
         this.config = config;
         this.directory = directory;
         this.connectionCache = connectionCache;
         this.circuitManager = circuitManager;
         this.pathChooser = pathChooser;
+        this.hiddenServiceManager = hiddenServiceManager;
+        this.pendingRequests = new CopyOnWriteArraySet<StreamExitRequest>();
         this.executor = Threading.newPool("CircuitCreationTask worker");
         this.buildHandler = createCircuitBuildHandler();
         this.internalBuildHandler = createInternalCircuitBuildHandler();
         this.predictor = new CircuitPredictor();
         this.lastNewCircuit = new AtomicLong();
+
     }
 
-    public CircuitPredictor getCircuitPredictor() {
-        return predictor;
+    @Override
+    public void start() {
+        self().sendOnce(new Iterate());
     }
 
-    public void run() {
-        expireOldCircuits();
-        assignPendingStreamsToActiveCircuits();
-        checkExpiredPendingCircuits();
-        checkCircuitsForCreation();
-    }
-
-    public void predictPort(int port) {
+    @Override
+    public Future<TorStream> openExitStream(final String hostname, final int port, long timeout) {
+        if (hostname.endsWith(".onion")) {
+            // TODO: Better implementation
+            final TypedFuture<TorStream> res = future();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        res.doComplete(hiddenServiceManager.getStreamTo(hostname, port));
+                    } catch (OpenFailedException e) {
+                        e.printStackTrace();
+                        res.doError(e);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        res.doError(e);
+                    } catch (TimeoutException e) {
+                        e.printStackTrace();
+                        res.doError(e);
+                    }
+                }
+            }.start();
+            return res;
+        }
+        TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
+        pendingRequests.add(new StreamExitRequest(hostname, port, res));
+        return res;
+    }
+
+    @Override
+    public Future<TorStream> openExitStream(IPv4Address address, int port, long timeout) {
+        TypedFuture<TorStream> res = future();
+        predictor.addExitPortRequest(port);
+        pendingRequests.add(new StreamExitRequest(address, port, res));
+        return res;
+    }
+
+    @Override
+    public void stop() {
+        context().stopSelf();
+    }
+
+    @Override
+    public void onReceive(Object message) {
+        super.onReceive(message);
+        if (message instanceof Iterate) {
+            expireOldCircuits();
+            assignPendingStreamsToActiveCircuits();
+            checkExpiredPendingCircuits();
+            checkCircuitsForCreation();
+            self().sendOnce(new Iterate(), 5000);
+        }
     }
 
     private void assignPendingStreamsToActiveCircuits() {
-        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
-        if (pendingExitStreams.isEmpty())
+        if (pendingRequests.isEmpty())
             return;
 
         for (ExitCircuit c : circuitManager.getRandomlyOrderedListOfExitCircuits()) {
-            final Iterator<StreamExitRequest> it = pendingExitStreams.iterator();
+            final Iterator<StreamExitRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
                 if (attemptHandleStreamRequest(c, it.next()))
                     it.remove();
@@ -106,7 +186,7 @@ public class CircuitCreationTask implements Runnable {
         });
         for (Circuit c : circuits) {
             logger.fine("Closing idle dirty circuit: " + c);
-            ((CircuitImpl) c).markForClose();
+            c.markForClose();
         }
     }
 
@@ -141,10 +221,9 @@ public class CircuitCreationTask implements Runnable {
             return;
         }
 
-        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
         final List<PredictedPortTarget> predictedPorts = predictor.getPredictedPortTargets();
         final List<ExitTarget> exitTargets = new ArrayList<ExitTarget>();
-        for (StreamExitRequest streamRequest : pendingExitStreams) {
+        for (StreamExitRequest streamRequest : pendingRequests) {
             if (!streamRequest.isReserved() && countCircuitsSupportingTarget(streamRequest, false) == 0) {
                 exitTargets.add(streamRequest);
             }
@@ -212,7 +291,7 @@ public class CircuitCreationTask implements Runnable {
             return;
         }
 
-        final Circuit circuit = circuitManager.createNewExitCircuit(exitRouter);
+        final Circuit circuit = new ExitCircuitImpl(circuitManager, exitRouter);
         final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler, false);
         final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
         executor.execute(task);
@@ -252,8 +331,7 @@ public class CircuitCreationTask implements Runnable {
             return;
         }
         final ExitCircuit ec = (ExitCircuit) circuit;
-        final List<StreamExitRequest> pendingExitStreams = circuitManager.getPendingExitStreams();
-        for (StreamExitRequest req : pendingExitStreams) {
+        for (StreamExitRequest req : pendingRequests) {
             if (ec.canHandleExitTo(req) && req.reserveRequest()) {
                 launchExitStreamTask(ec, req);
             }
@@ -287,5 +365,10 @@ public class CircuitCreationTask implements Runnable {
                 circuitManager.addCleanInternalCircuit((InternalCircuit) circuit);
             }
         };
+    }
+
+
+    private static class Iterate {
+
     }
 }

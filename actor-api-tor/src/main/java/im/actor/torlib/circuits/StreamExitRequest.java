@@ -1,169 +1,74 @@
 package im.actor.torlib.circuits;
- 
-import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.errors.OpenFailedException;
-import im.actor.torlib.errors.StreamConnectFailedException;
+import com.droidkit.actors.typed.TypedFuture;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
-import im.actor.utils.misc.GuardedBy;
 
 public class StreamExitRequest implements ExitTarget {
-	
-	private enum CompletionStatus {NOT_COMPLETED, SUCCESS, TIMEOUT, STREAM_OPEN_FAILURE, EXIT_FAILURE, INTERRUPTED};
-	
-	private final boolean isAddress;
-	private final IPv4Address address;
-	private final String hostname;
-	private final int port;
-	private final Object requestCompletionLock;
-	
-	@GuardedBy("requestCompletionLock") private CompletionStatus completionStatus;
-	@GuardedBy("requestCompletionLock") private TorStream torStream;
-	@GuardedBy("requestCompletionLock") private int streamOpenFailReason;
-	
-	@GuardedBy("this") private boolean isReserved;
-	@GuardedBy("this") private int retryCount;
-	@GuardedBy("this") private long specificTimeout;
 
-	StreamExitRequest(Object requestCompletionLock, IPv4Address address, int port) {
-		this(requestCompletionLock, true, "", address, port);
-	}
+    private final TypedFuture<TorStream> res;
 
-	StreamExitRequest(Object requestCompletionLock, String hostname, int port) {
-		this(requestCompletionLock, false, hostname, null, port);
-	}
-	
-	private StreamExitRequest(Object requestCompletionLock, boolean isAddress, String hostname, IPv4Address address, int port) {
-		this.requestCompletionLock = requestCompletionLock;
-		this.isAddress = isAddress;
-		this.hostname = hostname;
-		this.address = address;
-		this.port = port;
-		this.completionStatus = CompletionStatus.NOT_COMPLETED;
-	}
+    private final boolean isAddress;
+    private final IPv4Address address;
+    private final String hostname;
+    private final int port;
 
-	public boolean isAddressTarget() {
-		return isAddress;
-	}
+    private boolean isReserved;
 
-	public IPv4Address getAddress() {
-		return address;
-	}
+    public StreamExitRequest(IPv4Address address, int port, TypedFuture<TorStream> res) {
+        this(true, "", address, port, res);
+    }
 
-	public String getHostname() {
-		return hostname;
-	}
+    public StreamExitRequest(String hostname, int port, TypedFuture<TorStream> res) {
+        this(false, hostname, null, port, res);
+    }
 
-	public int getPort() {
-		return port;
-	}
+    private StreamExitRequest(boolean isAddress, String hostname, IPv4Address address, int port, TypedFuture<TorStream> res) {
+        this.res = res;
+        this.isAddress = isAddress;
+        this.hostname = hostname;
+        this.address = address;
+        this.port = port;
+    }
 
-	public synchronized void setStreamTimeout(long timeout) {
-		specificTimeout = timeout;
-	}
-	
-	public synchronized long getStreamTimeout() {
-		if(specificTimeout > 0) {
-			return specificTimeout;
-		} else if(retryCount < 2) {
-			return 10 * 1000;
-		} else {
-			return 15 * 1000;
-		}
-	}
+    public boolean isAddressTarget() {
+        return isAddress;
+    }
 
-	void setCompletedTimeout() {
-		synchronized (requestCompletionLock) {
-			newStatus(CompletionStatus.TIMEOUT);
-		}
-	}
-	
-	void setExitFailed() {
-		synchronized (requestCompletionLock) {
-			newStatus(CompletionStatus.EXIT_FAILURE);
-		}
-	}
-	
-	void setStreamOpenFailure(int reason) {
-		synchronized (requestCompletionLock) {
-			streamOpenFailReason = reason;
-			newStatus(CompletionStatus.STREAM_OPEN_FAILURE);
-		}
-	}
-	
-	void setCompletedSuccessfully(TorStream torStream) {
-		synchronized (requestCompletionLock) {
-			this.torStream = torStream;
-			newStatus(CompletionStatus.SUCCESS);
-		}
-	}
-	
-	void setInterrupted() {
-		synchronized (requestCompletionLock) {
-			newStatus(CompletionStatus.INTERRUPTED);	
-		}
-	}
+    public IPv4Address getAddress() {
+        return address;
+    }
 
-	private void newStatus(CompletionStatus newStatus) {
-		if(completionStatus != CompletionStatus.NOT_COMPLETED) {
-			throw new IllegalStateException("Attempt to set completion state to " + newStatus +" while status is "+ completionStatus);
-		}
-		completionStatus = newStatus;
-		requestCompletionLock.notifyAll();
-	}
+    public String getHostname() {
+        return hostname;
+    }
 
-	
-	TorStream getTorStream() throws OpenFailedException, TimeoutException, StreamConnectFailedException, InterruptedException {
-		synchronized(requestCompletionLock) {
-			switch(completionStatus) {
-			case NOT_COMPLETED:
-				throw new IllegalStateException("Request not completed");
-			case EXIT_FAILURE:
-				throw new OpenFailedException("Failure at exit node");
-			case TIMEOUT:
-				throw new TimeoutException();
-			case STREAM_OPEN_FAILURE:
-				throw new StreamConnectFailedException(streamOpenFailReason);
-			case INTERRUPTED:
-				throw new InterruptedException();
-			case SUCCESS:
-				return torStream;
-			default:
-				throw new IllegalStateException("Unknown completion status");
-			}
-		}
-	}
+    public int getPort() {
+        return port;
+    }
 
-	synchronized void resetForRetry() {
-		synchronized (requestCompletionLock) {
-			streamOpenFailReason = 0;
-			completionStatus = CompletionStatus.NOT_COMPLETED;
-		}
-		retryCount += 1;
-		isReserved = false;
-	}
+    public void complete(TorStream stream) {
+        res.doComplete(stream);
+    }
 
-	boolean isCompleted() {
-		synchronized (requestCompletionLock) {
-			return completionStatus != CompletionStatus.NOT_COMPLETED;
-		}
-	}
-	
-	synchronized boolean reserveRequest() {
-		if(isReserved) return false;
-		isReserved = true;
-		return true;
-	}
-	
-	synchronized boolean isReserved() {
-		return isReserved;
-	}
-	
-	public String toString() {
-		if(isAddress)
-			return address + ":"+ port;
-		else
-			return hostname + ":"+ port;
-	}
+    public void error(Exception e) {
+        res.doError(e);
+    }
+
+    public boolean reserveRequest() {
+        if (isReserved) return false;
+        isReserved = true;
+        return true;
+    }
+
+    public boolean isReserved() {
+        return isReserved;
+    }
+
+    public String toString() {
+        if (isAddress)
+            return address + ":" + port;
+        else
+            return hostname + ":" + port;
+    }
 }

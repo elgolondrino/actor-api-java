@@ -17,13 +17,13 @@ public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
 	private final Router exitRouter;
 	private final Set<ExitTarget> failedExitRequests;
 
-	ExitCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
+	public ExitCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
 		super(circuitManager, prechosenPath);
 		this.exitRouter = prechosenPath.get(prechosenPath.size() - 1);
 		this.failedExitRequests = new HashSet<ExitTarget>();
 	}
 
-	ExitCircuitImpl(CircuitManager circuitManager, Router exitRouter) {
+	public ExitCircuitImpl(CircuitManager circuitManager, Router exitRouter) {
 		super(circuitManager);
 		this.exitRouter = exitRouter;
 		this.failedExitRequests = new HashSet<ExitTarget>();

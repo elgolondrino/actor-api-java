@@ -6,43 +6,44 @@ import java.util.logging.Logger;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class OpenExitStreamTask implements Runnable {
-	private final static Logger logger = Logger.getLogger(OpenExitStreamTask.class.getName());
-	private final ExitCircuit circuit;
-	private final StreamExitRequest exitRequest;
+    private final static Logger logger = Logger.getLogger(OpenExitStreamTask.class.getName());
+    private final ExitCircuit circuit;
+    private final StreamExitRequest exitRequest;
 
-	OpenExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
-		this.circuit = circuit;
-		this.exitRequest = exitRequest;
-	}
+    public OpenExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
+        this.circuit = circuit;
+        this.exitRequest = exitRequest;
+    }
 
-	public void run() {
-		logger.fine("Attempting to open stream to "+ exitRequest);
-		try {
-			exitRequest.setCompletedSuccessfully(tryOpenExitStream());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			exitRequest.setInterrupted();
-		} catch (TimeoutException e) {
-			circuit.markForClose();
-			exitRequest.setCompletedTimeout();
-		} catch (StreamConnectFailedException e) {
-			if(!e.isReasonRetryable()) {
-				exitRequest.setExitFailed();
-				circuit.recordFailedExitTarget(exitRequest);
-			} else {
-				circuit.markForClose();
-				exitRequest.setStreamOpenFailure(e.getReason());
-			}
-			
-		}
-	}
+    public void run() {
+        logger.fine("Attempting to open stream to " + exitRequest);
+        try {
+            exitRequest.complete(tryOpenExitStream());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            exitRequest.error(e);
+        } catch (TimeoutException e) {
+            circuit.markForClose();
+            exitRequest.error(e);
+        } catch (StreamConnectFailedException e) {
+            if (!e.isReasonRetryable()) {
+                exitRequest.error(e);
+                circuit.recordFailedExitTarget(exitRequest);
+            } else {
+                circuit.markForClose();
+                exitRequest.error(e);
+            }
 
-	private TorStream tryOpenExitStream() throws InterruptedException, TimeoutException, StreamConnectFailedException {
-		if(exitRequest.isAddressTarget()) {
-			return circuit.openExitStream(exitRequest.getAddress(), exitRequest.getPort(), exitRequest.getStreamTimeout());
-		} else {
-			return circuit.openExitStream(exitRequest.getHostname(), exitRequest.getPort(), exitRequest.getStreamTimeout());
-		}
-	}
+        }
+    }
+
+    // TODO: Fix timeouts
+    private TorStream tryOpenExitStream() throws InterruptedException, TimeoutException, StreamConnectFailedException {
+        if (exitRequest.isAddressTarget()) {
+            return circuit.openExitStream(exitRequest.getAddress(), exitRequest.getPort(), 15000);
+        } else {
+            return circuit.openExitStream(exitRequest.getHostname(), exitRequest.getPort(), 15000);
+        }
+    }
 
 }

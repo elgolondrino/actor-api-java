@@ -3,13 +3,12 @@ package im.actor.torlib.socks.actors;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.droidkit.actors.*;
 import com.droidkit.actors.tasks.AskCallback;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.actors.ExitStreamActor;
+import im.actor.torlib.circuits.actors.StreamСreateActor;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.circuits.TorStream;
 
@@ -85,9 +84,9 @@ public class ProxyAcceptActor extends Actor {
             LOG.info("SOCKS CONNECT to " + request.getTarget() + " starting opening sequence");
             ActorRef askActor;
             if (request.hasHostname()) {
-                askActor = ExitStreamActor.openExitStream(request.getHostname(), request.getPort(), circuitManager);
+                askActor = StreamСreateActor.openExitStream(request.getHostname(), request.getPort(), circuitManager);
             } else {
-                askActor = ExitStreamActor.openExitStream(request.getAddress(), request.getPort(), circuitManager);
+                askActor = StreamСreateActor.openExitStream(request.getAddress(), request.getPort(), circuitManager);
             }
             ask(askActor, new AskCallback<TorStream>() {
                 @Override

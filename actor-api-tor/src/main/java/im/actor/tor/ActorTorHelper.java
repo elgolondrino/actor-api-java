@@ -21,8 +21,8 @@ public class ActorTorHelper {
         return torClient;
     }
 
-    public void start() {
+    public void start(int port) {
         this.torClient.start();
-        this.torClient.enableSocksListener(9152);
+        this.torClient.enableSocksListener(port);
     }
 }

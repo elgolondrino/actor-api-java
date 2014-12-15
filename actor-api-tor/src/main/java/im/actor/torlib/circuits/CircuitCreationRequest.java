@@ -25,10 +25,7 @@ public class CircuitCreationRequest implements CircuitBuildHandler {
 	}
 	
 	void choosePath() throws InterruptedException, PathSelectionFailedException {
-		if(!(circuit instanceof CircuitImpl)) {
-			throw new IllegalArgumentException();
-		}
-		path = ((CircuitImpl)circuit).choosePath(pathChooser);
+		path = circuit.choosePath(pathChooser);
 
 	}
 
