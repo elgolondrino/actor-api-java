@@ -1,6 +1,5 @@
 package im.actor.torlib.circuits.build.path;
 
-import im.actor.torlib.circuits.CircuitImpl;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.InternalCircuitImpl;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
@@ -21,10 +20,7 @@ public class InternalCircuitFactory extends CircuitFactory<InternalCircuitImpl> 
     public InternalCircuitImpl buildNewCircuit() {
         try {
             return new InternalCircuitImpl(circuitManager.getPathChooser().chooseInternalPath(), circuitManager);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
-        } catch (PathSelectionFailedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

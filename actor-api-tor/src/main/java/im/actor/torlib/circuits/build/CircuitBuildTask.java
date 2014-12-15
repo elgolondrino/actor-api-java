@@ -36,6 +36,10 @@ public class CircuitBuildTask implements Runnable {
         try {
             creationRequest.buildCircuit();
             circuit = creationRequest.getCircuit();
+            if (circuit == null) {
+                connectionFailed("Unable to create internal circuit", null);
+                return;
+            }
             CircuitExtender extender = new CircuitExtender(circuit);
             circuit.notifyCircuitBuildStart();
 
@@ -49,7 +53,12 @@ public class CircuitBuildTask implements Runnable {
             final CircuitNode firstNode = extender.createFastTo(firstRouter);
             creationRequest.nodeAdded(firstNode);
 
+            boolean isFirst = true;
             for (Router p : circuit.getPath()) {
+                if (isFirst) {
+                    isFirst = false;
+                    continue;
+                }
                 final CircuitNode extendedNode = extender.extendTo(p);
                 creationRequest.nodeAdded(extendedNode);
             }
