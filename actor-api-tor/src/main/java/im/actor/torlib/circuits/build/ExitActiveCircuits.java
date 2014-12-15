@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * Created by ex3ndr on 15.12.14.
  */
-public class ActiveCircuits {
+public class ExitActiveCircuits {
 
     public interface CircuitFilter {
         boolean filter(Circuit circuit);
@@ -24,7 +24,7 @@ public class ActiveCircuits {
 
     private final Set<CircuitImpl> activeCircuits;
 
-    public ActiveCircuits() {
+    public ExitActiveCircuits() {
         this.activeCircuits = new HashSet<CircuitImpl>();
     }
 

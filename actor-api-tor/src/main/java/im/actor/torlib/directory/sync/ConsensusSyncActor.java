@@ -3,11 +3,13 @@ package im.actor.torlib.directory.sync;
 import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
+import com.droidkit.actors.concurrency.FutureCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.bser.Bser;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.directory.Consensus;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.NewDirectory;
@@ -183,7 +185,18 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
             }
 
             isDownloadingConsensus = true;
-            executor.execute(new DownloadConsensusTask());
+
+            ask(circuitManager.openDirectoryStream(), new FutureCallback<TorStream>() {
+                @Override
+                public void onResult(TorStream result) {
+                    executor.execute(new DownloadConsensusTask(result));
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    isDownloadingConsensus = false;
+                }
+            });
         }
     }
 
@@ -193,8 +206,20 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         }
 
         isDownloadingCertificates = true;
-        executor.execute(
-                new DownloadCertificatesTask(new ArrayList<ConsensusDocument.RequiredCertificate>(requiredCertificates)));
+
+        ask(circuitManager.openDirectoryStream(), new FutureCallback<TorStream>() {
+            @Override
+            public void onResult(TorStream result) {
+                executor.execute(new DownloadCertificatesTask(result,
+                        new ArrayList<ConsensusDocument.RequiredCertificate>(requiredCertificates)));
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                isDownloadingCertificates = false;
+            }
+        });
+
     }
 
     private void onConsensusDownloaded(ConsensusDocument consensus) {
@@ -302,18 +327,16 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         context().stopSelf();
     }
 
-    private DirectoryCircuit openCircuit() throws DirectoryRequestFailedException {
-        try {
-            return circuitManager.openDirectoryCircuit();
-        } catch (OpenFailedException e) {
-            throw new DirectoryRequestFailedException("Failed to open directory circuit", e);
-        }
-    }
-
     private class DownloadConsensusTask implements Runnable {
+        private TorStream stream;
+
+        public DownloadConsensusTask(TorStream stream) {
+            this.stream = stream;
+        }
+
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(stream);
                 ConsensusDocument consensus = requestor.downloadCurrentConsensus();
                 self().send(new ConsensusDownloaded(consensus));
             } catch (DirectoryRequestFailedException e) {
@@ -327,13 +350,16 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
         private List<ConsensusDocument.RequiredCertificate> requiredCertificates;
 
-        public DownloadCertificatesTask(List<ConsensusDocument.RequiredCertificate> requiredCertificates) {
+        private TorStream stream;
+
+        public DownloadCertificatesTask(TorStream stream, List<ConsensusDocument.RequiredCertificate> requiredCertificates) {
+            this.stream = stream;
             this.requiredCertificates = requiredCertificates;
         }
 
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(stream);
                 List<KeyCertificateDocument> certificates = requestor.downloadKeyCertificates(requiredCertificates);
                 self().send(new CertificatesDownloaded(certificates));
             } catch (DirectoryRequestFailedException e) {

@@ -21,7 +21,6 @@ import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.path.ExitCircuitFactory;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.connections.Connection;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
@@ -30,20 +29,20 @@ import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.IPv4Address;
 import im.actor.utils.Threading;
 
-public class CircuitCreationActor extends TypedActor<CircuitCreationInt> implements CircuitCreationInt {
+public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements ExitCircuitsInt {
 
 
-    public static CircuitCreationInt get(final CircuitManager circuitManager) {
-        return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(CircuitCreationActor.class,
-                new ActorCreator<CircuitCreationActor>() {
+    public static ExitCircuitsInt get(final CircuitManager circuitManager) {
+        return TypedCreator.typed(ActorSystem.system().actorOf(Props.create(ExitCircuitsActor.class,
+                new ActorCreator<ExitCircuitsActor>() {
                     @Override
-                    public CircuitCreationActor create() {
-                        return new CircuitCreationActor(circuitManager);
+                    public ExitCircuitsActor create() {
+                        return new ExitCircuitsActor(circuitManager);
                     }
-                }), "/tor/circuit/build"), CircuitCreationInt.class);
+                }), "/tor/circuit/build"), ExitCircuitsInt.class);
     }
 
-    private final static Logger logger = Logger.getLogger(CircuitCreationActor.class.getName());
+    private final static Logger logger = Logger.getLogger(ExitCircuitsActor.class.getName());
     private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
     private final static int MAX_PENDING_CIRCUITS = 4;
 
@@ -51,29 +50,27 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     private final HiddenServiceManager hiddenServiceManager;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
-    private final CircuitPathChooser pathChooser;
     private final Executor executor;
     private final CircuitBuildHandler buildHandler;
     // To avoid obnoxiously printing a warning every second
     private int notEnoughDirectoryInformationWarningCounter = 0;
 
-    private final CircuitPredictor predictor;
+    private final ExitCircuitsPredictor predictor;
 
     private final Set<StreamExitRequest> pendingRequests;
 
-    public CircuitCreationActor(CircuitManager circuitManager) {
-        super(CircuitCreationInt.class);
+    public ExitCircuitsActor(CircuitManager circuitManager) {
+        super(ExitCircuitsInt.class);
 
         this.circuitManager = circuitManager;
         this.directory = circuitManager.getDirectory();
         this.connectionCache = circuitManager.getConnectionCache();
-        this.pathChooser = circuitManager.getPathChooser();
 
         this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), directory, circuitManager);
         this.pendingRequests = new CopyOnWriteArraySet<StreamExitRequest>();
-        this.executor = Threading.newPool("CircuitCreationTask worker");
+        this.executor = Threading.newPool("ExitCircuitsActor worker");
         this.buildHandler = createCircuitBuildHandler();
-        this.predictor = new CircuitPredictor();
+        this.predictor = new ExitCircuitsPredictor();
 
     }
 
@@ -140,7 +137,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         if (pendingRequests.isEmpty())
             return;
 
-        for (ExitCircuit c : circuitManager.getActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
+        for (ExitCircuit c : circuitManager.getExitActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
             final Iterator<StreamExitRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
                 StreamExitRequest req = it.next();
@@ -163,12 +160,12 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     }
 
     private void launchExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
-        final OpenExitStreamTask task = new OpenExitStreamTask(circuit, exitRequest);
+        final ExitCircuitStreamTask task = new ExitCircuitStreamTask(circuit, exitRequest);
         executor.execute(task);
     }
 
     private void expireOldCircuits() {
-        final Set<Circuit> circuits = circuitManager.getActiveCircuits().getCircuitsByFilter(new ActiveCircuits.CircuitFilter() {
+        final Set<Circuit> circuits = circuitManager.getExitActiveCircuits().getCircuitsByFilter(new ExitActiveCircuits.CircuitFilter() {
 
             public boolean filter(Circuit circuit) {
                 return !circuit.isMarkedForClose() && circuit.getSecondsDirty() > MAX_CIRCUIT_DIRTINESS;
@@ -216,7 +213,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
 
 
     private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
-        final ActiveCircuits.CircuitFilter filter = new ActiveCircuits.CircuitFilter() {
+        final ExitActiveCircuits.CircuitFilter filter = new ExitActiveCircuits.CircuitFilter() {
             public boolean filter(Circuit circuit) {
                 if (!(circuit instanceof ExitCircuit)) {
                     return false;
@@ -227,7 +224,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
                 return pendingOrConnected && isCleanIfNeeded && ec.canHandleExitTo(target);
             }
         };
-        return circuitManager.getActiveCircuits().getCircuitsByFilter(filter).size();
+        return circuitManager.getExitActiveCircuits().getCircuitsByFilter(filter).size();
     }
 
     private void buildCircuitToHandleExitTargets(List<ExitTarget> exitTargets) {
@@ -236,7 +233,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         }
         if (!directory.haveMinimumRouterInfo())
             return;
-        if (circuitManager.getActiveCircuits().getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
+        if (circuitManager.getExitActiveCircuits().getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
             return;
 
         if (logger.isLoggable(Level.FINE)) {

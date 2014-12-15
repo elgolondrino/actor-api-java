@@ -90,12 +90,12 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         }
         status.updateCreatedTimestamp();
         status.setStateBuilding();
-        circuitManager.getActiveCircuits().addActiveCircuit(this);
+        circuitManager.getExitActiveCircuits().addActiveCircuit(this);
     }
 
     public void notifyCircuitBuildFailed() {
         status.setStateFailed();
-        circuitManager.getActiveCircuits().removeActiveCircuit(this);
+        circuitManager.getExitActiveCircuits().removeActiveCircuit(this);
     }
 
     public void notifyCircuitBuildCompleted() {
@@ -182,7 +182,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 
     public void setStateDestroyed() {
         status.setStateDestroyed();
-        circuitManager.getActiveCircuits().removeActiveCircuit(this);
+        circuitManager.getExitActiveCircuits().removeActiveCircuit(this);
     }
 
     public void destroyCircuit() {
@@ -190,7 +190,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         if (io != null) {
             io.destroyCircuit();
         }
-        circuitManager.getActiveCircuits().removeActiveCircuit(this);
+        circuitManager.getExitActiveCircuits().removeActiveCircuit(this);
     }
 
 

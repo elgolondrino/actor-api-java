@@ -46,7 +46,7 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
         this.manager = manager;
         this.cleanInternalCircuits = new LinkedList<InternalCircuit>();
         this.pending = new LinkedList<TypedFuture<InternalCircuit>>();
-        this.executor = Threading.newPool("CircuitCreationTask worker");
+        this.executor = Threading.newPool("InternalCircuitsActor worker");
         this.internalBuildHandler = createInternalCircuitBuildHandler();
     }
 

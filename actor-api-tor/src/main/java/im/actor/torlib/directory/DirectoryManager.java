@@ -28,9 +28,9 @@ public class DirectoryManager {
         this.circuitManager = circuitManager;
     }
 
-    public synchronized void start(NewDirectory directory) {
+    public void start(NewDirectory directory) {
         if (isStarted) {
-            logger.warning("Directory downloader already running");
+            logger.warning("Directory manager already running");
             return;
         }
 
@@ -43,7 +43,7 @@ public class DirectoryManager {
         isStarted = true;
     }
 
-    public synchronized void stop() {
+    public void stop() {
         if (!isStarted || isStopped) {
             return;
         }
@@ -51,18 +51,5 @@ public class DirectoryManager {
         isStarted = false;
         directorySync.stopSync();
         descriptorsSync.stopSync();
-    }
-
-    public DescriptorDocument downloadBridgeDescriptor(Router bridge) throws DirectoryRequestFailedException {
-        final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openBridgeCircuit(bridge));
-        return requestor.downloadBridgeDescriptor();
-    }
-
-    private DirectoryCircuit openBridgeCircuit(Router bridge) throws DirectoryRequestFailedException {
-        try {
-            return circuitManager.openDirectoryCircuitTo(bridge);
-        } catch (OpenFailedException e) {
-            throw new DirectoryRequestFailedException("Failed to open directory circuit to bridge " + bridge, e);
-        }
     }
 }

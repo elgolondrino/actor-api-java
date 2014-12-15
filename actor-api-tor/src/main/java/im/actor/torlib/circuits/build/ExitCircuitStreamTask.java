@@ -8,12 +8,12 @@ import im.actor.torlib.circuits.StreamExitRequest;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
-public class OpenExitStreamTask implements Runnable {
-    private final static Logger logger = Logger.getLogger(OpenExitStreamTask.class.getName());
+public class ExitCircuitStreamTask implements Runnable {
+    private final static Logger logger = Logger.getLogger(ExitCircuitStreamTask.class.getName());
     private final ExitCircuit circuit;
     private final StreamExitRequest exitRequest;
 
-    public OpenExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
+    public ExitCircuitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
         this.circuit = circuit;
         this.exitRequest = exitRequest;
     }

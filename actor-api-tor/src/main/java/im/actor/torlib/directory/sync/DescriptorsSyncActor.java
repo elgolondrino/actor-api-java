@@ -3,17 +3,17 @@ package im.actor.torlib.directory.sync;
 import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
+import com.droidkit.actors.concurrency.FutureCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.documents.downloader.DescriptorProcessor;
 import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
-import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.Threading;
 
 import java.util.*;
@@ -79,30 +79,35 @@ public class DescriptorsSyncActor extends TypedActor<DescriptorsSyncInt> impleme
         if (ds.isEmpty()) {
             return;
         }
-        for (List<HexDigest> dlist : ds) {
+        for (final List<HexDigest> dlist : ds) {
             outstandingDescriptorTasks.incrementAndGet();
-            executor.execute(new DownloadRouterDescriptorsTask(dlist));
-        }
-    }
+            ask(circuitManager.openDirectoryStream(), new FutureCallback<TorStream>() {
+                @Override
+                public void onResult(TorStream result) {
+                    executor.execute(new DownloadRouterDescriptorsTask(result, dlist));
+                }
 
-    private DirectoryCircuit openCircuit() throws DirectoryRequestFailedException {
-        try {
-            return circuitManager.openDirectoryCircuit();
-        } catch (OpenFailedException e) {
-            throw new DirectoryRequestFailedException("Failed to open directory circuit", e);
+                @Override
+                public void onError(Throwable throwable) {
+                    outstandingDescriptorTasks.decrementAndGet();
+                }
+            });
+
         }
     }
 
     private class DownloadRouterDescriptorsTask implements Runnable {
         private final Set<HexDigest> fingerprints;
+        private TorStream stream;
 
-        public DownloadRouterDescriptorsTask(Collection<HexDigest> fingerprints) {
+        public DownloadRouterDescriptorsTask(TorStream stream, Collection<HexDigest> fingerprints) {
+            this.stream = stream;
             this.fingerprints = new HashSet<HexDigest>(fingerprints);
         }
 
         public void run() {
             try {
-                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(openCircuit());
+                final DirectoryDocumentRequestor requestor = new DirectoryDocumentRequestor(stream);
                 final List<DescriptorDocument> ds = requestor.downloadRouterDescriptors(fingerprints);
                 directory.applyRouterDescriptors(removeUnrequestedDescriptors(fingerprints, ds));
             } catch (DirectoryRequestFailedException e) {

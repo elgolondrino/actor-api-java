@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import im.actor.torlib.circuits.DirectoryCircuit;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
@@ -17,12 +18,10 @@ import im.actor.torlib.errors.StreamConnectFailedException;
  * Synchronously downloads directory documents.
  */
 public class DirectoryDocumentRequestor {
-    private final static int OPEN_DIRECTORY_STREAM_TIMEOUT = 10 * 1000;
+    private final TorStream stream;
 
-    private final DirectoryCircuit circuit;
-
-    public DirectoryDocumentRequestor(DirectoryCircuit circuit) {
-        this.circuit = circuit;
+    public DirectoryDocumentRequestor(TorStream stream) {
+        this.stream = stream;
     }
 
     public DescriptorDocument downloadBridgeDescriptor() throws DirectoryRequestFailedException {
@@ -51,24 +50,14 @@ public class DirectoryDocumentRequestor {
 
     private <T> List<T> fetchDocuments(DocumentFetcher<T> fetcher) throws DirectoryRequestFailedException {
         try {
-            final TorHttpConnection http = createHttpConnection();
+            final TorHttpConnection http = new TorHttpConnection(stream);
             try {
                 return fetcher.requestDocuments(http);
             } finally {
                 http.close();
             }
-        } catch (TimeoutException e) {
-            throw new DirectoryRequestFailedException("Directory request timed out");
-        } catch (StreamConnectFailedException e) {
-            throw new DirectoryRequestFailedException("Failed to open directory stream", e);
         } catch (IOException e) {
             throw new DirectoryRequestFailedException("I/O exception processing directory request", e);
-        } catch (InterruptedException e) {
-            throw new DirectoryRequestFailedException("Directory request interrupted");
         }
-    }
-
-    private TorHttpConnection createHttpConnection() throws InterruptedException, TimeoutException, StreamConnectFailedException {
-        return new TorHttpConnection(circuit.openDirectoryStream(OPEN_DIRECTORY_STREAM_TIMEOUT, true));
     }
 }

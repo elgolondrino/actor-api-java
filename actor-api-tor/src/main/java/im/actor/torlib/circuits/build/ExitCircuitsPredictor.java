@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class CircuitPredictor {
+public class ExitCircuitsPredictor {
 
     private final static long TIMEOUT_MS = 60 * 60 * 1000; // One hour
 
     private final Map<Integer, Long> portsSeen;
 
-    public CircuitPredictor() {
+    public ExitCircuitsPredictor() {
         portsSeen = new HashMap<Integer, Long>();
         addExitPortRequest(80);
     }

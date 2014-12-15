@@ -12,8 +12,6 @@ import im.actor.torlib.directory.routers.Router;
 
 public class CircuitCreationRequest implements CircuitBuildHandler {
 
-    public enum CircuitType {INTERNAL, EXIT, DIRECTORY}
-
     private final CircuitFactory circuitFactory;
     private final CircuitBuildHandler buildHandler;
 
@@ -28,25 +26,9 @@ public class CircuitCreationRequest implements CircuitBuildHandler {
         circuit = circuitFactory.buildNewCircuit();
     }
 
-    public CircuitFactory getCircuitFactory() {
-        return circuitFactory;
-    }
-
     public CircuitImpl getCircuit() {
         return circuit;
     }
-
-    //    List<Router> getPath() {
-//        return path;
-//    }
-//
-//    int getPathLength() {
-//        return path.size();
-//    }
-//
-//    Router getPathElement(int idx) {
-//        return path.get(idx);
-//    }
 
     public void connectionCompleted(Connection connection) {
         if (buildHandler != null) {
