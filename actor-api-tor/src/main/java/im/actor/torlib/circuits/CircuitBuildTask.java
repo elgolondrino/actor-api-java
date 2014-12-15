@@ -86,7 +86,7 @@ public class CircuitBuildTask implements Runnable {
     }
 
     private void openEntryNodeConnection(Router firstRouter) throws ConnectionTimeoutException, ConnectionFailedException, ConnectionHandshakeException, InterruptedException {
-        connection = connectionCache.getConnectionTo(firstRouter, creationRequest.isDirectoryCircuit());
+        connection = connectionCache.getConnectionTo(firstRouter);
         circuit.bindToConnection(connection);
         creationRequest.connectionCompleted(connection);
     }

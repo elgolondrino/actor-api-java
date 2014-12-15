@@ -9,77 +9,67 @@ import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.circuits.path.PathSelectionFailedException;
 
 public class CircuitCreationRequest implements CircuitBuildHandler {
-	private final CircuitImpl circuit;
-	private final CircuitPathChooser pathChooser;
-	private final CircuitBuildHandler buildHandler;
-	private final boolean isDirectoryCircuit;
-	
-	private List<Router> path;
-	
-	public CircuitCreationRequest(CircuitPathChooser pathChooser, Circuit circuit, CircuitBuildHandler buildHandler, boolean isDirectoryCircuit) {
-		this.pathChooser = pathChooser;
-		this.circuit = (CircuitImpl) circuit;
-		this.buildHandler = buildHandler;
-		this.path = Collections.emptyList();
-		this.isDirectoryCircuit = isDirectoryCircuit;
-	}
-	
-	void choosePath() throws InterruptedException, PathSelectionFailedException {
-		path = circuit.choosePath(pathChooser);
+    private final CircuitImpl circuit;
+    private final CircuitPathChooser pathChooser;
+    private final CircuitBuildHandler buildHandler;
 
-	}
+    private List<Router> path;
 
-	CircuitImpl getCircuit() {
-		return circuit;
-	}
+    public CircuitCreationRequest(CircuitPathChooser pathChooser, Circuit circuit, CircuitBuildHandler buildHandler) {
+        this.pathChooser = pathChooser;
+        this.circuit = (CircuitImpl) circuit;
+        this.buildHandler = buildHandler;
+        this.path = Collections.emptyList();
+    }
 
-	List<Router> getPath() {
-		return path;
-	}
-	
-	int getPathLength() {
-		return path.size();
-	}
-	
-	Router getPathElement(int idx) {
-		return path.get(idx);
-	}
-	
-	CircuitBuildHandler getBuildHandler() {
-		return buildHandler;
-	}
-	
-	boolean isDirectoryCircuit() {
-		return isDirectoryCircuit;
-	}
+    void choosePath() throws InterruptedException, PathSelectionFailedException {
+        path = circuit.choosePath(pathChooser);
 
-	public void connectionCompleted(Connection connection) {
-		if(buildHandler != null) {
-			buildHandler.connectionCompleted(connection);
-		}
-	}
+    }
 
-	public void connectionFailed(String reason) {
-		if(buildHandler != null) {
-			buildHandler.connectionFailed(reason);
-		}
-	}
+    CircuitImpl getCircuit() {
+        return circuit;
+    }
 
-	public void nodeAdded(CircuitNode node) {
-		if(buildHandler != null) {
-			buildHandler.nodeAdded(node);
-		}
-	}
+    List<Router> getPath() {
+        return path;
+    }
 
-	public void circuitBuildCompleted(Circuit circuit) {
-		if(buildHandler != null) {
-			buildHandler.circuitBuildCompleted(circuit);
-		}
-	}
+    int getPathLength() {
+        return path.size();
+    }
 
-	public void circuitBuildFailed(String reason) {
-		if(buildHandler != null) {
-			buildHandler.circuitBuildFailed(reason);
-		}
-	}
+    Router getPathElement(int idx) {
+        return path.get(idx);
+    }
+
+    public void connectionCompleted(Connection connection) {
+        if (buildHandler != null) {
+            buildHandler.connectionCompleted(connection);
+        }
+    }
+
+    public void connectionFailed(String reason) {
+        if (buildHandler != null) {
+            buildHandler.connectionFailed(reason);
+        }
+    }
+
+    public void nodeAdded(CircuitNode node) {
+        if (buildHandler != null) {
+            buildHandler.nodeAdded(node);
+        }
+    }
+
+    public void circuitBuildCompleted(Circuit circuit) {
+        if (buildHandler != null) {
+            buildHandler.circuitBuildCompleted(circuit);
+        }
+    }
+
+    public void circuitBuildFailed(String reason) {
+        if (buildHandler != null) {
+            buildHandler.circuitBuildFailed(reason);
+        }
+    }
 }

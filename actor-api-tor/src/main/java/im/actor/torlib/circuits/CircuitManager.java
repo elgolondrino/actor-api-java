@@ -3,7 +3,6 @@ package im.actor.torlib.circuits;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.droidkit.actors.concurrency.Future;
@@ -204,6 +203,7 @@ public class CircuitManager implements DashboardRenderable {
         return ac;
     }
 
+
     public Future<TorStream> openExitStreamTo(String hostname, int port) {
         return circuitCreationActor.openExitStream(hostname, port, 15000);
     }
@@ -245,6 +245,7 @@ public class CircuitManager implements DashboardRenderable {
         return res[0];
     }
 
+
     public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
         if ((flags & DASHBOARD_CIRCUITS) == 0) {
             return;
@@ -285,7 +286,7 @@ public class CircuitManager implements DashboardRenderable {
     @Deprecated
     private boolean tryOpenDirectoryCircuit(Circuit circuit) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
-        final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result, true);
+        final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result);
         final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache);
         task.run();
         return result.isSuccessful();

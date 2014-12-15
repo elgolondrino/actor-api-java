@@ -255,7 +255,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         }
 
         final Circuit circuit = new ExitCircuitImpl(circuitManager, exitRouter);
-        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler, false);
+        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler);
         final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
         executor.execute(task);
     }

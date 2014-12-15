@@ -51,7 +51,6 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
     private final Router router;
     private final Map<Integer, Circuit> circuitMap;
     private final BlockingQueue<Cell> connectionControlCells;
-    private final boolean isDirectoryConnection;
 
     private int currentId = 1;
     private boolean isConnected;
@@ -63,7 +62,7 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
     private final AtomicLong lastActivity = new AtomicLong();
 
 
-    public ConnectionImpl(TorConfig config, SSLSocket socket, Router router, boolean isDirectoryConnection) {
+    public ConnectionImpl(TorConfig config, SSLSocket socket, Router router) {
         this.config = config;
         this.socket = socket;
         this.router = router;
@@ -71,7 +70,6 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
         this.readCellsThread = new Thread(createReadCellsRunnable());
         this.readCellsThread.setDaemon(true);
         this.connectionControlCells = new LinkedBlockingQueue<Cell>();
-        this.isDirectoryConnection = isDirectoryConnection;
         initializeCurrentCircuitId();
     }
 

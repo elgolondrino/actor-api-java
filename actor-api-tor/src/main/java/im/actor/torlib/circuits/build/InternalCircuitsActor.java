@@ -90,7 +90,7 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     private void launchBuildTaskForInternalCircuit() {
         // logger.fine("Launching new internal circuit");
         final InternalCircuitImpl circuit = new InternalCircuitImpl(manager);
-        final CircuitCreationRequest request = new CircuitCreationRequest(manager.getPathChooser(), circuit, internalBuildHandler, false);
+        final CircuitCreationRequest request = new CircuitCreationRequest(manager.getPathChooser(), circuit, internalBuildHandler);
         final CircuitBuildTask task = new CircuitBuildTask(request, manager.getConnectionCache());
         executor.execute(task);
         incrementPendingInternalCircuitCount();

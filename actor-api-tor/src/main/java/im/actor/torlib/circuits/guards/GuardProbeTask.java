@@ -27,7 +27,7 @@ public class GuardProbeTask implements Runnable{
 			return;
 		}
 		try {
-			connectionCache.getConnectionTo(router, false);
+			connectionCache.getConnectionTo(router);
 			entryGuards.probeConnectionSucceeded(entry);
 			return;
 		} catch (ConnectionIOException e) {
