@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.routers.Router;
@@ -14,18 +12,10 @@ import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
 
-    private final Router exitRouter;
     private final Set<ExitTarget> failedExitRequests;
 
-    public ExitCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
-        super(circuitManager, prechosenPath);
-        this.exitRouter = prechosenPath.get(prechosenPath.size() - 1);
-        this.failedExitRequests = new HashSet<ExitTarget>();
-    }
-
-    public ExitCircuitImpl(CircuitManager circuitManager, Router exitRouter) {
-        super(circuitManager);
-        this.exitRouter = exitRouter;
+    public ExitCircuitImpl(List<Router> path, CircuitManager circuitManager) {
+        super(path, circuitManager);
         this.failedExitRequests = new HashSet<ExitTarget>();
     }
 
@@ -62,15 +52,10 @@ public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
         }
 
         if (target.isAddressTarget()) {
-            return exitRouter.exitPolicyAccepts(target.getAddress(), target.getPort());
+            return path.get(path.size() - 1).exitPolicyAccepts(target.getAddress(), target.getPort());
         } else {
-            return exitRouter.exitPolicyAccepts(target.getPort());
+            return path.get(path.size() - 1).exitPolicyAccepts(target.getPort());
         }
-    }
-
-    @Override
-    protected List<Router> choosePathForCircuit(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
-        return pathChooser.choosePathWithExit(exitRouter);
     }
 
     @Override

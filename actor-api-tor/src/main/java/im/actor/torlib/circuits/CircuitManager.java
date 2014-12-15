@@ -5,6 +5,7 @@ import java.util.*;
 import com.droidkit.actors.concurrency.Future;
 import com.droidkit.actors.concurrency.FutureCallback;
 import im.actor.torlib.circuits.build.*;
+import im.actor.torlib.circuits.build.path.DirectoryCircuitFactory;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
@@ -117,8 +118,8 @@ public class CircuitManager {
     public DirectoryCircuit openDirectoryCircuit() throws OpenFailedException {
         int failCount = 0;
         while (failCount < OPEN_DIRECTORY_STREAM_RETRY_COUNT) {
-            final DirectoryCircuit circuit = new DirectoryCircuitImpl(this, null);
-            if (tryOpenDirectoryCircuit(circuit)) {
+            DirectoryCircuit circuit = tryOpenDirectoryCircuit(new DirectoryCircuitFactory(this));
+            if (circuit != null) {
                 return circuit;
             }
             failCount += 1;
@@ -128,20 +129,24 @@ public class CircuitManager {
 
     @Deprecated
     public DirectoryCircuit openDirectoryCircuitTo(Router destRouter) throws OpenFailedException {
-        final DirectoryCircuit circuit = new DirectoryCircuitImpl(this, Arrays.asList(destRouter));
-        if (!tryOpenDirectoryCircuit(circuit)) {
+        DirectoryCircuit circuit = tryOpenDirectoryCircuit(new DirectoryCircuitFactory(destRouter, this));
+        if (circuit == null) {
             throw new OpenFailedException("Could not create directory circuit for path");
         }
         return circuit;
     }
 
     @Deprecated
-    private boolean tryOpenDirectoryCircuit(Circuit circuit) {
+    private DirectoryCircuit tryOpenDirectoryCircuit(DirectoryCircuitFactory factory) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
-        final CircuitCreationRequest req = new CircuitCreationRequest(pathChooser, circuit, result);
+        final CircuitCreationRequest req = new CircuitCreationRequest(factory, result);
         final CircuitBuildTask task = new CircuitBuildTask(req, connectionCache);
         task.run();
-        return result.isSuccessful();
+        if (result.isSuccessful()) {
+            return (DirectoryCircuit) task.getCreationRequest().getCircuit();
+        } else {
+            return null;
+        }
     }
 
     private static class DirectoryCircuitResult implements CircuitBuildHandler {

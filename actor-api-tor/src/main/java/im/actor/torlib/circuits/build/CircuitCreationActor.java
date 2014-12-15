@@ -18,13 +18,13 @@ import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.*;
+import im.actor.torlib.circuits.build.path.ExitCircuitFactory;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.directory.routers.exitpolicy.PredictedPortTarget;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.IPv4Address;
@@ -215,7 +215,6 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     }
 
 
-
     private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
         final ActiveCircuits.CircuitFilter filter = new ActiveCircuits.CircuitFilter() {
             public boolean filter(Circuit circuit) {
@@ -248,14 +247,8 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     }
 
     private void launchBuildTaskForTargets(List<ExitTarget> exitTargets) {
-        final Router exitRouter = pathChooser.chooseExitNodeForTargets(exitTargets);
-        if (exitRouter == null) {
-            logger.warning("Failed to select suitable exit node for targets");
-            return;
-        }
-
-        final Circuit circuit = new ExitCircuitImpl(circuitManager, exitRouter);
-        final CircuitCreationRequest request = new CircuitCreationRequest(pathChooser, circuit, buildHandler);
+        final CircuitCreationRequest request = new CircuitCreationRequest(
+                new ExitCircuitFactory(exitTargets, circuitManager), buildHandler);
         final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
         executor.execute(task);
     }

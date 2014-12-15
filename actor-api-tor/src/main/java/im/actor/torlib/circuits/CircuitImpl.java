@@ -14,8 +14,6 @@ import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
 
@@ -26,34 +24,23 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
     protected final static Logger logger = Logger.getLogger(CircuitImpl.class.getName());
 
     private final CircuitManager circuitManager;
-    protected final List<Router> prechosenPath;
+    protected final List<Router> path;
 
     private final List<CircuitNode> nodeList;
     private final CircuitStatus status;
 
     private CircuitIO io;
 
-
-    protected CircuitImpl(CircuitManager circuitManager) {
-        this(circuitManager, null);
-    }
-
-    protected CircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
+    protected CircuitImpl(List<Router> path, CircuitManager circuitManager) {
         nodeList = new ArrayList<CircuitNode>();
         this.circuitManager = circuitManager;
-        this.prechosenPath = prechosenPath;
+        this.path = path;
         status = new CircuitStatus();
     }
 
-    public List<Router> choosePath(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
-        if (prechosenPath != null) {
-            return new ArrayList<Router>(prechosenPath);
-        } else {
-            return choosePathForCircuit(pathChooser);
-        }
+    public List<Router> getPath() {
+        return path;
     }
-
-    protected abstract List<Router> choosePathForCircuit(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException;
 
     public void bindToConnection(Connection connection) {
         if (io != null) {

@@ -3,10 +3,9 @@ package im.actor.torlib.circuits;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import im.actor.torlib.circuits.build.extender.CircuitExtender;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.StreamConnectFailedException;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 
 public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit, DirectoryCircuit, HiddenServiceCircuit {
 
@@ -14,21 +13,10 @@ public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit,
 
     private InternalType type;
 
-    public InternalCircuitImpl(CircuitManager circuitManager, List<Router> prechosenPath) {
-        super(circuitManager, prechosenPath);
+    public InternalCircuitImpl(List<Router> path, CircuitManager circuitManager) {
+        super(path, circuitManager);
         this.type = InternalType.UNUSED;
     }
-
-    public InternalCircuitImpl(CircuitManager circuitManager) {
-        this(circuitManager, null);
-    }
-
-    @Override
-    protected List<Router> choosePathForCircuit(CircuitPathChooser pathChooser)
-            throws InterruptedException, PathSelectionFailedException {
-        return pathChooser.chooseInternalPath();
-    }
-
 
     public Circuit cannibalizeToIntroductionPoint(Router target) {
         cannibalizeTo(target);

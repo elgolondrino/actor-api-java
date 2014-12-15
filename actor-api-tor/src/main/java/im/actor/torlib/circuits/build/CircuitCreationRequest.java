@@ -1,51 +1,52 @@
 package im.actor.torlib.circuits.build;
 
-import java.util.Collections;
 import java.util.List;
 
 import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitBuildHandler;
 import im.actor.torlib.circuits.CircuitImpl;
 import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.build.path.CircuitFactory;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 
 public class CircuitCreationRequest implements CircuitBuildHandler {
-    private final CircuitImpl circuit;
-    private final CircuitPathChooser pathChooser;
+
+    public enum CircuitType {INTERNAL, EXIT, DIRECTORY}
+
+    private final CircuitFactory circuitFactory;
     private final CircuitBuildHandler buildHandler;
 
-    private List<Router> path;
+    private CircuitImpl circuit;
 
-    public CircuitCreationRequest(CircuitPathChooser pathChooser, Circuit circuit, CircuitBuildHandler buildHandler) {
-        this.pathChooser = pathChooser;
-        this.circuit = (CircuitImpl) circuit;
+    public CircuitCreationRequest(CircuitFactory circuitFactory, CircuitBuildHandler buildHandler) {
+        this.circuitFactory = circuitFactory;
         this.buildHandler = buildHandler;
-        this.path = Collections.emptyList();
     }
 
-    void choosePath() throws InterruptedException, PathSelectionFailedException {
-        path = circuit.choosePath(pathChooser);
-
+    public void buildCircuit() {
+        circuit = circuitFactory.buildNewCircuit();
     }
 
-    CircuitImpl getCircuit() {
+    public CircuitFactory getCircuitFactory() {
+        return circuitFactory;
+    }
+
+    public CircuitImpl getCircuit() {
         return circuit;
     }
 
-    List<Router> getPath() {
-        return path;
-    }
-
-    int getPathLength() {
-        return path.size();
-    }
-
-    Router getPathElement(int idx) {
-        return path.get(idx);
-    }
+    //    List<Router> getPath() {
+//        return path;
+//    }
+//
+//    int getPathLength() {
+//        return path.size();
+//    }
+//
+//    Router getPathElement(int idx) {
+//        return path.get(idx);
+//    }
 
     public void connectionCompleted(Connection connection) {
         if (buildHandler != null) {

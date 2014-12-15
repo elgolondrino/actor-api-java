@@ -3,9 +3,9 @@ package im.actor.torlib.circuits.build;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.CircuitExtender;
 import im.actor.torlib.circuits.CircuitImpl;
 import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.build.extender.CircuitExtender;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.Router;
@@ -13,94 +13,81 @@ import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.circuits.path.PathSelectionFailedException;
 
 public class CircuitBuildTask implements Runnable {
     private final static Logger logger = Logger.getLogger(CircuitBuildTask.class.getName());
     private final CircuitCreationRequest creationRequest;
     private final ConnectionCache connectionCache;
-    private final CircuitImpl circuit;
-    private final CircuitExtender extender;
 
     private Connection connection = null;
 
     public CircuitBuildTask(CircuitCreationRequest request, ConnectionCache connectionCache) {
         this.creationRequest = request;
         this.connectionCache = connectionCache;
-        this.circuit = request.getCircuit();
-        this.extender = new CircuitExtender(request.getCircuit());
+    }
+
+    public CircuitCreationRequest getCreationRequest() {
+        return creationRequest;
     }
 
     public void run() {
         Router firstRouter = null;
+        CircuitImpl circuit = null;
         try {
+            creationRequest.buildCircuit();
+            circuit = creationRequest.getCircuit();
+            CircuitExtender extender = new CircuitExtender(circuit);
             circuit.notifyCircuitBuildStart();
-            creationRequest.choosePath();
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Opening a new circuit to " + pathToString(creationRequest));
+
+            firstRouter = circuit.getPath().get(0);
+
+            connection = connectionCache.getConnectionTo(firstRouter);
+            circuit.bindToConnection(connection);
+            creationRequest.connectionCompleted(connection);
+
+
+            final CircuitNode firstNode = extender.createFastTo(firstRouter);
+            creationRequest.nodeAdded(firstNode);
+
+            for (Router p : circuit.getPath()) {
+                final CircuitNode extendedNode = extender.extendTo(p);
+                creationRequest.nodeAdded(extendedNode);
             }
-            firstRouter = creationRequest.getPathElement(0);
-            openEntryNodeConnection(firstRouter);
-            buildCircuit(firstRouter);
+
+            creationRequest.circuitBuildCompleted(circuit);
+
             circuit.notifyCircuitBuildCompleted();
         } catch (ConnectionTimeoutException e) {
-            connectionFailed("Timeout connecting to " + firstRouter);
+            connectionFailed("Timeout connecting to " + firstRouter, circuit);
         } catch (ConnectionFailedException e) {
-            connectionFailed("Connection failed to " + firstRouter + " : " + e.getMessage());
+            connectionFailed("Connection failed to " + firstRouter + " : " + e.getMessage(), circuit);
         } catch (ConnectionHandshakeException e) {
-            connectionFailed("Handshake error connecting to " + firstRouter + " : " + e.getMessage());
+            connectionFailed("Handshake error connecting to " + firstRouter + " : " + e.getMessage(), circuit);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            circuitBuildFailed("Circuit building thread interrupted");
-        } catch (PathSelectionFailedException e) {
-            circuitBuildFailed(e.getMessage());
+            circuitBuildFailed("Circuit building thread interrupted", circuit);
         } catch (TorException e) {
-            circuitBuildFailed(e.getMessage());
+            circuitBuildFailed(e.getMessage(), circuit);
         } catch (Exception e) {
-            circuitBuildFailed("Unexpected exception: " + e);
+            circuitBuildFailed("Unexpected exception: " + e, circuit);
             logger.log(Level.WARNING, "Unexpected exception while building circuit: " + e, e);
         }
     }
 
-    private String pathToString(CircuitCreationRequest ccr) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (Router r : ccr.getPath()) {
-            if (sb.length() > 1)
-                sb.append(",");
-            sb.append(r.getNickname());
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    private void connectionFailed(String message) {
+    private void connectionFailed(String message, CircuitImpl circuit) {
         creationRequest.connectionFailed(message);
-        circuit.notifyCircuitBuildFailed();
+        if (circuit != null) {
+            circuit.notifyCircuitBuildFailed();
+        }
     }
 
-    private void circuitBuildFailed(String message) {
+    private void circuitBuildFailed(String message, CircuitImpl circuit) {
         creationRequest.circuitBuildFailed(message);
-        circuit.notifyCircuitBuildFailed();
-        if (connection != null) {
-            connection.removeCircuit(circuit);
+        if (circuit != null) {
+            circuit.notifyCircuitBuildFailed();
+            if (connection != null) {
+                connection.removeCircuit(circuit);
+            }
         }
-    }
-
-    private void openEntryNodeConnection(Router firstRouter) throws ConnectionTimeoutException, ConnectionFailedException, ConnectionHandshakeException, InterruptedException {
-        connection = connectionCache.getConnectionTo(firstRouter);
-        circuit.bindToConnection(connection);
-        creationRequest.connectionCompleted(connection);
-    }
-
-    private void buildCircuit(Router firstRouter) throws TorException {
-        final CircuitNode firstNode = extender.createFastTo(firstRouter);
-        creationRequest.nodeAdded(firstNode);
-
-        for (int i = 1; i < creationRequest.getPathLength(); i++) {
-            final CircuitNode extendedNode = extender.extendTo(creationRequest.getPathElement(i));
-            creationRequest.nodeAdded(extendedNode);
-        }
-        creationRequest.circuitBuildCompleted(circuit);
     }
 }

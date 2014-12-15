@@ -8,6 +8,7 @@ import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.*;
+import im.actor.torlib.circuits.build.path.InternalCircuitFactory;
 import im.actor.torlib.connections.Connection;
 import im.actor.utils.Threading;
 
@@ -69,7 +70,6 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
 
     @Override
     public Future<InternalCircuit> pickInternalCircuit() {
-
         if (cleanInternalCircuits.isEmpty()) {
             TypedFuture<InternalCircuit> res = future();
             pending.add(res);
@@ -80,7 +80,7 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     }
 
     private void maybeBuildInternalCircuit() {
-        final int needed = getNeededCleanCircuitCount(true);
+        final int needed = getNeededCleanCircuitCount();
 
         if (needed > 0) {
             launchBuildTaskForInternalCircuit();
@@ -88,18 +88,16 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     }
 
     private void launchBuildTaskForInternalCircuit() {
-        // logger.fine("Launching new internal circuit");
-        final InternalCircuitImpl circuit = new InternalCircuitImpl(manager);
-        final CircuitCreationRequest request = new CircuitCreationRequest(manager.getPathChooser(), circuit, internalBuildHandler);
+        final CircuitCreationRequest request = new CircuitCreationRequest(
+                new InternalCircuitFactory(manager), internalBuildHandler);
         final CircuitBuildTask task = new CircuitBuildTask(request, manager.getConnectionCache());
         executor.execute(task);
         incrementPendingInternalCircuitCount();
     }
 
-    public int getNeededCleanCircuitCount(boolean isPredicted) {
+    public int getNeededCleanCircuitCount() {
         synchronized (cleanInternalCircuits) {
-            final int predictedCount = (isPredicted) ? 2 : 0;
-            final int needed = Math.max(pending.size(), predictedCount) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
+            final int needed = Math.max(pending.size(), 2) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
             if (needed < 0) {
                 return 0;
             } else {

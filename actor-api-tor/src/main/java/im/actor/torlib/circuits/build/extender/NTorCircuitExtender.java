@@ -1,8 +1,7 @@
-package im.actor.torlib.circuits.build;
+package im.actor.torlib.circuits.build.extender;
 
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.CircuitExtender;
 import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.CircuitNodeCryptoState;
 import im.actor.torlib.circuits.cells.RelayCell;

@@ -1,8 +1,11 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build.extender;
 
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.build.NTorCircuitExtender;
+import im.actor.torlib.circuits.CircuitImpl;
+import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitNodeCryptoState;
+import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
