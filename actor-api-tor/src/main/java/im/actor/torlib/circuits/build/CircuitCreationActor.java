@@ -155,8 +155,10 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         for (ExitCircuit c : circuitManager.getRandomlyOrderedListOfExitCircuits()) {
             final Iterator<StreamExitRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
-                if (attemptHandleStreamRequest(c, it.next()))
-                    it.remove();
+                StreamExitRequest req = it.next();
+                if (attemptHandleStreamRequest(c, req)) {
+                    pendingRequests.remove(req);
+                }
             }
         }
     }

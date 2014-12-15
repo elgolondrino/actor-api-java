@@ -1,5 +1,10 @@
 package im.actor.tor;
 
+import com.droidkit.actors.Actor;
+import com.droidkit.actors.ActorRef;
+import com.droidkit.actors.ActorSystem;
+import com.droidkit.actors.debug.TraceInterface;
+import com.droidkit.actors.mailbox.Envelope;
 import im.actor.api.*;
 import im.actor.api.mtp.MTProtoEndpoint;
 import im.actor.api.scheme.ApiRequests;
@@ -20,8 +25,38 @@ public class TestTor extends TestCase {
     private static final long PHONE_NUMBER = 75552212121L;
 
     public void testTor() throws Exception {
+
+        ActorSystem.system().setTraceInterface(new TraceInterface() {
+            @Override
+            public void onEnvelopeDelivered(Envelope envelope) {
+
+            }
+
+            @Override
+            public void onEnvelopeProcessed(Envelope envelope, long duration) {
+
+            }
+
+            @Override
+            public void onDrop(ActorRef sender, Object message, Actor actor) {
+                System.out.println("Message dropped: " + message + " to " + actor.self().getPath());
+            }
+
+            @Override
+            public void onDeadLetter(ActorRef receiver, Object message) {
+                System.out.println("DeadLetter dropped: " + message + " to " + receiver.getPath());
+            }
+
+            @Override
+            public void onActorDie(ActorRef ref, Exception e) {
+                System.out.println("Actor Die: " + ref.getPath() + " by " + e);
+                e.printStackTrace();
+            }
+        });
+
         ActorTorHelper helper = new ActorTorHelper("/Users/ex3ndr/Develop/tor_junit/");
         helper.start(9152);
+
 
         ActorApiConfig config = new ActorApiConfig.Builder()
                 .setApiCallback(new EmptyApiCallback())
