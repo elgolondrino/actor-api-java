@@ -57,7 +57,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
     private final ExitCircuitsPredictor predictor;
 
-    private final Set<StreamExitRequest> pendingRequests;
+    private final Set<ExitCircuitStreamRequest> pendingRequests;
 
     public ExitCircuitsActor(CircuitManager circuitManager) {
         super(ExitCircuitsInt.class);
@@ -67,7 +67,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         this.connectionCache = circuitManager.getConnectionCache();
 
         this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), directory, circuitManager);
-        this.pendingRequests = new CopyOnWriteArraySet<StreamExitRequest>();
+        this.pendingRequests = new CopyOnWriteArraySet<ExitCircuitStreamRequest>();
         this.executor = Threading.newPool("ExitCircuitsActor worker");
         this.buildHandler = createCircuitBuildHandler();
         this.predictor = new ExitCircuitsPredictor();
@@ -105,7 +105,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         }
         TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
-        pendingRequests.add(new StreamExitRequest(hostname, port, res));
+        pendingRequests.add(new ExitCircuitStreamRequest(hostname, port, res));
         return res;
     }
 
@@ -113,7 +113,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
     public Future<TorStream> openExitStream(IPv4Address address, int port, long timeout) {
         TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
-        pendingRequests.add(new StreamExitRequest(address, port, res));
+        pendingRequests.add(new ExitCircuitStreamRequest(address, port, res));
         return res;
     }
 
@@ -138,9 +138,9 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
             return;
 
         for (ExitCircuit c : circuitManager.getExitActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
-            final Iterator<StreamExitRequest> it = pendingRequests.iterator();
+            final Iterator<ExitCircuitStreamRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
-                StreamExitRequest req = it.next();
+                ExitCircuitStreamRequest req = it.next();
                 if (attemptHandleStreamRequest(c, req)) {
                     pendingRequests.remove(req);
                 }
@@ -148,7 +148,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         }
     }
 
-    private boolean attemptHandleStreamRequest(ExitCircuit c, StreamExitRequest request) {
+    private boolean attemptHandleStreamRequest(ExitCircuit c, ExitCircuitStreamRequest request) {
         if (c.canHandleExitTo(request)) {
             if (request.reserveRequest()) {
                 launchExitStreamTask(c, request);
@@ -159,7 +159,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         return false;
     }
 
-    private void launchExitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
+    private void launchExitStreamTask(ExitCircuit circuit, ExitCircuitStreamRequest exitRequest) {
         final ExitCircuitStreamTask task = new ExitCircuitStreamTask(circuit, exitRequest);
         executor.execute(task);
     }
@@ -198,7 +198,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
         final List<PredictedPortTarget> predictedPorts = predictor.getPredictedPortTargets();
         final List<ExitTarget> exitTargets = new ArrayList<ExitTarget>();
-        for (StreamExitRequest streamRequest : pendingRequests) {
+        for (ExitCircuitStreamRequest streamRequest : pendingRequests) {
             if (!streamRequest.isReserved() && countCircuitsSupportingTarget(streamRequest, false) == 0) {
                 exitTargets.add(streamRequest);
             }
@@ -272,7 +272,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
                 buildCircuitIfNeeded();
             }
 
-            public void nodeAdded(CircuitNode node) {
+            public void nodeAdded(CircuitNodeImpl node) {
                 logger.finer("Node added to circuit: " + node);
             }
         };
@@ -283,7 +283,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
             return;
         }
         final ExitCircuit ec = (ExitCircuit) circuit;
-        for (StreamExitRequest req : pendingRequests) {
+        for (ExitCircuitStreamRequest req : pendingRequests) {
             if (ec.canHandleExitTo(req) && req.reserveRequest()) {
                 launchExitStreamTask(ec, req);
             }

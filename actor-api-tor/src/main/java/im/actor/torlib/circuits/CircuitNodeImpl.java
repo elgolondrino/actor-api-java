@@ -5,17 +5,17 @@ import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
-public class CircuitNodeImpl implements CircuitNode {
+public class CircuitNodeImpl {
 	
-	public static CircuitNode createAnonymous(CircuitNode previous, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNodeImpl createAnonymous(CircuitNodeImpl previous, byte[] keyMaterial, byte[] verifyDigest) {
 		return createNode(null, previous, keyMaterial, verifyDigest);
 	}
 	
-	public static CircuitNode createFirstHop(Router r, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNodeImpl createFirstHop(Router r, byte[] keyMaterial, byte[] verifyDigest) {
 		return createNode(r, null, keyMaterial, verifyDigest);
 	}
 	
-	public static CircuitNode createNode(Router r, CircuitNode previous, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNodeImpl createNode(Router r, CircuitNodeImpl previous, byte[] keyMaterial, byte[] verifyDigest) {
 		final CircuitNodeCryptoState cs = CircuitNodeCryptoState.createFromKeyMaterial(keyMaterial, verifyDigest);
 		return new CircuitNodeImpl(r, previous, cs);
 	}
@@ -25,13 +25,13 @@ public class CircuitNodeImpl implements CircuitNode {
 
 	private final Router router;
 	private final CircuitNodeCryptoState cryptoState;
-	private final CircuitNode previousNode;
+	private final CircuitNodeImpl previousNode;
 
 	private final Object windowLock;
 	private int packageWindow;
 	private int deliverWindow;
 	
-	private CircuitNodeImpl(Router router, CircuitNode previous, CircuitNodeCryptoState cryptoState) {
+	private CircuitNodeImpl(Router router, CircuitNodeImpl previous, CircuitNodeCryptoState cryptoState) {
 		previousNode = previous;
 		this.router = router;
 		this.cryptoState = cryptoState;
@@ -44,7 +44,7 @@ public class CircuitNodeImpl implements CircuitNode {
 		return router;
 	}
 
-	public CircuitNode getPreviousNode() {
+	public CircuitNodeImpl getPreviousNode() {
 		return previousNode;
 	}
 

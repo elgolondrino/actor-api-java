@@ -1,14 +1,10 @@
 package im.actor.torlib.circuits.build;
 
-import java.util.List;
-
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitBuildHandler;
 import im.actor.torlib.circuits.CircuitImpl;
-import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.circuits.build.path.CircuitFactory;
 import im.actor.torlib.connections.Connection;
-import im.actor.torlib.directory.routers.Router;
 
 public class CircuitCreationRequest implements CircuitBuildHandler {
 
@@ -42,7 +38,7 @@ public class CircuitCreationRequest implements CircuitBuildHandler {
         }
     }
 
-    public void nodeAdded(CircuitNode node) {
+    public void nodeAdded(CircuitNodeImpl node) {
         if (buildHandler != null) {
             buildHandler.nodeAdded(node);
         }

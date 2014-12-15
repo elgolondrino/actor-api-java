@@ -52,9 +52,9 @@ public class ExitCircuitImpl extends CircuitImpl implements ExitCircuit {
         }
 
         if (target.isAddressTarget()) {
-            return path.get(path.size() - 1).exitPolicyAccepts(target.getAddress(), target.getPort());
+            return getLastRouter().exitPolicyAccepts(target.getAddress(), target.getPort());
         } else {
-            return path.get(path.size() - 1).exitPolicyAccepts(target.getPort());
+            return getLastRouter().exitPolicyAccepts(target.getPort());
         }
     }
 

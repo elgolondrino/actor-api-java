@@ -72,10 +72,6 @@ public class CircuitManager {
         return directoryCircuitsActor.openDirectoryStream();
     }
 
-    public Future<TorStream> openBridgeStream(Router bridgeRouter) {
-        return directoryCircuitsActor.openBridgeStream(bridgeRouter);
-    }
-
     public Future<TorStream> openExitStreamTo(String hostname, int port) {
         return circuitCreationActor.openExitStream(hostname, port, 15000);
     }

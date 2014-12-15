@@ -1,10 +1,11 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
 import com.droidkit.actors.typed.TypedFuture;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 
-public class StreamExitRequest implements ExitTarget {
+public class ExitCircuitStreamRequest implements ExitTarget {
 
     private final TypedFuture<TorStream> res;
 
@@ -15,15 +16,15 @@ public class StreamExitRequest implements ExitTarget {
 
     private boolean isReserved;
 
-    public StreamExitRequest(IPv4Address address, int port, TypedFuture<TorStream> res) {
+    public ExitCircuitStreamRequest(IPv4Address address, int port, TypedFuture<TorStream> res) {
         this(true, "", address, port, res);
     }
 
-    public StreamExitRequest(String hostname, int port, TypedFuture<TorStream> res) {
+    public ExitCircuitStreamRequest(String hostname, int port, TypedFuture<TorStream> res) {
         this(false, hostname, null, port, res);
     }
 
-    private StreamExitRequest(boolean isAddress, String hostname, IPv4Address address, int port, TypedFuture<TorStream> res) {
+    private ExitCircuitStreamRequest(boolean isAddress, String hostname, IPv4Address address, int port, TypedFuture<TorStream> res) {
         this.res = res;
         this.isAddress = isAddress;
         this.hostname = hostname;

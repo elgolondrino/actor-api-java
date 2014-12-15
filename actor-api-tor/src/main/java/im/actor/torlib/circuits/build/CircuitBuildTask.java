@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitImpl;
-import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.circuits.build.extender.CircuitExtender;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.connections.ConnectionCache;
@@ -50,7 +50,7 @@ public class CircuitBuildTask implements Runnable {
             creationRequest.connectionCompleted(connection);
 
 
-            final CircuitNode firstNode = extender.createFastTo(firstRouter);
+            final CircuitNodeImpl firstNode = extender.createFastTo(firstRouter);
             creationRequest.nodeAdded(firstNode);
 
             boolean isFirst = true;
@@ -59,7 +59,7 @@ public class CircuitBuildTask implements Runnable {
                     isFirst = false;
                     continue;
                 }
-                final CircuitNode extendedNode = extender.extendTo(p);
+                final CircuitNodeImpl extendedNode = extender.extendTo(p);
                 creationRequest.nodeAdded(extendedNode);
             }
 

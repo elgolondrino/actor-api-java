@@ -58,7 +58,7 @@ public interface Circuit {
 	 * @param targetNode The target circuit node to encrypt this cell for.
 	 * @return A newly created relay cell object.
 	 */
-	RelayCell createRelayCell(int relayCommand, int streamId, CircuitNode targetNode);
+	RelayCell createRelayCell(int relayCommand, int streamId, CircuitNodeImpl targetNode);
 	
 	/**
 	 * Returns the next relay response cell received on this circuit.  If no response is
@@ -82,7 +82,7 @@ public interface Circuit {
 	 * 
 	 * @return The final 'hop' or node of this circuit.
 	 */
-	CircuitNode getFinalCircuitNode();
+	CircuitNodeImpl getFinalCircuitNode();
 
 
 	void destroyCircuit();
@@ -95,5 +95,5 @@ public interface Circuit {
 
 	void markForClose();
 		
-	void appendNode(CircuitNode node);
+	void appendNode(CircuitNodeImpl node);
 }

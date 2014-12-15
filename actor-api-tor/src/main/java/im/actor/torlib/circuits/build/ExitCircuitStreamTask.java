@@ -4,16 +4,15 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.ExitCircuit;
-import im.actor.torlib.circuits.StreamExitRequest;
 import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class ExitCircuitStreamTask implements Runnable {
     private final static Logger logger = Logger.getLogger(ExitCircuitStreamTask.class.getName());
     private final ExitCircuit circuit;
-    private final StreamExitRequest exitRequest;
+    private final ExitCircuitStreamRequest exitRequest;
 
-    public ExitCircuitStreamTask(ExitCircuit circuit, StreamExitRequest exitRequest) {
+    public ExitCircuitStreamTask(ExitCircuit circuit, ExitCircuitStreamRequest exitRequest) {
         this.circuit = circuit;
         this.exitRequest = exitRequest;
     }

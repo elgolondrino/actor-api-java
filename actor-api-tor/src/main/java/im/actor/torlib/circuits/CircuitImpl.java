@@ -26,16 +26,20 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
     private final CircuitManager circuitManager;
     protected final List<Router> path;
 
-    private final List<CircuitNode> nodeList;
+    private final List<CircuitNodeImpl> nodeList;
     private final CircuitStatus status;
 
     private CircuitIO io;
 
     protected CircuitImpl(List<Router> path, CircuitManager circuitManager) {
-        nodeList = new ArrayList<CircuitNode>();
+        this.nodeList = new ArrayList<CircuitNodeImpl>();
         this.circuitManager = circuitManager;
         this.path = path;
-        status = new CircuitStatus();
+        this.status = new CircuitStatus();
+    }
+
+    public Router getLastRouter() {
+        return path.get(path.size() - 1);
     }
 
     public List<Router> getPath() {
@@ -125,11 +129,11 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         io.sendRelayCellTo(cell, getFinalCircuitNode());
     }
 
-    public void appendNode(CircuitNode node) {
+    public void appendNode(CircuitNodeImpl node) {
         nodeList.add(node);
     }
 
-    public List<CircuitNode> getNodeList() {
+    public List<CircuitNodeImpl> getNodeList() {
         return nodeList;
     }
 
@@ -137,13 +141,13 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         return nodeList.size();
     }
 
-    public CircuitNode getFinalCircuitNode() {
+    public CircuitNodeImpl getFinalCircuitNode() {
         if (nodeList.isEmpty())
             throw new TorException("getFinalCircuitNode() called on empty circuit");
         return nodeList.get(getCircuitLength() - 1);
     }
 
-    public RelayCell createRelayCell(int relayCommand, int streamId, CircuitNode targetNode) {
+    public RelayCell createRelayCell(int relayCommand, int streamId, CircuitNodeImpl targetNode) {
         return io.createRelayCell(relayCommand, streamId, targetNode);
     }
 
@@ -220,7 +224,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
     protected String pathToString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (CircuitNode node : nodeList) {
+        for (CircuitNodeImpl node : nodeList) {
             if (sb.length() > 1)
                 sb.append(",");
             sb.append(node.toString());

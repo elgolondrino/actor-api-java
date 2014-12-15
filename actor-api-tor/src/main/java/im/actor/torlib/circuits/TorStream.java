@@ -28,7 +28,7 @@ public class TorStream implements DashboardRenderable {
     private final int streamId;
     private final boolean autoclose;
 
-    private final CircuitNode targetNode;
+    private final CircuitNodeImpl targetNode;
     private final TorInputStream inputStream;
     private final TorOutputStream outputStream;
 
@@ -43,10 +43,11 @@ public class TorStream implements DashboardRenderable {
 
     private String streamTarget = "";
 
-    public TorStream(CircuitImpl circuit, CircuitNode targetNode, boolean autoclose) {
+    public TorStream(CircuitImpl circuit, CircuitNodeImpl targetNode, boolean autoclose) {
         this.circuit = circuit;
         this.targetNode = targetNode;
-        this.streamId = NEXT_ID.incrementAndGet();
+        // Stream id must be two bytes long
+        this.streamId = NEXT_ID.incrementAndGet() & 0xFFFFFF;
         this.autoclose = autoclose;
         this.inputStream = new TorInputStream(this);
         this.outputStream = new TorOutputStream(this);
@@ -107,7 +108,7 @@ public class TorStream implements DashboardRenderable {
         return circuit;
     }
 
-    public CircuitNode getTargetNode() {
+    public CircuitNodeImpl getTargetNode() {
         return targetNode;
     }
 

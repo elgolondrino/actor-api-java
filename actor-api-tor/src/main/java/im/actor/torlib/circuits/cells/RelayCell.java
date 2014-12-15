@@ -2,12 +2,12 @@ package im.actor.torlib.circuits.cells;
 
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.errors.TorException;
 
 public class RelayCell extends Cell {
 
-	public static RelayCell createFromCell(CircuitNode node, Cell cell) {
+	public static RelayCell createFromCell(CircuitNodeImpl node, Cell cell) {
 		if(cell.getCommand() != RELAY)
 			throw new TorException("Attempted to create RelayCell from Cell type: "+ cell.getCommand());
 		return new RelayCell(node, cell.getCellBytes());
@@ -61,7 +61,7 @@ public class RelayCell extends Cell {
 
 	private final int streamId;
 	private final int relayCommand;
-	private final CircuitNode circuitNode;
+	private final CircuitNodeImpl circuitNode;
 	private final boolean isOutgoing;
 
 	/*
@@ -74,11 +74,11 @@ public class RelayCell extends Cell {
      *     Data                    [CELL_LEN-14 bytes]
      */
 	
-	 public RelayCell(CircuitNode node, int circuit, int stream, int relayCommand) {
+	 public RelayCell(CircuitNodeImpl node, int circuit, int stream, int relayCommand) {
 		 this(node, circuit, stream, relayCommand, false);
 	 }
 	 
-	 public RelayCell(CircuitNode node, int circuit, int stream, int relayCommand, boolean isRelayEarly) {
+	 public RelayCell(CircuitNodeImpl node, int circuit, int stream, int relayCommand, boolean isRelayEarly) {
 		super(circuit, (isRelayEarly) ? (RELAY_EARLY) : (RELAY));
 		this.circuitNode = node;
 		this.relayCommand = relayCommand;
@@ -91,7 +91,7 @@ public class RelayCell extends Cell {
 		putShort(0);			// Length	
 	}
 
-	private RelayCell(CircuitNode node, byte[] rawCell) {
+	private RelayCell(CircuitNodeImpl node, byte[] rawCell) {
 		super(rawCell);
 		this.circuitNode = node;
 		this.relayCommand = getByte();
@@ -129,7 +129,7 @@ public class RelayCell extends Cell {
 		return dup.slice();
 	}
 
-	public CircuitNode getCircuitNode() {
+	public CircuitNodeImpl getCircuitNode() {
 		return circuitNode;
 	}
 

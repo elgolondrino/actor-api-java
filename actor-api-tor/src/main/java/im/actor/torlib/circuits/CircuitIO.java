@@ -69,7 +69,7 @@ public class CircuitIO implements DashboardRenderable {
     }
 
     private RelayCell decryptRelayCell(Cell cell) {
-        for (CircuitNode node : circuit.getNodeList()) {
+        for (CircuitNodeImpl node : circuit.getNodeList()) {
             if (node.decryptBackwardCell(cell)) {
                 return RelayCell.createFromCell(node, cell);
             }
@@ -182,11 +182,11 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    RelayCell createRelayCell(int relayCommand, int streamId, CircuitNode targetNode) {
+    RelayCell createRelayCell(int relayCommand, int streamId, CircuitNodeImpl targetNode) {
         return new RelayCell(targetNode, circuitId, streamId, relayCommand);
     }
 
-    void sendRelayCellTo(RelayCell cell, CircuitNode targetNode) {
+    void sendRelayCellTo(RelayCell cell, CircuitNodeImpl targetNode) {
         relaySendLock.lock();
         try {
             logRelayCell("Sending:     ", cell);
@@ -194,7 +194,7 @@ public class CircuitIO implements DashboardRenderable {
             targetNode.updateForwardDigest(cell);
             cell.setDigest(targetNode.getForwardDigestBytes());
 
-            for (CircuitNode node = targetNode; node != null; node = node.getPreviousNode())
+            for (CircuitNodeImpl node = targetNode; node != null; node = node.getPreviousNode())
                 node.encryptForwardCell(cell);
 
             if (cell.getRelayCommand() == RelayCell.RELAY_DATA)

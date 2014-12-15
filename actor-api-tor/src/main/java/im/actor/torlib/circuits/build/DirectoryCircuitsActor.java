@@ -10,7 +10,6 @@ import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.path.DirectoryCircuitFactory;
 import im.actor.torlib.connections.Connection;
-import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.Threading;
 
@@ -70,31 +69,6 @@ public class DirectoryCircuitsActor extends TypedActor<DirectoryCircuitsInt> imp
         return res;
     }
 
-    @Override
-    public Future<TorStream> openBridgeStream(final Router bridgeRouter) {
-        final TypedFuture<TorStream> res = future();
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                DirectoryCircuit circuit = tryOpenDirectoryCircuit(new DirectoryCircuitFactory(bridgeRouter, manager));
-                if (circuit == null) {
-                    res.doError(new OpenFailedException("Could not create directory circuit for path"));
-                    return;
-                }
-                try {
-                    TorStream torStream = circuit.openDirectoryStream(OPEN_DIRECTORY_STREAM_TIMEOUT, true);
-                    res.doComplete(torStream);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    res.doError(e);
-                }
-            }
-        });
-        return res;
-    }
-
-
     private DirectoryCircuit tryOpenDirectoryCircuit(DirectoryCircuitFactory factory) {
         final DirectoryCircuitResult result = new DirectoryCircuitResult();
         final CircuitCreationRequest req = new CircuitCreationRequest(factory, result);
@@ -114,7 +88,7 @@ public class DirectoryCircuitsActor extends TypedActor<DirectoryCircuitsInt> imp
         public void connectionCompleted(Connection connection) {
         }
 
-        public void nodeAdded(CircuitNode node) {
+        public void nodeAdded(CircuitNodeImpl node) {
         }
 
         public void circuitBuildCompleted(Circuit circuit) {

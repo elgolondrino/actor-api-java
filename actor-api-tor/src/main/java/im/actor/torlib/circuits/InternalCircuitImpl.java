@@ -55,7 +55,7 @@ public class InternalCircuitImpl extends CircuitImpl implements InternalCircuit,
     }
 
 
-    public HiddenServiceCircuit connectHiddenService(CircuitNode node) {
+    public HiddenServiceCircuit connectHiddenService(CircuitNodeImpl node) {
         if (type != InternalType.UNUSED) {
             throw new IllegalStateException("Cannot connect hidden service from internal circuit type " + type);
         }

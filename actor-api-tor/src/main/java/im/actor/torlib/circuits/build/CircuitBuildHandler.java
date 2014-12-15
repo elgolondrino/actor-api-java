@@ -1,5 +1,7 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.CircuitNodeImpl;
 import im.actor.torlib.connections.Connection;
 
 /**
@@ -10,9 +12,9 @@ import im.actor.torlib.connections.Connection;
  * The normal sequence of callbacks which are fired when a circuit is opened
  * successfully is {@link #connectionCompleted(im.actor.torlib.connections.Connection)} for the initial
  * connection to the entry router, followed by one or more 
- * {@link #nodeAdded(CircuitNode)} as the circuit is extended with new nodes.
+ * {@link #nodeAdded(im.actor.torlib.circuits.CircuitNodeImpl)} as the circuit is extended with new nodes.
  * When all requested nodes in the path have been added successfully to the
- * circuit {@link #circuitBuildCompleted(Circuit)} is called and passed the
+ * circuit {@link #circuitBuildCompleted(im.actor.torlib.circuits.Circuit)} is called and passed the
  * newly constructed circuit.
  * 
  */
@@ -41,7 +43,7 @@ public interface CircuitBuildHandler {
 	 * 
 	 * @param node The newly added circuit node.
 	 */
-	void nodeAdded(CircuitNode node);
+	void nodeAdded(CircuitNodeImpl node);
 
 	/**
 	 * The circuit has been successfully built and is ready for use.

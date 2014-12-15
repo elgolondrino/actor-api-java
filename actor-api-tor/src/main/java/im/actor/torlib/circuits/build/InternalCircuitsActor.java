@@ -132,7 +132,7 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     private CircuitBuildHandler createInternalCircuitBuildHandler() {
         return new CircuitBuildHandler() {
 
-            public void nodeAdded(CircuitNode node) {
+            public void nodeAdded(CircuitNodeImpl node) {
 
             }
 
