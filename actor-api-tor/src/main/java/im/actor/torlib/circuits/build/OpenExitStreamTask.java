@@ -1,8 +1,11 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
+import im.actor.torlib.circuits.ExitCircuit;
+import im.actor.torlib.circuits.StreamExitRequest;
+import im.actor.torlib.circuits.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class OpenExitStreamTask implements Runnable {

@@ -2,6 +2,7 @@ package im.actor.torlib.circuits;
 
 import java.util.logging.Logger;
 
+import im.actor.torlib.circuits.build.NTorCircuitExtender;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
@@ -17,18 +18,18 @@ public class CircuitExtender {
     private final static int DH_BYTES = 1024 / 8;
     private final static int PKCS1_OAEP_PADDING_OVERHEAD = 42;
     private final static int CIPHER_KEY_LEN = TorStreamCipher.KEY_LEN;
-    final static int TAP_ONIONSKIN_LEN = PKCS1_OAEP_PADDING_OVERHEAD + CIPHER_KEY_LEN + DH_BYTES;
-    final static int TAP_ONIONSKIN_REPLY_LEN = DH_BYTES + TorMessageDigest.TOR_DIGEST_SIZE;
+    public final static int TAP_ONIONSKIN_LEN = PKCS1_OAEP_PADDING_OVERHEAD + CIPHER_KEY_LEN + DH_BYTES;
+    public final static int TAP_ONIONSKIN_REPLY_LEN = DH_BYTES + TorMessageDigest.TOR_DIGEST_SIZE;
 
 
     private final CircuitImpl circuit;
 
-    CircuitExtender(CircuitImpl circuit) {
+    public CircuitExtender(CircuitImpl circuit) {
         this.circuit = circuit;
     }
 
 
-    CircuitNode createFastTo(Router targetRouter) {
+    public CircuitNode createFastTo(Router targetRouter) {
         logger.fine("Creating 'fast' to " + targetRouter);
         final TorCreateFastKeyAgreement kex = new TorCreateFastKeyAgreement();
         sendCreateFastCell(kex);
@@ -64,7 +65,7 @@ public class CircuitExtender {
         return node;
     }
 
-    CircuitNode extendTo(Router targetRouter) {
+    public CircuitNode extendTo(Router targetRouter) {
         if (circuit.getCircuitLength() == 0) {
             throw new TorException("Cannot EXTEND an empty circuit");
         }
@@ -129,7 +130,7 @@ public class CircuitExtender {
         return new RelayCell(circuit.getFinalCircuitNode(), circuit.getCircuitId(), 0, command, true);
     }
 
-    Router getFinalRouter() {
+    public Router getFinalRouter() {
         final CircuitNode node = circuit.getFinalCircuitNode();
         if (node != null) {
             return node.getRouter();

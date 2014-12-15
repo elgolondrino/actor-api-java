@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.directory.routers.exitpolicy;
 
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;

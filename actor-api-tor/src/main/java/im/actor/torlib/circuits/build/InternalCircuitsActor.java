@@ -135,25 +135,22 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
         return new CircuitBuildHandler() {
 
             public void nodeAdded(CircuitNode node) {
-                // logger.finer("Node added to internal circuit: " + node);
+
             }
 
             public void connectionFailed(String reason) {
-                // logger.fine("Circuit connection failed: " + reason);
                 self().send(new ConnectionFailed());
             }
 
             public void connectionCompleted(Connection connection) {
-                // logger.finer("Circuit connection completed to " + connection);
+
             }
 
             public void circuitBuildFailed(String reason) {
-                // logger.fine("Circuit build failed: " + reason);
                 self().send(new ConnectionFailed());
             }
 
             public void circuitBuildCompleted(Circuit circuit) {
-                // logger.fine("Internal circuit build completed: " + circuit);
                 self().send(new ConnectionCompleted((InternalCircuit) circuit));
             }
         };

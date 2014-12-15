@@ -17,7 +17,6 @@ import com.droidkit.actors.concurrency.Future;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
-import im.actor.torlib.*;
 import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.connections.Connection;
@@ -26,6 +25,7 @@ import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.directory.routers.exitpolicy.PredictedPortTarget;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.IPv4Address;
 import im.actor.utils.Threading;
@@ -140,7 +140,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         if (pendingRequests.isEmpty())
             return;
 
-        for (ExitCircuit c : circuitManager.getRandomlyOrderedListOfExitCircuits()) {
+        for (ExitCircuit c : circuitManager.getActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
             final Iterator<StreamExitRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
                 StreamExitRequest req = it.next();
@@ -168,7 +168,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
     }
 
     private void expireOldCircuits() {
-        final Set<Circuit> circuits = circuitManager.getCircuitsByFilter(new CircuitManager.CircuitFilter() {
+        final Set<Circuit> circuits = circuitManager.getActiveCircuits().getCircuitsByFilter(new ActiveCircuits.CircuitFilter() {
 
             public boolean filter(Circuit circuit) {
                 return !circuit.isMarkedForClose() && circuit.getSecondsDirty() > MAX_CIRCUIT_DIRTINESS;
@@ -217,7 +217,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
 
 
     private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
-        final CircuitManager.CircuitFilter filter = new CircuitManager.CircuitFilter() {
+        final ActiveCircuits.CircuitFilter filter = new ActiveCircuits.CircuitFilter() {
             public boolean filter(Circuit circuit) {
                 if (!(circuit instanceof ExitCircuit)) {
                     return false;
@@ -228,7 +228,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
                 return pendingOrConnected && isCleanIfNeeded && ec.canHandleExitTo(target);
             }
         };
-        return circuitManager.getCircuitsByFilter(filter).size();
+        return circuitManager.getActiveCircuits().getCircuitsByFilter(filter).size();
     }
 
     private void buildCircuitToHandleExitTargets(List<ExitTarget> exitTargets) {
@@ -237,7 +237,7 @@ public class CircuitCreationActor extends TypedActor<CircuitCreationInt> impleme
         }
         if (!directory.haveMinimumRouterInfo())
             return;
-        if (circuitManager.getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
+        if (circuitManager.getActiveCircuits().getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
             return;
 
         if (logger.isLoggable(Level.FINE)) {

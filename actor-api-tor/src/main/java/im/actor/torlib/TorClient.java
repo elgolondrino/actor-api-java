@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.connections.ConnectionCache;
-import im.actor.torlib.connections.ConnectionCacheImpl;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.DirectoryManager;
@@ -37,7 +36,7 @@ public class TorClient {
         config = Tor.createConfig();
         newDirectory = new NewDirectory(config);
 
-        connectionCache = new ConnectionCacheImpl(config);
+        connectionCache = new ConnectionCache(config);
 
         circuitManager = new CircuitManager(config, newDirectory, connectionCache);
         directoryManager = new DirectoryManager(circuitManager);
@@ -78,7 +77,7 @@ public class TorClient {
                 dashboard.stopListening();
             }
             directoryManager.stop();
-            circuitManager.stopBuildingCircuits(true);
+            circuitManager.stopBuildingCircuits();
             newDirectory.close();
             connectionCache.close();
         } catch (Exception e) {

@@ -1,7 +1,10 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
 import java.util.logging.Logger;
 
+import im.actor.torlib.circuits.CircuitExtender;
+import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitNodeCryptoState;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
@@ -21,7 +24,7 @@ public class NTorCircuitExtender {
 		this.kex = new TorNTorKeyAgreement(router.getIdentityHash(), router.getNTorOnionKey());
 	}
 
-	CircuitNode extendTo() {
+	public CircuitNode extendTo() {
 		final byte[] onion = kex.createOnionSkin();
 		if(finalRouterSupportsExtend2()) {
 			logger.fine("Extending circuit to "+ router.getNickname() + " with NTor inside RELAY_EXTEND2");

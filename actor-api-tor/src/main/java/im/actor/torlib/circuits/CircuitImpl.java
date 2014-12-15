@@ -45,7 +45,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         status = new CircuitStatus();
     }
 
-    List<Router> choosePath(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
+    public List<Router> choosePath(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException {
         if (prechosenPath != null) {
             return new ArrayList<Router>(prechosenPath);
         } else {
@@ -55,7 +55,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
 
     protected abstract List<Router> choosePathForCircuit(CircuitPathChooser pathChooser) throws InterruptedException, PathSelectionFailedException;
 
-    void bindToConnection(Connection connection) {
+    public void bindToConnection(Connection connection) {
         if (io != null) {
             throw new IllegalStateException("Circuit already bound to a connection");
         }
@@ -77,7 +77,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         }
     }
 
-    CircuitStatus getStatus() {
+    public CircuitStatus getStatus() {
         return status;
     }
 
@@ -97,21 +97,21 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         return (int) (status.getMillisecondsDirty() / 1000);
     }
 
-    void notifyCircuitBuildStart() {
+    public void notifyCircuitBuildStart() {
         if (!status.isUnconnected()) {
             throw new IllegalStateException("Can only connect UNCONNECTED circuits");
         }
         status.updateCreatedTimestamp();
         status.setStateBuilding();
-        circuitManager.addActiveCircuit(this);
+        circuitManager.getActiveCircuits().addActiveCircuit(this);
     }
 
-    void notifyCircuitBuildFailed() {
+    public void notifyCircuitBuildFailed() {
         status.setStateFailed();
-        circuitManager.removeActiveCircuit(this);
+        circuitManager.getActiveCircuits().removeActiveCircuit(this);
     }
 
-    void notifyCircuitBuildCompleted() {
+    public void notifyCircuitBuildCompleted() {
         status.setStateOpen();
         status.updateCreatedTimestamp();
     }
@@ -142,11 +142,11 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         nodeList.add(node);
     }
 
-    List<CircuitNode> getNodeList() {
+    public List<CircuitNode> getNodeList() {
         return nodeList;
     }
 
-    int getCircuitLength() {
+    public int getCircuitLength() {
         return nodeList.size();
     }
 
@@ -164,11 +164,11 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         return io.dequeueRelayResponseCell();
     }
 
-    void sendCell(Cell cell) {
+    public void sendCell(Cell cell) {
         io.sendCell(cell);
     }
 
-    Cell receiveControlCellResponse() {
+    public Cell receiveControlCellResponse() {
         return io.receiveControlCellResponse();
     }
 
@@ -193,9 +193,9 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         return createNewStream(false);
     }
 
-    void setStateDestroyed() {
+    public void setStateDestroyed() {
         status.setStateDestroyed();
-        circuitManager.removeActiveCircuit(this);
+        circuitManager.getActiveCircuits().removeActiveCircuit(this);
     }
 
     public void destroyCircuit() {
@@ -203,7 +203,7 @@ public abstract class CircuitImpl implements Circuit, DashboardRenderable {
         if (io != null) {
             io.destroyCircuit();
         }
-        circuitManager.removeActiveCircuit(this);
+        circuitManager.getActiveCircuits().removeActiveCircuit(this);
     }
 
 

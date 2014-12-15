@@ -1,8 +1,12 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.build;
 
 import java.util.Collections;
 import java.util.List;
 
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.CircuitBuildHandler;
+import im.actor.torlib.circuits.CircuitImpl;
+import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
