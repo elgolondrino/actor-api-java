@@ -23,11 +23,13 @@ import im.actor.torlib.circuits.actors.target.PredictedPortTarget;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.ConnectionCache;
+import im.actor.torlib.directory.DirectoryChangedListener;
 import im.actor.torlib.errors.OpenFailedException;
+import im.actor.torlib.log.Log;
 import im.actor.utils.IPv4Address;
 import im.actor.utils.Threading;
 
-public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements ExitCircuitsInt {
+public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements ExitCircuitsInt, DirectoryChangedListener {
 
 
     public static ExitCircuitsInt get(final CircuitManager circuitManager) {
@@ -40,7 +42,8 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
                 }), "/tor/circuit/build"), ExitCircuitsInt.class);
     }
 
-    private final static Logger logger = Logger.getLogger(ExitCircuitsActor.class.getName());
+    private final static String TAG = "ExitCircuitsActor";
+
     private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
 
     private final HiddenServiceManager hiddenServiceManager;
@@ -68,10 +71,12 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
     @Override
     public void start() {
         self().sendOnce(new Iterate());
+        circuitManager.getDirectory().registerListener(this);
     }
 
     @Override
     public Future<TorStream> openExitStream(final String hostname, final int port, long timeout) {
+        Log.d(TAG, "openExitStream " + hostname + ":" + port + "");
         if (hostname.endsWith(".onion")) {
             // TODO: Better implementation
             final TypedFuture<TorStream> res = future();
@@ -103,6 +108,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
     @Override
     public Future<TorStream> openExitStream(IPv4Address address, int port, long timeout) {
+        Log.d(TAG, "openExitStream " + address + ":" + port + "");
         TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
         pendingRequests.add(new ExitCircuitStreamRequest(address, port, res));
@@ -113,14 +119,16 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
     @Override
     public void stop() {
         context().stopSelf();
+        circuitManager.getDirectory().unregisterListener(this);
     }
 
     @Override
     public void onReceive(Object message) {
         super.onReceive(message);
         if (message instanceof Iterate) {
-            expireOldCircuits();
+            Log.d(TAG, "Iteration");
             assignPendingStreamsToActiveCircuits();
+            expireOldCircuits();
             buildCircuitIfNeeded();
             self().sendOnce(new Iterate(), 5000);
         }
@@ -165,14 +173,14 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
             }
         });
         for (Circuit c : circuits) {
-            logger.fine("Closing idle dirty circuit: " + c);
+            // logger.fine("Closing idle dirty circuit: " + c);
             c.markForClose();
         }
     }
 
     private void buildCircuitIfNeeded() {
         if (connectionCache.isClosed()) {
-            logger.warning("Not building circuits, because connection cache is closed");
+            // logger.warning("Not building circuits, because connection cache is closed");
             return;
         }
 
@@ -206,17 +214,13 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         if (exitTargets.isEmpty()) {
             return;
         }
-//        if (!directory.haveMinimumRouterInfo())
-//            return;
 
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Building new circuit to handle " + exitTargets.size() + " pending streams and predicted ports");
-        }
-
+        Log.d(TAG, "Starting building new circuit");
         ask(CircuitBuildActor.build(new ExitCircuitFactory(exitTargets, circuitManager), connectionCache),
                 new AskCallback<Circuit>() {
                     @Override
                     public void onResult(Circuit circuit) {
+                        Log.d(TAG, "Circuit created " + circuit);
                         circuitManager.getExitActiveCircuits().addActiveCircuit(circuit);
                         for (ExitCircuitStreamRequest req : pendingRequests) {
                             if (canHandleExitTo(circuit, req) && req.reserveRequest()) {
@@ -227,6 +231,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
                     @Override
                     public void onError(Throwable throwable) {
+                        Log.d(TAG, "Circuit create error");
                         // Try Again
                         self().sendOnce(new Iterate(), 1000);
                     }
@@ -242,6 +247,12 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         } else {
             return circuit.getLastRouter().exitPolicyAccepts(target.getPort());
         }
+    }
+
+    @Override
+    public void onDirectoryChanged() {
+        Log.d(TAG, "Directory changed");
+        self().sendOnce(new Iterate());
     }
 
 

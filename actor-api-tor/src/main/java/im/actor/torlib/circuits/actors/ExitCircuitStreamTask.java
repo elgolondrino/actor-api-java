@@ -36,7 +36,6 @@ public class ExitCircuitStreamTask implements Runnable {
                 circuit.markForClose();
                 exitRequest.error(e);
             }
-
         }
     }
 

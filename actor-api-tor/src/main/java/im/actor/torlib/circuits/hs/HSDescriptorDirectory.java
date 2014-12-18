@@ -7,17 +7,17 @@ public class HSDescriptorDirectory {
 	
 	private final HexDigest descriptorId;
 	private final Router directory;
-	
-	HSDescriptorDirectory(HexDigest descriptorId, Router directory) {
+
+	public HSDescriptorDirectory(HexDigest descriptorId, Router directory) {
 		this.descriptorId = descriptorId;
 		this.directory = directory;
 	}
-	
-	Router getDirectory() {
+
+	public Router getDirectory() {
 		return directory;
 	}
-	
-	HexDigest getDescriptorId() {
+
+	public HexDigest getDescriptorId() {
 		return descriptorId;
 	}
 	

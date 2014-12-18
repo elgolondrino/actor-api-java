@@ -1,11 +1,11 @@
 package im.actor.torlib.documents;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import im.actor.torlib.utils.Tor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
@@ -149,7 +149,7 @@ public class DescriptorDocument implements Document {
 		if (getRawDocumentData() == null) {
 			return ByteBuffer.allocate(0);
 		} else {
-			return ByteBuffer.wrap(getRawDocumentData().getBytes(Tor.getDefaultCharset()));
+			return ByteBuffer.wrap(getRawDocumentData().getBytes(Charset.forName("ISO-8859-1")));
 		}
 	}
 }

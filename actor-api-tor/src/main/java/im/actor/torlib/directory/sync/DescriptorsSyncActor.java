@@ -32,7 +32,7 @@ public class DescriptorsSyncActor extends TypedActor<DescriptorsSyncInt> impleme
             public DescriptorsSyncActor create() {
                 return new DescriptorsSyncActor(directory, circuitManager);
             }
-        }), "directories/" + directory.getId() + "/sync/descriptors"), DescriptorsSyncInt.class);
+        }), "/tor/dir/" + directory.getId() + "/sync/descriptors"), DescriptorsSyncInt.class);
     }
 
     private final static Logger LOG = Logger.getLogger(DescriptorsSyncActor.class.getName());

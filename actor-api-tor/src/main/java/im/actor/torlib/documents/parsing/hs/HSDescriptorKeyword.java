@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits.hs;
+package im.actor.torlib.documents.parsing.hs;
 
 public enum HSDescriptorKeyword {
 	RENDEZVOUS_SERVICE_DESCRIPTOR("rendezvous-service-descriptor", 1),

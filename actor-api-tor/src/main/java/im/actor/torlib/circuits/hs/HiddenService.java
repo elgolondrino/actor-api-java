@@ -6,6 +6,7 @@ import java.util.List;
 
 import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.crypto.TorMessageDigest;
+import im.actor.torlib.documents.HSDescriptor;
 import im.actor.utils.Base32;
 import im.actor.utils.HexDigest;
 
@@ -26,71 +27,71 @@ public class HiddenService {
     }
 
 
-    HiddenService(byte[] permanentId) {
+    public HiddenService(byte[] permanentId) {
         this.permanentId = permanentId;
     }
 
-    String getOnionAddressForLogging() {
+    public String getOnionAddressForLogging() {
         return getOnionAddress();
     }
 
-    String getOnionAddress() {
+    public String getOnionAddress() {
         return Base32.base32Encode(permanentId) + ".onion";
     }
 
-    boolean hasCurrentDescriptor() {
+    public boolean hasCurrentDescriptor() {
         return (descriptor != null && !descriptor.isExpired());
     }
 
-    HSDescriptor getDescriptor() {
+    public HSDescriptor getDescriptor() {
         return descriptor;
     }
 
-    void setDescriptor(HSDescriptor descriptor) {
+    public void setDescriptor(HSDescriptor descriptor) {
         this.descriptor = descriptor;
     }
 
-    Circuit getCircuit() {
+    public Circuit getCircuit() {
         return circuit;
     }
 
-    void setCircuit(Circuit circuit) {
+    public void setCircuit(Circuit circuit) {
         this.circuit = circuit;
     }
 
-    List<HexDigest> getAllCurrentDescriptorIds() {
+    public List<HexDigest> getAllCurrentDescriptorIds() {
         final List<HexDigest> ids = new ArrayList<HexDigest>();
         ids.add(getCurrentDescriptorId(0));
         ids.add(getCurrentDescriptorId(1));
         return ids;
     }
 
-    HexDigest getCurrentDescriptorId(int replica) {
+    public HexDigest getCurrentDescriptorId(int replica) {
         final TorMessageDigest digest = new TorMessageDigest();
         digest.update(permanentId);
         digest.update(getCurrentSecretId(replica));
         return digest.getHexDigest();
     }
 
-    byte[] getCurrentSecretId(int replica) {
+    public byte[] getCurrentSecretId(int replica) {
         final TorMessageDigest digest = new TorMessageDigest();
         digest.update(getCurrentTimePeriod());
         digest.update(new byte[]{(byte) replica});
         return digest.getDigestBytes();
     }
 
-    byte[] getCurrentTimePeriod() {
+    public  byte[] getCurrentTimePeriod() {
         final long now = System.currentTimeMillis() / 1000;
         final int idByte = permanentId[0] & 0xFF;
         return calculateTimePeriod(now, idByte);
     }
 
-    static byte[] calculateTimePeriod(long currentTime, int idByte) {
+    public static byte[] calculateTimePeriod(long currentTime, int idByte) {
         final long t = (currentTime + (idByte * 86400L / 256)) / 86400L;
         return toNetworkBytes(t);
     }
 
-    static byte[] toNetworkBytes(long value) {
+    public static byte[] toNetworkBytes(long value) {
         final byte[] result = new byte[4];
         for (int i = 3; i >= 0; i--) {
             result[i] = (byte) (value & 0xFF);

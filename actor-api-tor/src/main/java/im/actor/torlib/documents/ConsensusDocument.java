@@ -1,6 +1,7 @@
 package im.actor.torlib.documents;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -13,7 +14,6 @@ import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.TrustedAuthorities;
 import im.actor.torlib.documents.parsing.consensus.DirectorySignature;
 import im.actor.torlib.documents.parsing.consensus.RequiredCertificateImpl;
-import im.actor.torlib.utils.Tor;
 
 public class ConsensusDocument implements Document {
 
@@ -172,7 +172,7 @@ public class ConsensusDocument implements Document {
         if (getRawDocumentData() == null) {
             return ByteBuffer.allocate(0);
         } else {
-            return ByteBuffer.wrap(getRawDocumentData().getBytes(Tor.getDefaultCharset()));
+            return ByteBuffer.wrap(getRawDocumentData().getBytes(Charset.forName("ISO-8859-1")));
         }
     }
 

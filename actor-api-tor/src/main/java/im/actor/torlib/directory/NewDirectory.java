@@ -7,6 +7,7 @@ import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,6 +20,8 @@ public class NewDirectory {
     private final int id;
     private final DirectoryStorage store;
 
+    private CopyOnWriteArrayList<DirectoryChangedListener> listeners = new CopyOnWriteArrayList<DirectoryChangedListener>();
+
     private Consensus currentConsensus;
 
     private Routers routers;
@@ -28,6 +31,23 @@ public class NewDirectory {
         this.dataPath = dataPath;
         this.store = new DirectoryStorage(dataPath);
         this.routers = new Routers(store);
+    }
+
+    public void registerListener(DirectoryChangedListener listener) {
+        if (listeners.contains(listener)) {
+            return;
+        }
+        listeners.add(listener);
+    }
+
+    public void unregisterListener(DirectoryChangedListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyDirectoryChanged() {
+        for (DirectoryChangedListener l : listeners) {
+            l.onDirectoryChanged();
+        }
     }
 
     public String getDataPath() {
@@ -54,10 +74,12 @@ public class NewDirectory {
     public void applyConsensusDocument(Consensus consensus) {
         routers.applyNewConsensus(consensus);
         this.currentConsensus = consensus;
+        notifyDirectoryChanged();
     }
 
     public void applyRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
         routers.addRouterDescriptors(descriptorDocuments);
+        notifyDirectoryChanged();
     }
 
 

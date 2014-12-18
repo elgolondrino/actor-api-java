@@ -8,6 +8,8 @@ import im.actor.torlib.circuits.actors.InternalCircuitMutate;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.documents.HSDescriptor;
+import im.actor.torlib.documents.IntroductionPoint;
 import im.actor.torlib.errors.TorException;
 
 public class RendezvousCircuitBuilder implements Callable<Circuit> {

@@ -1,6 +1,7 @@
 package im.actor.torlib.directory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,6 @@ import im.actor.torlib.crypto.TorRandom;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.consensus.RouterStatus;
 import im.actor.torlib.directory.consensus.StatusFlag;
-import im.actor.torlib.utils.Tor;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.documents.parsing.DocumentFieldParser;
@@ -66,7 +66,7 @@ public class TrustedAuthorities {
             builder.append(entry);
             builder.append('\n');
         }
-        final ByteBuffer buffer = ByteBuffer.wrap(builder.toString().getBytes(Tor.getDefaultCharset()));
+        final ByteBuffer buffer = ByteBuffer.wrap(builder.toString().getBytes(Charset.forName("ISO-8859-1")));
         final DocumentFieldParser parser = new DocumentFieldParserImpl(buffer);
 
         parser.setHandler(new DocumentParsingHandler() {

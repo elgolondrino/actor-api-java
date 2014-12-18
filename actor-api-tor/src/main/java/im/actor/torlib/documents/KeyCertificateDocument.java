@@ -1,12 +1,12 @@
 package im.actor.torlib.documents;
 
-import im.actor.torlib.utils.Tor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
 import im.actor.utils.Timestamp;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * This class represents a key certificate document as specified in 
@@ -85,7 +85,7 @@ public class KeyCertificateDocument implements Document {
 		if(getRawDocumentData() == null) {
 			return ByteBuffer.allocate(0);
 		} else {
-			return ByteBuffer.wrap(getRawDocumentData().getBytes(Tor.getDefaultCharset()));
+			return ByteBuffer.wrap(getRawDocumentData().getBytes(Charset.forName("ISO-8859-1")));
 		}
 	}
 

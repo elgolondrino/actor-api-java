@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits.hs;
+package im.actor.torlib.documents.downloader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,6 +10,10 @@ import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.actors.CircuitStreamFactory;
 import im.actor.torlib.circuits.actors.InternalCircuitMutate;
+import im.actor.torlib.documents.HSDescriptor;
+import im.actor.torlib.circuits.hs.HSDescriptorDirectory;
+import im.actor.torlib.documents.parsing.hs.HSDescriptorParser;
+import im.actor.torlib.circuits.hs.HiddenService;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.streams.TorStream;
@@ -17,7 +21,6 @@ import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.documents.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
-import im.actor.torlib.documents.downloader.TorHttpConnection;
 import im.actor.torlib.documents.parsing.DocumentParsingResultHandler;
 
 public class HSDescriptorDownloader {

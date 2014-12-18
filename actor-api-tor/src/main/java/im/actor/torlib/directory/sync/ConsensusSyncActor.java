@@ -21,6 +21,7 @@ import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
+import im.actor.torlib.log.Log;
 import im.actor.utils.SafeFileWriter;
 import im.actor.utils.Threading;
 import im.actor.torlib.crypto.TorRandom;
@@ -43,14 +44,14 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
             public ConsensusSyncActor create() {
                 return new ConsensusSyncActor(directory, circuitManager);
             }
-        }), "directories/" + directory.getId() + "/sync/consensus"), ConsensusSyncInt.class);
+        }), "/tor/dir/" + directory.getId() + "/sync/consensus"), ConsensusSyncInt.class);
     }
 
     private final static DocumentParserFactory PARSER_FACTORY = new DocumentParserFactoryImpl();
 
     private final static TorRandom RANDOM = new TorRandom();
 
-    private final static Logger LOG = Logger.getLogger(ConsensusSyncActor.class.getName());
+    private static final String TAG = "ConsensusSyncActor";
 
 
     private final ExecutorService executor = Threading.newPool("DirectoryDownloadTask worker");
@@ -121,25 +122,25 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
 
     @Override
     public void startSync() {
-        LOG.info("Loading consensus...");
+        Log.d(TAG, "Loading consensus...");
         long start = System.currentTimeMillis();
         Consensus consensusDocument = loadConsensus();
         if (consensusDocument != null) {
-            LOG.info("Consensus loaded in " + (System.currentTimeMillis() - start) + " ms");
+            Log.d(TAG, "Consensus loaded in " + (System.currentTimeMillis() - start) + " ms");
             applyCurrentConsensus(consensusDocument);
         } else {
-            LOG.info("Consensus NOT loaded.");
+            Log.d(TAG, "Consensus NOT loaded.");
             applyCurrentConsensus(null);
         }
-        LOG.info("Loading certificates...");
+        Log.d(TAG, "Loading certificates...");
         start = System.currentTimeMillis();
         loadCertificates();
-        LOG.info("Certificates loaded in " + (System.currentTimeMillis() - start) + " ms");
-        LOG.info("Loading directory state...");
+        Log.d(TAG, "Certificates loaded in " + (System.currentTimeMillis() - start) + " ms");
+        Log.d(TAG, "Loading directory state...");
         start = System.currentTimeMillis();
         // OBSOLETE
         directory.loadFromStore();
-        LOG.info("Directory state loaded in " + (System.currentTimeMillis() - start) + " ms");
+        Log.d(TAG, "Directory state loaded in " + (System.currentTimeMillis() - start) + " ms");
 
         self().sendOnce(new CheckConsensus());
     }
@@ -175,11 +176,11 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         if (currentConsensus == null || !currentConsensus.isLive() ||
                 consensusDownloadTime.before(new Date())) {
             if (currentConsensus == null) {
-                LOG.info("Downloading consensus: no consensus available");
+                Log.d(TAG, "Downloading consensus: no consensus available");
             } else if (!currentConsensus.isLive()) {
-                LOG.info("Downloading consensus: consensus is outdated");
+                Log.d(TAG, "Downloading consensus: consensus is outdated");
             } else {
-                LOG.info("Downloading consensus: consensus is required to download");
+                Log.d(TAG, "Downloading consensus: consensus is required to download");
             }
 
             isDownloadingConsensus = true;
@@ -224,17 +225,17 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         isDownloadingConsensus = false;
 
         if (currentConsensus != null && consensus.getValidAfterTime().getTime() < currentConsensus.getValidAfter() * 1000L) {
-            LOG.warning("New consensus document is older than current consensus document");
+            Log.w(TAG, "New consensus document is older than current consensus document");
             return;
         }
 
         switch (consensus.verifySignatures()) {
             case STATUS_FAILED:
-                LOG.warning("Unable to verify signatures on consensus document, discarding...");
+                Log.w(TAG, "Unable to verify signatures on consensus document, discarding...");
                 return;
 
             case STATUS_NEED_CERTS:
-                LOG.info("Downloading required certificates");
+                Log.d(TAG, "Downloading required certificates");
                 currentPendingConsensus = consensus;
                 requiredCertificates.addAll(consensus.getRequiredCertificates());
                 self().sendOnce(new CheckConsensus());
@@ -270,7 +271,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         final boolean wasRequired = removeRequiredCertificate(certificate);
         final DirectoryServer as = TrustedAuthorities.getInstance().getAuthorityServerByIdentity(certificate.getAuthorityFingerprint());
         if (as == null) {
-            LOG.warning("Certificate read for unknown directory authority with identity: " + certificate.getAuthorityFingerprint());
+            Log.w(TAG, "Certificate read for unknown directory authority with identity: " + certificate.getAuthorityFingerprint());
             return;
         }
         as.addCertificate(certificate);
@@ -338,7 +339,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
                 ConsensusDocument consensus = requestor.downloadCurrentConsensus();
                 self().send(new ConsensusDownloaded(consensus));
             } catch (DirectoryRequestFailedException e) {
-                LOG.warning("Failed to download current consensus document: " + e.getMessage());
+                Log.w(TAG, "Failed to download current consensus document: " + e.getMessage());
                 self().send(new ConsensusDownloadFailed());
             }
         }
@@ -361,7 +362,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
                 List<KeyCertificateDocument> certificates = requestor.downloadKeyCertificates(requiredCertificates);
                 self().send(new CertificatesDownloaded(certificates));
             } catch (DirectoryRequestFailedException e) {
-                LOG.warning("Failed to download key certificates: " + e.getMessage());
+                Log.w(TAG, "Failed to download key certificates: " + e.getMessage());
                 self().send(new CertificateDownloadFailed());
             }
         }

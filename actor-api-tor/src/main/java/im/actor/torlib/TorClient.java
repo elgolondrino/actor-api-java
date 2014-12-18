@@ -7,13 +7,15 @@ import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.proxy.SocksTorProxy;
-import im.actor.torlib.utils.Tor;
 
 /**
  * This class is the main entry-point for running a Tor proxy
  * or client.
  */
 public class TorClient {
+
+    public static final String VERSION = "AcTOR v0.0.1";
+
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
     private final NewDirectory newDirectory;
     private final CircuitManager circuitManager;
@@ -42,7 +44,7 @@ public class TorClient {
         if (isStopped) {
             throw new IllegalStateException("Cannot restart a TorClient instance.  Create a new instance instead.");
         }
-        logger.info("Starting AcTOR (version: " + Tor.getFullVersion() + ")");
+        logger.info("Starting " + VERSION);
         directoryManager.start(newDirectory);
         circuitManager.startBuildingCircuits();
         isStarted = true;

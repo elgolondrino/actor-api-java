@@ -3,13 +3,13 @@ package im.actor.torlib.proxy.actors;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 import com.droidkit.actors.*;
 import com.droidkit.actors.tasks.AskCallback;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.circuits.streams.TorStream;
+import im.actor.torlib.log.Log;
 
 public class ProxyAcceptActor extends Actor {
 
@@ -25,7 +25,7 @@ public class ProxyAcceptActor extends Actor {
         }), "/tor/proxy/" + id + "/init");
     }
 
-    private final static Logger LOG = Logger.getLogger(ProxyAcceptActor.class.getName());
+    private static final String TAG = "ProxyAcceptActor";
 
     private final int id;
     private final Socket socket;
@@ -44,7 +44,7 @@ public class ProxyAcceptActor extends Actor {
             try {
                 socket.close();
             } catch (IOException e) {
-                LOG.warning("Error closing SOCKS socket: " + e.getMessage());
+                Log.w(TAG, "Error closing SOCKS socket: " + e.getMessage());
             }
         }
     }
@@ -53,7 +53,7 @@ public class ProxyAcceptActor extends Actor {
         try {
             return socket.getInputStream().read();
         } catch (IOException e) {
-            LOG.warning("IO error reading version byte: " + e.getMessage());
+            Log.w(TAG, "IO error reading version byte: " + e.getMessage());
             return -1;
         }
     }
@@ -75,12 +75,12 @@ public class ProxyAcceptActor extends Actor {
         try {
             request.readRequest();
             if (!request.isConnectRequest()) {
-                LOG.warning("Non connect command (" + request.getCommandCode() + ")");
+                Log.w(TAG, "Non connect command (" + request.getCommandCode() + ")");
                 request.sendError(true);
                 return false;
             }
 
-            LOG.info("SOCKS CONNECT to " + request.getTarget() + " starting opening sequence");
+            Log.d(TAG, "SOCKS CONNECT to " + request.getTarget() + " starting opening sequence");
             ActorRef askActor;
             if (request.hasHostname()) {
                 askActor = StreamСreateActor.openExitStream(request.getHostname(), request.getPort(), circuitManager);
@@ -90,7 +90,7 @@ public class ProxyAcceptActor extends Actor {
             ask(askActor, new AskCallback<TorStream>() {
                 @Override
                 public void onResult(TorStream stream) {
-                    LOG.info("SOCKS CONNECT to " + request.getTarget() + " completed");
+                    Log.d(TAG, "SOCKS CONNECT to " + request.getTarget() + " completed");
                     try {
                         request.sendSuccess();
                     } catch (SocksRequestException e) {
@@ -102,7 +102,7 @@ public class ProxyAcceptActor extends Actor {
                 @Override
                 public void onError(Throwable throwable) {
                     try {
-                        LOG.warning("SOCKS CONNECT to " + request.getTarget() + " failed: " + throwable.getMessage());
+                        Log.w(TAG, "SOCKS CONNECT to " + request.getTarget() + " failed: " + throwable.getMessage());
                         if (throwable instanceof OpenFailedException) {
                             try {
                                 request.sendConnectionRefused();
@@ -127,7 +127,7 @@ public class ProxyAcceptActor extends Actor {
             });
             return true;
         } catch (SocksRequestException e) {
-            LOG.warning("Failure reading SOCKS request: " + e.getMessage());
+            Log.w(TAG, "Failure reading SOCKS request: " + e.getMessage());
             try {
                 request.sendError(false);
                 socket.close();

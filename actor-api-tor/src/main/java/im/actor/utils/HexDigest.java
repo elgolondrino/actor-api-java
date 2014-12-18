@@ -1,9 +1,9 @@
 package im.actor.utils;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-import im.actor.torlib.utils.Tor;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorMessageDigest;
 
@@ -103,7 +103,7 @@ public class HexDigest {
 	}
 
 	public String toBase64(boolean stripTrailingEquals) {
-		final String b64 = new String(Base64.encode(digestBytes), Tor.getDefaultCharset());
+		final String b64 = new String(Base64.encode(digestBytes), Charset.forName("ISO-8859-1"));
 		if(stripTrailingEquals) {
 			return stripTrailingEquals(b64);
 		} else {

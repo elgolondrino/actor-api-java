@@ -9,6 +9,7 @@ import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.crypto.HybridEncryption;
 import im.actor.torlib.crypto.TorPublicKey;
+import im.actor.torlib.documents.IntroductionPoint;
 
 public class IntroductionProcessor {
     private final static Logger logger = Logger.getLogger(IntroductionProcessor.class.getName());

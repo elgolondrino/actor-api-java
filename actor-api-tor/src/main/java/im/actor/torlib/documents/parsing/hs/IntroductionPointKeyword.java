@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits.hs;
+package im.actor.torlib.documents.parsing.hs;
 
 public enum IntroductionPointKeyword {
 	SERVICE_AUTHENTICATION("service-authentication", 2),

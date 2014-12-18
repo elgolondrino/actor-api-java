@@ -1,13 +1,9 @@
-package im.actor.torlib.circuits.hs;
+package im.actor.torlib.documents.parsing.hs;
 
+import im.actor.torlib.documents.IntroductionPoint;
+import im.actor.torlib.documents.parsing.*;
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.utils.HexDigest;
-import im.actor.torlib.documents.parsing.BasicDocumentParsingResult;
-import im.actor.torlib.documents.parsing.DocumentFieldParser;
-import im.actor.torlib.documents.parsing.DocumentParser;
-import im.actor.torlib.documents.parsing.DocumentParsingHandler;
-import im.actor.torlib.documents.parsing.DocumentParsingResult;
-import im.actor.torlib.documents.parsing.DocumentParsingResultHandler;
 
 public class IntroductionPointParser implements DocumentParser<IntroductionPoint> {
 

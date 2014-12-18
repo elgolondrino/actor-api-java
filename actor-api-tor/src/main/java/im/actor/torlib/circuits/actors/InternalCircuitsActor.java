@@ -102,13 +102,11 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     }
 
     public int getNeededCleanCircuitCount() {
-        synchronized (cleanInternalCircuits) {
-            final int needed = Math.max(pending.size(), CACHED_CIRCUITS) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
-            if (needed < 0) {
-                return 0;
-            } else {
-                return needed;
-            }
+        final int needed = Math.max(pending.size(), CACHED_CIRCUITS) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
+        if (needed < 0) {
+            return 0;
+        } else {
+            return needed;
         }
     }
 

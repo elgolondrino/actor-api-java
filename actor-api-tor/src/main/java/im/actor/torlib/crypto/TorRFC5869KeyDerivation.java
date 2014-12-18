@@ -1,18 +1,18 @@
 package im.actor.torlib.crypto;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import im.actor.torlib.utils.Tor;
 
 public class TorRFC5869KeyDerivation {
 	private final static String PROTOID = "ntor-curve25519-sha256-1";
 	private final static String M_EXPAND = PROTOID + ":key_expand";
-	private final static byte[] M_EXPAND_BYTES = M_EXPAND.getBytes(Tor.getDefaultCharset());
+	private final static byte[] M_EXPAND_BYTES = M_EXPAND.getBytes(Charset.forName("ISO-8859-1"));
 	
 	private final byte[] seed;
 	

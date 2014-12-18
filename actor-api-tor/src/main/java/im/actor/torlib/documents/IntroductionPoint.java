@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits.hs;
+package im.actor.torlib.documents;
 
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
@@ -11,28 +11,28 @@ public class IntroductionPoint {
 	private int onionPort;
 	private TorPublicKey onionKey;
 	private TorPublicKey serviceKey;
-	
-	IntroductionPoint(HexDigest identity) {
+
+	public IntroductionPoint(HexDigest identity) {
 		this.identity = identity;
 	}
 
-	void setAddress(IPv4Address address) {
+	public void setAddress(IPv4Address address) {
 		this.address = address;
 	}
-	
-	void setOnionPort(int onionPort) {
+
+	public void setOnionPort(int onionPort) {
 		this.onionPort = onionPort;
 	}
-	
-	void setOnionKey(TorPublicKey onionKey) {
+
+	public void setOnionKey(TorPublicKey onionKey) {
 		this.onionKey = onionKey;
 	}
-	
-	void setServiceKey(TorPublicKey serviceKey) {
+
+	public void setServiceKey(TorPublicKey serviceKey) {
 		this.serviceKey = serviceKey;
 	}
-	
-	boolean isValidDocument() {
+
+	public boolean isValidDocument() {
 		return identity != null && address != null && onionPort != 0 && onionKey != null && serviceKey != null;
 	}
 	
