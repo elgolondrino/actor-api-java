@@ -1,7 +1,7 @@
 package im.actor.torlib.circuits.build;
 
 import com.droidkit.actors.concurrency.Future;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.utils.IPv4Address;
 
 /**

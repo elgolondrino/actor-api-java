@@ -3,7 +3,7 @@ package im.actor.torlib.circuits.build.extender;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitNodeCryptoState;
-import im.actor.torlib.circuits.CircuitNodeImpl;
+import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
@@ -23,7 +23,7 @@ public class NTorCircuitExtender {
 		this.kex = new TorNTorKeyAgreement(router.getIdentityHash(), router.getNTorOnionKey());
 	}
 
-	public CircuitNodeImpl extendTo() {
+	public CircuitNode extendTo() {
 		final byte[] onion = kex.createOnionSkin();
 		if(finalRouterSupportsExtend2()) {
 			logger.fine("Extending circuit to "+ router.getNickname() + " with NTor inside RELAY_EXTEND2");
@@ -34,14 +34,14 @@ public class NTorCircuitExtender {
 		}
 	}
 	
-	private CircuitNodeImpl extendWithExtend2(byte[] onion) {
+	private CircuitNode extendWithExtend2(byte[] onion) {
 		final RelayCell cell = createExtend2Cell(onion);
 		extender.sendRelayCell(cell);
 		final RelayCell response = extender.receiveRelayResponse(RelayCell.RELAY_EXTENDED2, router);
 		return processExtended2(response);
 	}
 	
-	private CircuitNodeImpl extendWithTunneledExtend(byte[] onion) {
+	private CircuitNode extendWithTunneledExtend(byte[] onion) {
 		final RelayCell cell = createExtendCell(onion, kex.getNtorCreateMagic());
 		extender.sendRelayCell(cell);
 		final RelayCell response = extender.receiveRelayResponse(RelayCell.RELAY_EXTENDED, router);
@@ -85,7 +85,7 @@ public class NTorCircuitExtender {
 		return cell;
 	}
 	
-	private CircuitNodeImpl processExtended(RelayCell cell) {
+	private CircuitNode processExtended(RelayCell cell) {
 		byte[] payload = new byte[CircuitExtender.TAP_ONIONSKIN_REPLY_LEN];
 		cell.getByteArray(payload);
 		
@@ -93,7 +93,7 @@ public class NTorCircuitExtender {
 	}
 	
 
-	private CircuitNodeImpl processExtended2(RelayCell cell) {
+	private CircuitNode processExtended2(RelayCell cell) {
 		final int payloadLength = cell.getShort();
 		if(payloadLength > cell.cellBytesRemaining()) {
 			throw new TorException("Incorrect payload length value in RELAY_EXTENED2 cell");
@@ -104,7 +104,7 @@ public class NTorCircuitExtender {
 		return processPayload(payload);
 	}
 	
-	private CircuitNodeImpl processPayload(byte[] payload) {
+	private CircuitNode processPayload(byte[] payload) {
 		final byte[] keyMaterial = new byte[CircuitNodeCryptoState.KEY_MATERIAL_SIZE];
 		final byte[] verifyDigest = new byte[TorMessageDigest.TOR_DIGEST_SIZE];
 		if(!kex.deriveKeysFromHandshakeResponse(payload, keyMaterial, verifyDigest)) {

@@ -7,7 +7,7 @@ import com.droidkit.actors.concurrency.FutureCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.documents.DescriptorDocument;
@@ -128,7 +128,7 @@ public class DescriptorsSyncActor extends TypedActor<DescriptorsSyncInt> impleme
                 }
             }
             if (unrequestedCount > 0) {
-                // logger.warning("Discarding " + unrequestedCount + " received descriptor(s) with fingerprints that did not match requested descriptors");
+                // LOG.warning("Discarding " + unrequestedCount + " received descriptor(s) with fingerprints that did not match requested descriptors");
             }
             return result;
         }

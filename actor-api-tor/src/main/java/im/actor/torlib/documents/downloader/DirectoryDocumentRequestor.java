@@ -3,16 +3,13 @@ package im.actor.torlib.documents.downloader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 
-import im.actor.torlib.circuits.DirectoryCircuit;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.documents.DescriptorDocument;
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
-import im.actor.torlib.errors.StreamConnectFailedException;
 
 /**
  * Synchronously downloads directory documents.
@@ -22,10 +19,6 @@ public class DirectoryDocumentRequestor {
 
     public DirectoryDocumentRequestor(TorStream stream) {
         this.stream = stream;
-    }
-
-    public DescriptorDocument downloadBridgeDescriptor() throws DirectoryRequestFailedException {
-        return fetchSingleDocument(new BridgeDescriptorFetcher());
     }
 
     public ConsensusDocument downloadCurrentConsensus() throws DirectoryRequestFailedException {

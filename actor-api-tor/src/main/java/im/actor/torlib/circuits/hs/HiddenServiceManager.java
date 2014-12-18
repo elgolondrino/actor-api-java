@@ -7,9 +7,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import im.actor.torlib.*;
+import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.HiddenServiceCircuit;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
+import im.actor.torlib.circuits.build.CircuitStreamFactory;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
@@ -37,18 +38,18 @@ public class HiddenServiceManager {
 
     public TorStream getStreamTo(String onion, int port) throws OpenFailedException, InterruptedException, TimeoutException {
         final HiddenService hs = getHiddenServiceForOnion(onion);
-        final HiddenServiceCircuit circuit = getCircuitTo(hs);
+        final Circuit circuit = getCircuitTo(hs);
 
         try {
-            return circuit.openStream(port, HS_STREAM_TIMEOUT);
+            return CircuitStreamFactory.openHiddenServiceStream(circuit, port, HS_STREAM_TIMEOUT);
         } catch (StreamConnectFailedException e) {
             throw new OpenFailedException("Failed to open stream to hidden service " + hs.getOnionAddressForLogging() + " reason " + e.getReason());
         }
     }
 
-    private synchronized HiddenServiceCircuit getCircuitTo(HiddenService hs) throws OpenFailedException {
+    private synchronized Circuit getCircuitTo(HiddenService hs) throws OpenFailedException {
         if (hs.getCircuit() == null) {
-            final HiddenServiceCircuit c = openCircuitTo(hs);
+            final Circuit c = openCircuitTo(hs);
             if (c == null) {
                 throw new OpenFailedException("Failed to open circuit to " + hs.getOnionAddressForLogging());
             }
@@ -57,7 +58,7 @@ public class HiddenServiceManager {
         return hs.getCircuit();
     }
 
-    private HiddenServiceCircuit openCircuitTo(HiddenService hs) throws OpenFailedException {
+    private Circuit openCircuitTo(HiddenService hs) throws OpenFailedException {
         HSDescriptor descriptor;
         try {
             descriptor = getDescriptorFor(hs);
@@ -66,7 +67,7 @@ public class HiddenServiceManager {
         }
 
         for (int i = 0; i < RENDEZVOUS_RETRY_COUNT; i++) {
-            final HiddenServiceCircuit c = openRendezvousCircuit(hs, descriptor);
+            final Circuit c = openRendezvousCircuit(hs, descriptor);
             if (c != null) {
                 return c;
             }
@@ -115,7 +116,7 @@ public class HiddenServiceManager {
         }
     }
 
-    private HiddenServiceCircuit openRendezvousCircuit(HiddenService hs, HSDescriptor descriptor) {
+    private Circuit openRendezvousCircuit(HiddenService hs, HSDescriptor descriptor) {
         final RendezvousCircuitBuilder builder = new RendezvousCircuitBuilder(directory, circuitManager, hs, descriptor);
         try {
             return builder.call();

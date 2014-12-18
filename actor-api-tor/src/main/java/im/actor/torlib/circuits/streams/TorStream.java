@@ -1,5 +1,7 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.streams;
 
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.dashboard.DashboardRenderable;
 import im.actor.torlib.dashboard.DashboardRenderer;
@@ -23,12 +25,12 @@ public class TorStream implements DashboardRenderable {
     private final static int STREAMWINDOW_INCREMENT = 50;
     private final static int STREAMWINDOW_MAX_UNFLUSHED = 10;
 
-    private final CircuitImpl circuit;
+    private final Circuit circuit;
 
     private final int streamId;
     private final boolean autoclose;
 
-    private final CircuitNodeImpl targetNode;
+    private final CircuitNode targetNode;
     private final TorInputStream inputStream;
     private final TorOutputStream outputStream;
 
@@ -43,7 +45,7 @@ public class TorStream implements DashboardRenderable {
 
     private String streamTarget = "";
 
-    public TorStream(CircuitImpl circuit, CircuitNodeImpl targetNode, boolean autoclose) {
+    public TorStream(Circuit circuit, CircuitNode targetNode, boolean autoclose) {
         this.circuit = circuit;
         this.targetNode = targetNode;
         // Stream id must be two bytes long
@@ -108,7 +110,7 @@ public class TorStream implements DashboardRenderable {
         return circuit;
     }
 
-    public CircuitNodeImpl getTargetNode() {
+    public CircuitNode getTargetNode() {
         return targetNode;
     }
 

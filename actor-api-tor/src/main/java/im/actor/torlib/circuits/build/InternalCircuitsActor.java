@@ -4,6 +4,7 @@ import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.concurrency.Future;
+import com.droidkit.actors.tasks.AskCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
@@ -31,23 +32,20 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
                 }), "/tor/circuit/internal"), InternalCircuitsInt.class);
     }
 
-    private final Executor executor;
+    private static final int CACHED_CIRCUITS = 2;
 
-    private final Queue<InternalCircuit> cleanInternalCircuits;
-    private Queue<TypedFuture<InternalCircuit>> pending;
+    private final Queue<Circuit> cleanInternalCircuits;
+    private Queue<TypedFuture<Circuit>> pending;
     private int pendingInternalCircuitCount = 0;
 
-    private final CircuitBuildHandler internalBuildHandler;
 
     private CircuitManager manager;
 
     public InternalCircuitsActor(CircuitManager manager) {
         super(InternalCircuitsInt.class);
         this.manager = manager;
-        this.cleanInternalCircuits = new LinkedList<InternalCircuit>();
-        this.pending = new LinkedList<TypedFuture<InternalCircuit>>();
-        this.executor = Threading.newPool("InternalCircuitsActor worker");
-        this.internalBuildHandler = createInternalCircuitBuildHandler();
+        this.cleanInternalCircuits = new LinkedList<Circuit>();
+        this.pending = new LinkedList<TypedFuture<Circuit>>();
     }
 
     @Override
@@ -61,18 +59,15 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
         if (message instanceof Iterate) {
             maybeBuildInternalCircuit();
             self().sendOnce(new Iterate(), 5000);
-        } else if (message instanceof ConnectionFailed) {
-            decrementPendingInternalCircuitCount();
-        } else if (message instanceof ConnectionCompleted) {
-            addCleanInternalCircuit(((ConnectionCompleted) message).circuit);
         }
     }
 
     @Override
-    public Future<InternalCircuit> pickInternalCircuit() {
+    public Future<Circuit> pickInternalCircuit() {
         if (cleanInternalCircuits.isEmpty()) {
-            TypedFuture<InternalCircuit> res = future();
+            TypedFuture<Circuit> res = future();
             pending.add(res);
+            self().sendOnce(new Iterate());
             return res;
         } else {
             return result(cleanInternalCircuits.remove());
@@ -88,16 +83,30 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
     }
 
     private void launchBuildTaskForInternalCircuit() {
-        final CircuitCreationRequest request = new CircuitCreationRequest(
-                new InternalCircuitFactory(manager), internalBuildHandler);
-        final CircuitBuildTask task = new CircuitBuildTask(request, manager.getConnectionCache());
-        executor.execute(task);
-        incrementPendingInternalCircuitCount();
+        ask(CircuitBuildActor.build(new InternalCircuitFactory(manager), manager.getConnectionCache()),
+                new AskCallback<Circuit>() {
+                    @Override
+                    public void onResult(Circuit result) {
+                        pendingInternalCircuitCount--;
+
+                        if (pending.isEmpty()) {
+                            cleanInternalCircuits.add(result);
+                        } else {
+                            pending.remove().doComplete(result);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        pendingInternalCircuitCount--;
+                    }
+                });
+        pendingInternalCircuitCount++;
     }
 
     public int getNeededCleanCircuitCount() {
         synchronized (cleanInternalCircuits) {
-            final int needed = Math.max(pending.size(), 2) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
+            final int needed = Math.max(pending.size(), CACHED_CIRCUITS) - (pendingInternalCircuitCount + cleanInternalCircuits.size());
             if (needed < 0) {
                 return 0;
             } else {
@@ -106,67 +115,12 @@ public class InternalCircuitsActor extends TypedActor<InternalCircuitsInt> imple
         }
     }
 
-    public void incrementPendingInternalCircuitCount() {
-        pendingInternalCircuitCount += 1;
-    }
-
-    public void decrementPendingInternalCircuitCount() {
-        pendingInternalCircuitCount -= 1;
-    }
-
-    public void addCleanInternalCircuit(InternalCircuit circuit) {
-        pendingInternalCircuitCount -= 1;
-
-        if (pending.isEmpty()) {
-            cleanInternalCircuits.add(circuit);
-        } else {
-            pending.remove().doComplete(circuit);
-        }
-    }
-
     @Override
     public void stop() {
         context().stopSelf();
     }
 
-    private CircuitBuildHandler createInternalCircuitBuildHandler() {
-        return new CircuitBuildHandler() {
-
-            public void nodeAdded(CircuitNodeImpl node) {
-
-            }
-
-            public void connectionFailed(String reason) {
-                self().send(new ConnectionFailed());
-            }
-
-            public void connectionCompleted(Connection connection) {
-
-            }
-
-            public void circuitBuildFailed(String reason) {
-                self().send(new ConnectionFailed());
-            }
-
-            public void circuitBuildCompleted(Circuit circuit) {
-                self().send(new ConnectionCompleted((InternalCircuit) circuit));
-            }
-        };
-    }
-
     private static class Iterate {
 
-    }
-
-    private static class ConnectionFailed {
-
-    }
-
-    private static class ConnectionCompleted {
-        InternalCircuit circuit;
-
-        public ConnectionCompleted(InternalCircuit circuit) {
-            this.circuit = circuit;
-        }
     }
 }

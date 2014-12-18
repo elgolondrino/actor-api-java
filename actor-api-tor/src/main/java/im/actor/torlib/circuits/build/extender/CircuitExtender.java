@@ -2,9 +2,9 @@ package im.actor.torlib.circuits.build.extender;
 
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.CircuitImpl;
+import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitNodeCryptoState;
-import im.actor.torlib.circuits.CircuitNodeImpl;
+import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
@@ -24,14 +24,14 @@ public class CircuitExtender {
     public final static int TAP_ONIONSKIN_REPLY_LEN = DH_BYTES + TorMessageDigest.TOR_DIGEST_SIZE;
 
 
-    private final CircuitImpl circuit;
+    private final Circuit circuit;
 
-    public CircuitExtender(CircuitImpl circuit) {
+    public CircuitExtender(Circuit circuit) {
         this.circuit = circuit;
     }
 
 
-    public CircuitNodeImpl createFastTo(Router targetRouter) {
+    public CircuitNode createFastTo(Router targetRouter) {
         logger.fine("Creating 'fast' to " + targetRouter);
         final TorCreateFastKeyAgreement kex = new TorCreateFastKeyAgreement();
         sendCreateFastCell(kex);
@@ -44,7 +44,7 @@ public class CircuitExtender {
         circuit.sendCell(cell);
     }
 
-    private CircuitNodeImpl receiveAndProcessCreateFastResponse(Router targetRouter, TorKeyAgreement kex) {
+    private CircuitNode receiveAndProcessCreateFastResponse(Router targetRouter, TorKeyAgreement kex) {
         final Cell cell = circuit.receiveControlCellResponse();
         if (cell == null) {
             throw new TorException("Timeout building circuit waiting for CREATE_FAST response from " + targetRouter);
@@ -53,7 +53,7 @@ public class CircuitExtender {
         return processCreatedFastCell(targetRouter, cell, kex);
     }
 
-    private CircuitNodeImpl processCreatedFastCell(Router targetRouter, Cell cell, TorKeyAgreement kex) {
+    private CircuitNode processCreatedFastCell(Router targetRouter, Cell cell, TorKeyAgreement kex) {
         final byte[] payload = new byte[TorMessageDigest.TOR_DIGEST_SIZE * 2];
         final byte[] keyMaterial = new byte[CircuitNodeCryptoState.KEY_MATERIAL_SIZE];
         final byte[] verifyHash = new byte[TorMessageDigest.TOR_DIGEST_SIZE];
@@ -62,12 +62,12 @@ public class CircuitExtender {
             // XXX
             return null;
         }
-        final CircuitNodeImpl node = CircuitNodeImpl.createFirstHop(targetRouter, keyMaterial, verifyHash);
+        final CircuitNode node = CircuitNode.createFirstHop(targetRouter, keyMaterial, verifyHash);
         circuit.appendNode(node);
         return node;
     }
 
-    public CircuitNodeImpl extendTo(Router targetRouter) {
+    public CircuitNode extendTo(Router targetRouter) {
         if (circuit.getCircuitLength() == 0) {
             throw new TorException("Cannot EXTEND an empty circuit");
         }
@@ -82,7 +82,7 @@ public class CircuitExtender {
         logger.warning("Protocol error extending circuit from (" + sourceName + ") to (" + targetName + ") [version: " + version + "]");
     }
 
-    private String nodeToName(CircuitNodeImpl node) {
+    private String nodeToName(CircuitNode node) {
         if (node == null || node.getRouter() == null) {
             return "(null)";
         }
@@ -120,8 +120,8 @@ public class CircuitExtender {
     }
 
 
-    public CircuitNodeImpl createNewNode(Router r, byte[] keyMaterial, byte[] verifyDigest) {
-        final CircuitNodeImpl node = CircuitNodeImpl.createNode(r, circuit.getFinalCircuitNode(), keyMaterial, verifyDigest);
+    public CircuitNode createNewNode(Router r, byte[] keyMaterial, byte[] verifyDigest) {
+        final CircuitNode node = CircuitNode.createNode(r, circuit.getFinalCircuitNode(), keyMaterial, verifyDigest);
         logger.fine("Adding new circuit node for " + r.getNickname());
         circuit.appendNode(node);
         return node;
@@ -133,7 +133,7 @@ public class CircuitExtender {
     }
 
     public Router getFinalRouter() {
-        final CircuitNodeImpl node = circuit.getFinalCircuitNode();
+        final CircuitNode node = circuit.getFinalCircuitNode();
         if (node != null) {
             return node.getRouter();
         } else {

@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.streams;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,6 +13,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.CircuitStatus;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.errors.ConnectionIOException;
@@ -27,7 +30,7 @@ public class CircuitIO implements DashboardRenderable {
     private final static long CIRCUIT_BUILD_TIMEOUT_MS = 30 * 1000;
     private final static long CIRCUIT_RELAY_RESPONSE_TIMEOUT = 20 * 1000;
 
-    private final CircuitImpl circuit;
+    private final Circuit circuit;
     private final Connection connection;
     private final int circuitId;
 
@@ -40,7 +43,7 @@ public class CircuitIO implements DashboardRenderable {
     private boolean isMarkedForClose;
     private boolean isClosed;
 
-    public CircuitIO(CircuitImpl circuit, Connection connection, int circuitId) {
+    public CircuitIO(Circuit circuit, Connection connection, int circuitId) {
         this.circuit = circuit;
         this.connection = connection;
         this.circuitId = circuitId;
@@ -54,7 +57,7 @@ public class CircuitIO implements DashboardRenderable {
         return connection;
     }
 
-    int getCircuitId() {
+    public int getCircuitId() {
         return circuitId;
     }
 
@@ -69,7 +72,7 @@ public class CircuitIO implements DashboardRenderable {
     }
 
     private RelayCell decryptRelayCell(Cell cell) {
-        for (CircuitNodeImpl node : circuit.getNodeList()) {
+        for (CircuitNode node : circuit.getNodeList()) {
             if (node.decryptBackwardCell(cell)) {
                 return RelayCell.createFromCell(node, cell);
             }
@@ -91,10 +94,7 @@ public class CircuitIO implements DashboardRenderable {
 
 
     private long getReceiveTimeout() {
-        if (circuit.getStatus().isBuilding())
-            return remainingBuildTime();
-        else
-            return CIRCUIT_RELAY_RESPONSE_TIMEOUT;
+        return CIRCUIT_RELAY_RESPONSE_TIMEOUT;
     }
 
     private long remainingBuildTime() {
@@ -108,7 +108,7 @@ public class CircuitIO implements DashboardRenderable {
      * This is called by the cell reading thread in ConnectionImpl to deliver control cells
      * associated with this circuit (CREATED, CREATED_FAST, or DESTROY).
      */
-    void deliverControlCell(Cell cell) {
+    public void deliverControlCell(Cell cell) {
         if (cell.getCommand() == Cell.DESTROY) {
             processDestroyCell(cell.getByte());
         } else {
@@ -122,7 +122,7 @@ public class CircuitIO implements DashboardRenderable {
     }
 
     /* This is called by the cell reading thread in ConnectionImpl to deliver RELAY cells. */
-    void deliverRelayCell(Cell cell) {
+    public void deliverRelayCell(Cell cell) {
         circuit.getStatus().updateDirtyTimestamp();
         final RelayCell relayCell = decryptRelayCell(cell);
         logRelayCell("Dispatching: ", relayCell);
@@ -182,11 +182,11 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    RelayCell createRelayCell(int relayCommand, int streamId, CircuitNodeImpl targetNode) {
+    public RelayCell createRelayCell(int relayCommand, int streamId, CircuitNode targetNode) {
         return new RelayCell(targetNode, circuitId, streamId, relayCommand);
     }
 
-    void sendRelayCellTo(RelayCell cell, CircuitNodeImpl targetNode) {
+    public void sendRelayCellTo(RelayCell cell, CircuitNode targetNode) {
         relaySendLock.lock();
         try {
             logRelayCell("Sending:     ", cell);
@@ -194,7 +194,7 @@ public class CircuitIO implements DashboardRenderable {
             targetNode.updateForwardDigest(cell);
             cell.setDigest(targetNode.getForwardDigestBytes());
 
-            for (CircuitNodeImpl node = targetNode; node != null; node = node.getPreviousNode())
+            for (CircuitNode node = targetNode; node != null; node = node.getPreviousNode())
                 node.encryptForwardCell(cell);
 
             if (cell.getRelayCommand() == RelayCell.RELAY_DATA)
@@ -225,9 +225,9 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    void sendCell(Cell cell) {
+    public void sendCell(Cell cell) {
         final CircuitStatus status = circuit.getStatus();
-        if (!(status.isConnected() || status.isBuilding()))
+        if (!(status.isConnected()))
             return;
         try {
             status.updateDirtyTimestamp();
@@ -237,7 +237,7 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    void markForClose() {
+    public void markForClose() {
         boolean shouldClose;
         streamLock.lock();
         try {
@@ -253,7 +253,7 @@ public class CircuitIO implements DashboardRenderable {
             closeCircuit();
     }
 
-    boolean isMarkedForClose() {
+    public boolean isMarkedForClose() {
         streamLock.lock();
         try {
             return isMarkedForClose;
@@ -284,7 +284,7 @@ public class CircuitIO implements DashboardRenderable {
         cell.getCircuitNode().incrementSendWindow();
     }
 
-    void destroyCircuit() {
+    public void destroyCircuit() {
         streamLock.lock();
         try {
             if (isClosed) {
@@ -302,7 +302,7 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    TorStream createNewStream(boolean autoclose) {
+    public TorStream createNewStream(boolean autoclose) {
         streamLock.lock();
         try {
             // final int streamId = circuit.getStatus().nextStreamId();
@@ -314,7 +314,7 @@ public class CircuitIO implements DashboardRenderable {
         }
     }
 
-    void removeStream(TorStream torStream) {
+    public void removeStream(TorStream torStream) {
         boolean shouldClose;
         streamLock.lock();
         try {
@@ -327,7 +327,7 @@ public class CircuitIO implements DashboardRenderable {
             closeCircuit();
     }
 
-    List<TorStream> getActiveStreams() {
+    public List<TorStream> getActiveStreams() {
         streamLock.lock();
         try {
             return new ArrayList<TorStream>(streamMap.values());

@@ -6,7 +6,7 @@ import java.net.Socket;
 import im.actor.utils.IPv4Address;
 
 public abstract class SocksRequest {
-	// private final static Logger logger = Logger.getLogger(SocksRequest.class.getName());
+	// private final static Logger LOG = Logger.getLogger(SocksRequest.class.getName());
 	
 	// private final TorConfig config;
 	private final Socket socket;
@@ -87,7 +87,7 @@ public abstract class SocksRequest {
 	
 //	private void logUnsafeSOCKS() throws SocksRequestException {
 //		if((config.getWarnUnsafeSocks() || config.getSafeSocks()) && testRateLimit()) {
-//			logger.warning("Your application is giving Orchid only "+
+//			LOG.warning("Your application is giving Orchid only "+
 //							"an IP address.  Applications that do DNS "+
 //							"resolves themselves may leak information. "+
 //							"Consider using Socks4a (e.g. via privoxy or socat) "+

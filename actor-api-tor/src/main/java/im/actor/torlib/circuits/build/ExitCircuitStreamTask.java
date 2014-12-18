@@ -3,16 +3,16 @@ package im.actor.torlib.circuits.build;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.ExitCircuit;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 
 public class ExitCircuitStreamTask implements Runnable {
     private final static Logger logger = Logger.getLogger(ExitCircuitStreamTask.class.getName());
-    private final ExitCircuit circuit;
+    private final Circuit circuit;
     private final ExitCircuitStreamRequest exitRequest;
 
-    public ExitCircuitStreamTask(ExitCircuit circuit, ExitCircuitStreamRequest exitRequest) {
+    public ExitCircuitStreamTask(Circuit circuit, ExitCircuitStreamRequest exitRequest) {
         this.circuit = circuit;
         this.exitRequest = exitRequest;
     }
@@ -30,7 +30,7 @@ public class ExitCircuitStreamTask implements Runnable {
         } catch (StreamConnectFailedException e) {
             if (!e.isReasonRetryable()) {
                 exitRequest.error(e);
-                circuit.recordFailedExitTarget(exitRequest);
+                // circuit.recordFailedExitTarget(exitRequest);
             } else {
                 circuit.markForClose();
                 exitRequest.error(e);
@@ -42,9 +42,9 @@ public class ExitCircuitStreamTask implements Runnable {
     // TODO: Fix timeouts
     private TorStream tryOpenExitStream() throws InterruptedException, TimeoutException, StreamConnectFailedException {
         if (exitRequest.isAddressTarget()) {
-            return circuit.openExitStream(exitRequest.getAddress(), exitRequest.getPort(), 15000);
+            return CircuitStreamFactory.openExitStream(circuit, exitRequest.getAddress(), exitRequest.getPort(), 15000);
         } else {
-            return circuit.openExitStream(exitRequest.getHostname(), exitRequest.getPort(), 15000);
+            return CircuitStreamFactory.openExitStream(circuit, exitRequest.getHostname(), exitRequest.getPort(), 15000);
         }
     }
 

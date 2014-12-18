@@ -7,11 +7,9 @@ import com.droidkit.actors.Props;
 import com.droidkit.actors.concurrency.FutureCallback;
 import com.droidkit.actors.tasks.TaskActor;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.TorStream;
-import im.actor.torlib.errors.OpenFailedException;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.utils.IPv4Address;
 
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

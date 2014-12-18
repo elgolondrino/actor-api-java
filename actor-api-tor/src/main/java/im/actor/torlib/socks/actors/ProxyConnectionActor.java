@@ -10,7 +10,7 @@ import com.droidkit.actors.Actor;
 import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
 
 public class ProxyConnectionActor extends Actor {
 

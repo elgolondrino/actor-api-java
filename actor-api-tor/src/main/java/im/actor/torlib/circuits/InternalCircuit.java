@@ -1,11 +1,13 @@
 package im.actor.torlib.circuits;
 
+import java.util.List;
+
+import im.actor.torlib.connections.Connection;
 import im.actor.torlib.directory.routers.Router;
 
-public interface InternalCircuit extends Circuit {
-    DirectoryCircuit cannibalizeToDirectory(Router target);
+public class InternalCircuit extends Circuit {
 
-    Circuit cannibalizeToIntroductionPoint(Router target);
-
-    HiddenServiceCircuit connectHiddenService(CircuitNodeImpl node);
+    public InternalCircuit(List<Router> path, Connection connection, CircuitManager circuitManager) {
+        super(path, connection, circuitManager);
+    }
 }

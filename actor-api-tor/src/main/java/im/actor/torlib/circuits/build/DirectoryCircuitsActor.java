@@ -4,16 +4,20 @@ import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.concurrency.Future;
+import com.droidkit.actors.tasks.AskCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.path.DirectoryCircuitFactory;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.errors.OpenFailedException;
+import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.utils.Threading;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by ex3ndr on 15.12.14.
@@ -30,80 +34,38 @@ public class DirectoryCircuitsActor extends TypedActor<DirectoryCircuitsInt> imp
                 }), "/tor/circuit/dir"), DirectoryCircuitsInt.class);
     }
 
-    private final static int OPEN_DIRECTORY_STREAM_RETRY_COUNT = 5;
-
     private final static int OPEN_DIRECTORY_STREAM_TIMEOUT = 10 * 1000;
 
-    private final Executor executor;
     private CircuitManager manager;
 
     public DirectoryCircuitsActor(CircuitManager manager) {
         super(DirectoryCircuitsInt.class);
         this.manager = manager;
-        this.executor = Threading.newPool("DirectoryCircuitsActor worker");
     }
 
     @Override
     public Future<TorStream> openDirectoryStream() {
         final TypedFuture<TorStream> res = future();
-        executor.execute(new Runnable() {
+        ask(CircuitBuildActor.build(new DirectoryCircuitFactory(manager),
+                manager.getConnectionCache()), new AskCallback<Circuit>() {
+
             @Override
-            public void run() {
-                int failCount = 0;
-                while (failCount < OPEN_DIRECTORY_STREAM_RETRY_COUNT) {
-                    DirectoryCircuit circuit = tryOpenDirectoryCircuit(new DirectoryCircuitFactory(manager));
-                    if (circuit != null) {
-                        try {
-                            TorStream torStream = circuit.openDirectoryStream(OPEN_DIRECTORY_STREAM_TIMEOUT, true);
-                            res.doComplete(torStream);
-                            return;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    failCount += 1;
+            public void onResult(Circuit result) {
+                try {
+                    TorStream torStream = CircuitStreamFactory.
+                            openDirectoryStream(result, OPEN_DIRECTORY_STREAM_TIMEOUT, true);
+                    res.doComplete(torStream);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    res.doError(e);
                 }
-                res.doError(new OpenFailedException("Could not create circuit for directory stream"));
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                res.doError(throwable);
             }
         });
         return res;
-    }
-
-    private DirectoryCircuit tryOpenDirectoryCircuit(DirectoryCircuitFactory factory) {
-        final DirectoryCircuitResult result = new DirectoryCircuitResult();
-        final CircuitCreationRequest req = new CircuitCreationRequest(factory, result);
-        final CircuitBuildTask task = new CircuitBuildTask(req, manager.getConnectionCache());
-        task.run();
-        if (result.isSuccessful()) {
-            return (DirectoryCircuit) task.getCreationRequest().getCircuit();
-        } else {
-            return null;
-        }
-    }
-
-    private static class DirectoryCircuitResult implements CircuitBuildHandler {
-
-        private boolean isFailed;
-
-        public void connectionCompleted(Connection connection) {
-        }
-
-        public void nodeAdded(CircuitNodeImpl node) {
-        }
-
-        public void circuitBuildCompleted(Circuit circuit) {
-        }
-
-        public void connectionFailed(String reason) {
-            isFailed = true;
-        }
-
-        public void circuitBuildFailed(String reason) {
-            isFailed = true;
-        }
-
-        boolean isSuccessful() {
-            return !isFailed;
-        }
     }
 }

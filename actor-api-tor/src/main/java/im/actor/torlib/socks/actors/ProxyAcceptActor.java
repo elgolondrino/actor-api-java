@@ -10,7 +10,7 @@ import com.droidkit.actors.tasks.AskCallback;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.actors.StreamСreateActor;
 import im.actor.torlib.errors.OpenFailedException;
-import im.actor.torlib.circuits.TorStream;
+import im.actor.torlib.circuits.streams.TorStream;
 
 public class ProxyAcceptActor extends Actor {
 

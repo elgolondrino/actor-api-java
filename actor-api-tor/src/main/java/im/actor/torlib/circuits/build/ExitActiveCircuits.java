@@ -1,9 +1,6 @@
 package im.actor.torlib.circuits.build;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitImpl;
-import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.ExitCircuit;
 import im.actor.torlib.crypto.TorRandom;
 
 import java.util.ArrayList;
@@ -22,20 +19,20 @@ public class ExitActiveCircuits {
 
     private final TorRandom random = new TorRandom();
 
-    private final Set<CircuitImpl> activeCircuits;
+    private final Set<Circuit> activeCircuits;
 
     public ExitActiveCircuits() {
-        this.activeCircuits = new HashSet<CircuitImpl>();
+        this.activeCircuits = new HashSet<Circuit>();
     }
 
-    public void addActiveCircuit(CircuitImpl circuit) {
+    public void addActiveCircuit(Circuit circuit) {
         synchronized (activeCircuits) {
             activeCircuits.add(circuit);
             activeCircuits.notifyAll();
         }
     }
 
-    public void removeActiveCircuit(CircuitImpl circuit) {
+    public void removeActiveCircuit(Circuit circuit) {
         synchronized (activeCircuits) {
             activeCircuits.remove(circuit);
         }
@@ -47,21 +44,9 @@ public class ExitActiveCircuits {
         }
     }
 
-    public Set<Circuit> getPendingCircuits() {
-        return getCircuitsByFilter(new CircuitFilter() {
-            public boolean filter(Circuit circuit) {
-                return circuit.isPending();
-            }
-        });
-    }
-
-    public int getPendingCircuitCount() {
-        return getPendingCircuits().size();
-    }
-
     public Set<Circuit> getCircuitsByFilter(CircuitFilter filter) {
         final Set<Circuit> result = new HashSet<Circuit>();
-        final Set<CircuitImpl> circuits = new HashSet<CircuitImpl>();
+        final Set<Circuit> circuits = new HashSet<Circuit>();
 
         synchronized (activeCircuits) {
             // the filter might lock additional objects, causing a deadlock, so don't
@@ -69,7 +54,7 @@ public class ExitActiveCircuits {
             circuits.addAll(activeCircuits);
         }
 
-        for (CircuitImpl c : circuits) {
+        for (Circuit c : circuits) {
             if (filter == null || filter.filter(c)) {
                 result.add(c);
             }
@@ -77,23 +62,20 @@ public class ExitActiveCircuits {
         return result;
     }
 
-    public List<ExitCircuit> getRandomlyOrderedListOfExitCircuits() {
+    public List<Circuit> getRandomlyOrderedListOfExitCircuits() {
         final Set<Circuit> notDirectory = getCircuitsByFilter(new CircuitFilter() {
 
             public boolean filter(Circuit circuit) {
-                final boolean exitType = circuit instanceof ExitCircuit;
-                return exitType && !circuit.isMarkedForClose() && circuit.isConnected();
+                return !circuit.isMarkedForClose() && circuit.isConnected();
             }
         });
-        final ArrayList<ExitCircuit> ac = new ArrayList<ExitCircuit>();
+        final ArrayList<Circuit> ac = new ArrayList<Circuit>();
         for (Circuit c : notDirectory) {
-            if (c instanceof ExitCircuit) {
-                ac.add((ExitCircuit) c);
-            }
+            ac.add(c);
         }
         final int sz = ac.size();
         for (int i = 0; i < sz; i++) {
-            final ExitCircuit tmp = ac.get(i);
+            final Circuit tmp = ac.get(i);
             final int swapIdx = random.nextInt(sz);
             ac.set(i, ac.get(swapIdx));
             ac.set(swapIdx, tmp);
@@ -102,11 +84,11 @@ public class ExitActiveCircuits {
     }
 
     public void close() {
-        ArrayList<CircuitImpl> circuits;
+        ArrayList<Circuit> circuits;
         synchronized (activeCircuits) {
-            circuits = new ArrayList<CircuitImpl>(activeCircuits);
+            circuits = new ArrayList<Circuit>(activeCircuits);
         }
-        for (CircuitImpl c : circuits) {
+        for (Circuit c : circuits) {
             c.destroyCircuit();
         }
     }

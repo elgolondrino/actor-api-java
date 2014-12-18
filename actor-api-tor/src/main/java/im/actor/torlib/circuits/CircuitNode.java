@@ -5,19 +5,19 @@ import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
-public class CircuitNodeImpl {
+public class CircuitNode {
 	
-	public static CircuitNodeImpl createAnonymous(CircuitNodeImpl previous, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNode createAnonymous(CircuitNode previous, byte[] keyMaterial, byte[] verifyDigest) {
 		return createNode(null, previous, keyMaterial, verifyDigest);
 	}
 	
-	public static CircuitNodeImpl createFirstHop(Router r, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNode createFirstHop(Router r, byte[] keyMaterial, byte[] verifyDigest) {
 		return createNode(r, null, keyMaterial, verifyDigest);
 	}
 	
-	public static CircuitNodeImpl createNode(Router r, CircuitNodeImpl previous, byte[] keyMaterial, byte[] verifyDigest) {
+	public static CircuitNode createNode(Router r, CircuitNode previous, byte[] keyMaterial, byte[] verifyDigest) {
 		final CircuitNodeCryptoState cs = CircuitNodeCryptoState.createFromKeyMaterial(keyMaterial, verifyDigest);
-		return new CircuitNodeImpl(r, previous, cs);
+		return new CircuitNode(r, previous, cs);
 	}
 
 	private final static int CIRCWINDOW_START = 1000;
@@ -25,13 +25,13 @@ public class CircuitNodeImpl {
 
 	private final Router router;
 	private final CircuitNodeCryptoState cryptoState;
-	private final CircuitNodeImpl previousNode;
+	private final CircuitNode previousNode;
 
 	private final Object windowLock;
 	private int packageWindow;
 	private int deliverWindow;
 	
-	private CircuitNodeImpl(Router router, CircuitNodeImpl previous, CircuitNodeCryptoState cryptoState) {
+	private CircuitNode(Router router, CircuitNode previous, CircuitNodeCryptoState cryptoState) {
 		previousNode = previous;
 		this.router = router;
 		this.cryptoState = cryptoState;
@@ -44,7 +44,7 @@ public class CircuitNodeImpl {
 		return router;
 	}
 
-	public CircuitNodeImpl getPreviousNode() {
+	public CircuitNode getPreviousNode() {
 		return previousNode;
 	}
 

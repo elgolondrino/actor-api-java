@@ -3,16 +3,10 @@ package im.actor.torlib.directory;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.DirectoryCircuit;
-import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.directory.sync.ConsensusSyncActor;
 import im.actor.torlib.directory.sync.ConsensusSyncInt;
 import im.actor.torlib.directory.sync.DescriptorsSyncActor;
 import im.actor.torlib.directory.sync.DescriptorsSyncInt;
-import im.actor.torlib.errors.OpenFailedException;
-import im.actor.torlib.documents.downloader.DirectoryDocumentRequestor;
-import im.actor.torlib.errors.DirectoryRequestFailedException;
-import im.actor.torlib.documents.DescriptorDocument;
 
 public class DirectoryManager {
     private final static Logger logger = Logger.getLogger(DirectoryManager.class.getName());

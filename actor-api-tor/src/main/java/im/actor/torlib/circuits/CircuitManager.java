@@ -3,15 +3,12 @@ package im.actor.torlib.circuits;
 import com.droidkit.actors.concurrency.Future;
 import com.droidkit.actors.concurrency.FutureCallback;
 import im.actor.torlib.circuits.build.*;
-import im.actor.torlib.circuits.build.path.DirectoryCircuitFactory;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.ConnectionCache;
-import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.circuits.path.CircuitPathChooser;
-import im.actor.torlib.connections.Connection;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.errors.OpenFailedException;
 
 public class CircuitManager {
 
@@ -80,12 +77,12 @@ public class CircuitManager {
         return circuitCreationActor.openExitStream(address, port, 15000);
     }
 
-    public InternalCircuit pickInternalCircuit() throws InterruptedException {
-        final Future<InternalCircuit> future = circuitsInt.pickInternalCircuit();
-        final InternalCircuit[] res = new InternalCircuit[1];
-        future.addListener(new FutureCallback<InternalCircuit>() {
+    public Circuit pickInternalCircuit() throws InterruptedException {
+        final Future<Circuit> future = circuitsInt.pickInternalCircuit();
+        final Circuit[] res = new Circuit[1];
+        future.addListener(new FutureCallback<Circuit>() {
             @Override
-            public void onResult(InternalCircuit result) {
+            public void onResult(Circuit result) {
                 synchronized (res) {
                     res[0] = result;
                     res.notifyAll();

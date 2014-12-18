@@ -3,16 +3,14 @@ package im.actor.torlib.circuits.hs;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.HiddenServiceCircuit;
-import im.actor.torlib.circuits.InternalCircuit;
+import im.actor.torlib.circuits.*;
+import im.actor.torlib.circuits.build.InternalCircuitMutate;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
-public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> {
+public class RendezvousCircuitBuilder implements Callable<Circuit> {
     private final Logger logger = Logger.getLogger(RendezvousCircuitBuilder.class.getName());
 
     private final NewDirectory directory;
@@ -28,11 +26,11 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
         this.serviceDescriptor = descriptor;
     }
 
-    public HiddenServiceCircuit call() throws Exception {
+    public Circuit call() throws Exception {
 
         logger.fine("Opening rendezvous circuit for " + logServiceName());
 
-        final InternalCircuit rendezvous = circuitManager.pickInternalCircuit();
+        final Circuit rendezvous = circuitManager.pickInternalCircuit();
         logger.fine("Establishing rendezvous for " + logServiceName());
         RendezvousProcessor rp = new RendezvousProcessor(rendezvous);
         if (!rp.establishRendezvous()) {
@@ -55,7 +53,7 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
             return null;
         }
         logger.fine("Processing RV2 for " + logServiceName());
-        HiddenServiceCircuit hsc = rp.processRendezvous2(kex);
+        Circuit hsc = rp.processRendezvous2(kex);
         if (hsc == null) {
             rendezvous.markForClose();
         }
@@ -86,8 +84,9 @@ public class RendezvousCircuitBuilder implements Callable<HiddenServiceCircuit> 
         }
 
         try {
-            final InternalCircuit circuit = circuitManager.pickInternalCircuit();
-            return circuit.cannibalizeToIntroductionPoint(r);
+            final Circuit circuit = circuitManager.pickInternalCircuit();
+            InternalCircuitMutate.cannibalizeToIntroductionPoint(circuit, r);
+            return circuit;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;

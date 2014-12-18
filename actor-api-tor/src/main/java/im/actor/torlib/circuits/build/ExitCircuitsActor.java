@@ -14,12 +14,14 @@ import com.droidkit.actors.ActorCreator;
 import com.droidkit.actors.ActorSystem;
 import com.droidkit.actors.Props;
 import com.droidkit.actors.concurrency.Future;
+import com.droidkit.actors.tasks.AskCallback;
 import com.droidkit.actors.typed.TypedActor;
 import com.droidkit.actors.typed.TypedCreator;
 import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.path.ExitCircuitFactory;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
+import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
@@ -51,9 +53,6 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final Executor executor;
-    private final CircuitBuildHandler buildHandler;
-    // To avoid obnoxiously printing a warning every second
-    private int notEnoughDirectoryInformationWarningCounter = 0;
 
     private final ExitCircuitsPredictor predictor;
 
@@ -69,9 +68,8 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), directory, circuitManager);
         this.pendingRequests = new CopyOnWriteArraySet<ExitCircuitStreamRequest>();
         this.executor = Threading.newPool("ExitCircuitsActor worker");
-        this.buildHandler = createCircuitBuildHandler();
-        this.predictor = new ExitCircuitsPredictor();
 
+        this.predictor = new ExitCircuitsPredictor();
     }
 
     @Override
@@ -106,6 +104,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
         pendingRequests.add(new ExitCircuitStreamRequest(hostname, port, res));
+        self().sendOnce(new Iterate());
         return res;
     }
 
@@ -114,6 +113,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         TypedFuture<TorStream> res = future();
         predictor.addExitPortRequest(port);
         pendingRequests.add(new ExitCircuitStreamRequest(address, port, res));
+        self().sendOnce(new Iterate());
         return res;
     }
 
@@ -128,7 +128,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         if (message instanceof Iterate) {
             expireOldCircuits();
             assignPendingStreamsToActiveCircuits();
-            checkCircuitsForCreation();
+            buildCircuitIfNeeded();
             self().sendOnce(new Iterate(), 5000);
         }
     }
@@ -137,7 +137,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         if (pendingRequests.isEmpty())
             return;
 
-        for (ExitCircuit c : circuitManager.getExitActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
+        for (Circuit c : circuitManager.getExitActiveCircuits().getRandomlyOrderedListOfExitCircuits()) {
             final Iterator<ExitCircuitStreamRequest> it = pendingRequests.iterator();
             while (it.hasNext()) {
                 ExitCircuitStreamRequest req = it.next();
@@ -148,8 +148,8 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         }
     }
 
-    private boolean attemptHandleStreamRequest(ExitCircuit c, ExitCircuitStreamRequest request) {
-        if (c.canHandleExitTo(request)) {
+    private boolean attemptHandleStreamRequest(Circuit c, ExitCircuitStreamRequest request) {
+        if (canHandleExitTo(c, request)) {
             if (request.reserveRequest()) {
                 launchExitStreamTask(c, request);
             }
@@ -159,7 +159,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         return false;
     }
 
-    private void launchExitStreamTask(ExitCircuit circuit, ExitCircuitStreamRequest exitRequest) {
+    private void launchExitStreamTask(Circuit circuit, ExitCircuitStreamRequest exitRequest) {
         final ExitCircuitStreamTask task = new ExitCircuitStreamTask(circuit, exitRequest);
         executor.execute(task);
     }
@@ -175,19 +175,6 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
             logger.fine("Closing idle dirty circuit: " + c);
             c.markForClose();
         }
-    }
-
-
-    private void checkCircuitsForCreation() {
-
-        if (!directory.haveMinimumRouterInfo()) {
-            if (notEnoughDirectoryInformationWarningCounter % 20 == 0)
-                logger.info("Cannot build circuits because we don't have enough directory information");
-            notEnoughDirectoryInformationWarningCounter++;
-            return;
-        }
-
-        buildCircuitIfNeeded();
     }
 
     private void buildCircuitIfNeeded() {
@@ -211,17 +198,12 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         buildCircuitToHandleExitTargets(exitTargets);
     }
 
-
     private int countCircuitsSupportingTarget(final ExitTarget target, final boolean needClean) {
         final ExitActiveCircuits.CircuitFilter filter = new ExitActiveCircuits.CircuitFilter() {
             public boolean filter(Circuit circuit) {
-                if (!(circuit instanceof ExitCircuit)) {
-                    return false;
-                }
-                final ExitCircuit ec = (ExitCircuit) circuit;
-                final boolean pendingOrConnected = circuit.isPending() || circuit.isConnected();
+                final boolean pendingOrConnected = circuit.isConnected();
                 final boolean isCleanIfNeeded = !(needClean && !circuit.isClean());
-                return pendingOrConnected && isCleanIfNeeded && ec.canHandleExitTo(target);
+                return pendingOrConnected && isCleanIfNeeded && canHandleExitTo(circuit, target);
             }
         };
         return circuitManager.getExitActiveCircuits().getCircuitsByFilter(filter).size();
@@ -233,60 +215,39 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         }
         if (!directory.haveMinimumRouterInfo())
             return;
-        if (circuitManager.getExitActiveCircuits().getPendingCircuitCount() >= MAX_PENDING_CIRCUITS)
-            return;
 
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Building new circuit to handle " + exitTargets.size() + " pending streams and predicted ports");
         }
 
-        launchBuildTaskForTargets(exitTargets);
+        ask(CircuitBuildActor.build(new ExitCircuitFactory(exitTargets, circuitManager), connectionCache),
+                new AskCallback<Circuit>() {
+                    @Override
+                    public void onResult(Circuit circuit) {
+                        circuitManager.getExitActiveCircuits().addActiveCircuit(circuit);
+                        for (ExitCircuitStreamRequest req : pendingRequests) {
+                            if (canHandleExitTo(circuit, req) && req.reserveRequest()) {
+                                launchExitStreamTask(circuit, req);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        // Try Again
+                        self().sendOnce(new Iterate(), 1000);
+                    }
+                });
     }
 
-    private void launchBuildTaskForTargets(List<ExitTarget> exitTargets) {
-        final CircuitCreationRequest request = new CircuitCreationRequest(
-                new ExitCircuitFactory(exitTargets, circuitManager), buildHandler);
-        final CircuitBuildTask task = new CircuitBuildTask(request, connectionCache);
-        executor.execute(task);
-    }
-
-    private CircuitBuildHandler createCircuitBuildHandler() {
-        return new CircuitBuildHandler() {
-
-            public void circuitBuildCompleted(Circuit circuit) {
-                logger.fine("Circuit completed to: " + circuit);
-                circuitOpenedHandler(circuit);
-            }
-
-            public void circuitBuildFailed(String reason) {
-                logger.fine("Circuit build failed: " + reason);
-                buildCircuitIfNeeded();
-            }
-
-            public void connectionCompleted(Connection connection) {
-                logger.finer("Circuit connection completed to " + connection);
-            }
-
-            public void connectionFailed(String reason) {
-                logger.fine("Circuit connection failed: " + reason);
-                buildCircuitIfNeeded();
-            }
-
-            public void nodeAdded(CircuitNodeImpl node) {
-                logger.finer("Node added to circuit: " + node);
-            }
-        };
-    }
-
-    private void circuitOpenedHandler(Circuit circuit) {
-        if (!(circuit instanceof ExitCircuit)) {
-            return;
+    private boolean canHandleExitTo(Circuit circuit, ExitTarget target) {
+        if (circuit.isMarkedForClose()) {
+            return false;
         }
-        final ExitCircuit ec = (ExitCircuit) circuit;
-        for (ExitCircuitStreamRequest req : pendingRequests) {
-            if (ec.canHandleExitTo(req) && req.reserveRequest()) {
-                launchExitStreamTask(ec, req);
-            }
+        if (target.isAddressTarget()) {
+            return circuit.getLastRouter().exitPolicyAccepts(target.getAddress(), target.getPort());
+        } else {
+            return circuit.getLastRouter().exitPolicyAccepts(target.getPort());
         }
     }
 

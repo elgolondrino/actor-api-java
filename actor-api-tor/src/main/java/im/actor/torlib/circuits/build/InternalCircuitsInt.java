@@ -1,7 +1,7 @@
 package im.actor.torlib.circuits.build;
 
 import com.droidkit.actors.concurrency.Future;
-import im.actor.torlib.circuits.InternalCircuit;
+import im.actor.torlib.circuits.Circuit;
 
 /**
  * Created by ex3ndr on 15.12.14.
@@ -9,7 +9,7 @@ import im.actor.torlib.circuits.InternalCircuit;
 public interface InternalCircuitsInt {
     public void start();
 
-    public Future<InternalCircuit> pickInternalCircuit();
+    public Future<Circuit> pickInternalCircuit();
 
     public void stop();
 }

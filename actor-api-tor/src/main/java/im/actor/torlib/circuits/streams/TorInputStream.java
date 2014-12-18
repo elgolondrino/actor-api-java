@@ -1,4 +1,4 @@
-package im.actor.torlib.circuits;
+package im.actor.torlib.circuits.streams;
 
 import java.io.IOException;
 import java.io.InputStream;

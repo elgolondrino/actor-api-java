@@ -1,8 +1,8 @@
 package im.actor.torlib.connections;
 
 
-import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.Circuit;
+import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.ConnectionIOException;
 
