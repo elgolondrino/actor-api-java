@@ -1,9 +1,6 @@
 package im.actor.torlib.circuits.build;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -22,11 +19,7 @@ import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.path.ExitCircuitFactory;
 import im.actor.torlib.circuits.hs.HiddenServiceManager;
 import im.actor.torlib.circuits.streams.TorStream;
-import im.actor.torlib.connections.Connection;
 import im.actor.torlib.connections.ConnectionCache;
-import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
-import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.directory.routers.exitpolicy.PredictedPortTarget;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.utils.IPv4Address;
 import im.actor.utils.Threading;
@@ -46,9 +39,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
     private final static Logger logger = Logger.getLogger(ExitCircuitsActor.class.getName());
     private final static int MAX_CIRCUIT_DIRTINESS = 300; // seconds
-    private final static int MAX_PENDING_CIRCUITS = 4;
 
-    private final NewDirectory directory;
     private final HiddenServiceManager hiddenServiceManager;
     private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
@@ -62,10 +53,10 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         super(ExitCircuitsInt.class);
 
         this.circuitManager = circuitManager;
-        this.directory = circuitManager.getDirectory();
         this.connectionCache = circuitManager.getConnectionCache();
 
-        this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), directory, circuitManager);
+        this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), circuitManager.getDirectory(),
+                circuitManager);
         this.pendingRequests = new CopyOnWriteArraySet<ExitCircuitStreamRequest>();
         this.executor = Threading.newPool("ExitCircuitsActor worker");
 
@@ -213,8 +204,8 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         if (exitTargets.isEmpty()) {
             return;
         }
-        if (!directory.haveMinimumRouterInfo())
-            return;
+//        if (!directory.haveMinimumRouterInfo())
+//            return;
 
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Building new circuit to handle " + exitTargets.size() + " pending streams and predicted ports");
@@ -254,5 +245,46 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
 
     private static class Iterate {
 
+    }
+
+    public static class ExitCircuitsPredictor {
+
+        private final static long TIMEOUT_MS = 60 * 60 * 1000; // One hour
+
+        private final Map<Integer, Long> portsSeen;
+
+        public ExitCircuitsPredictor() {
+            portsSeen = new HashMap<Integer, Long>();
+            addExitPortRequest(80);
+        }
+
+        public void addExitPortRequest(int port) {
+            synchronized (portsSeen) {
+                portsSeen.put(port, System.currentTimeMillis());
+            }
+        }
+
+        public List<PredictedPortTarget> getPredictedPortTargets() {
+
+            synchronized (portsSeen) {
+                removeExpiredPorts();
+
+                final List<PredictedPortTarget> targets = new ArrayList<PredictedPortTarget>();
+                for (int p : portsSeen.keySet()) {
+                    targets.add(new PredictedPortTarget(p));
+                }
+                return targets;
+            }
+        }
+
+        private void removeExpiredPorts() {
+            final long now = System.currentTimeMillis();
+            final Iterator<Map.Entry<Integer, Long>> it = portsSeen.entrySet().iterator();
+            while (it.hasNext()) {
+                if ((now - it.next().getValue()) > TIMEOUT_MS) {
+                    it.remove();
+                }
+            }
+        }
     }
 }

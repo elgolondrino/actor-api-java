@@ -9,7 +9,6 @@ import im.actor.torlib.utils.Tor;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
-import im.actor.torlib.directory.routers.exitpolicy.ExitPorts;
 
 public class DescriptorDocument implements Document {
 	public enum CacheLocation { NOT_CACHED, CACHED_CACHEFILE, CACHED_JOURNAL }

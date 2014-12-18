@@ -2,7 +2,7 @@ package im.actor.torlib.circuits.cells;
 
 import java.nio.ByteBuffer;
 
-import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.streams.CircuitNode;
 import im.actor.torlib.errors.TorException;
 
 public class RelayCell extends Cell {

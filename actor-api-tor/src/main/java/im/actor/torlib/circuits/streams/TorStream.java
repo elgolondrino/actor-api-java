@@ -1,10 +1,7 @@
 package im.actor.torlib.circuits.streams;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.cells.RelayCell;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
 
@@ -16,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-public class TorStream implements DashboardRenderable {
+public class TorStream {
 
     private static final Logger logger = Logger.getLogger(TorStream.class.getName());
     private static final AtomicInteger NEXT_ID = new AtomicInteger(1);
@@ -204,17 +201,5 @@ public class TorStream implements DashboardRenderable {
 
     public String toString() {
         return "[Stream stream_id=" + streamId + " circuit=" + circuit + " target=" + streamTarget + "]";
-    }
-
-    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
-        writer.print("     ");
-        writer.print("[Stream stream_id=" + streamId + " cid=" + circuit.getCircuitId());
-        if (relayConnectedReceived) {
-            writer.print(" sent=" + outputStream.getBytesSent() + " recv=" + inputStream.getBytesReceived());
-        } else {
-            writer.print(" (waiting connect)");
-        }
-        writer.print(" target=" + streamTarget);
-        writer.println("]");
     }
 }

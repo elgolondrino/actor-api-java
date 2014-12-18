@@ -3,7 +3,7 @@ package im.actor.torlib.documents.downloader;
 import java.nio.ByteBuffer;
 
 import im.actor.torlib.documents.ConsensusDocument;
-import im.actor.torlib.directory.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParser;
 
 public class ConsensusFetcher extends DocumentFetcher<ConsensusDocument> {
 

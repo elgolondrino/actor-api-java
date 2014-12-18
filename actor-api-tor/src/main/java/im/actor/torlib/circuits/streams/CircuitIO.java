@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitNode;
 import im.actor.torlib.circuits.CircuitStatus;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.connections.Connection;
@@ -22,10 +21,8 @@ import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.utils.Threading;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
 
-public class CircuitIO implements DashboardRenderable {
+public class CircuitIO {
     private static final Logger logger = Logger.getLogger(CircuitIO.class.getName());
     private final static long CIRCUIT_BUILD_TIMEOUT_MS = 30 * 1000;
     private final static long CIRCUIT_RELAY_RESPONSE_TIMEOUT = 20 * 1000;
@@ -333,15 +330,6 @@ public class CircuitIO implements DashboardRenderable {
             return new ArrayList<TorStream>(streamMap.values());
         } finally {
             streamLock.unlock();
-        }
-    }
-
-    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
-        if ((flags & DASHBOARD_STREAMS) == 0) {
-            return;
-        }
-        for (TorStream s : getActiveStreams()) {
-            renderer.renderComponent(writer, flags, s);
         }
     }
 }

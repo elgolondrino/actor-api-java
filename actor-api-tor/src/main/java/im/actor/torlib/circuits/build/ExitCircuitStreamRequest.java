@@ -3,7 +3,6 @@ package im.actor.torlib.circuits.build;
 import com.droidkit.actors.typed.TypedFuture;
 import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.utils.IPv4Address;
-import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
 
 public class ExitCircuitStreamRequest implements ExitTarget {
 

@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.streams.CircuitIO;
+import im.actor.torlib.circuits.streams.CircuitNode;
 import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.circuits.cells.RelayCell;

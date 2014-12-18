@@ -1,11 +1,11 @@
 package im.actor.torlib.directory.routers;
 
+import im.actor.torlib.directory.consensus.RouterStatus;
 import im.actor.utils.HexDigest;
-import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.directory.cache.DescriptorCache;
-import im.actor.torlib.directory.parsing.DocumentParser;
-import im.actor.torlib.directory.parsing.DocumentParserFactory;
-import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
+import im.actor.torlib.documents.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParserFactory;
+import im.actor.torlib.documents.parsing.DocumentParserFactoryImpl;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
 

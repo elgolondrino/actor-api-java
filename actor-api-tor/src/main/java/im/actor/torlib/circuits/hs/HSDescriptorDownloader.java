@@ -15,10 +15,10 @@ import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.errors.StreamConnectFailedException;
 import im.actor.torlib.errors.TorException;
-import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
+import im.actor.torlib.documents.parsing.DocumentFieldParserImpl;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 import im.actor.torlib.documents.downloader.TorHttpConnection;
-import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
+import im.actor.torlib.documents.parsing.DocumentParsingResultHandler;
 
 public class HSDescriptorDownloader {
     private final static Logger logger = Logger.getLogger(HSDescriptorDirectory.class.getName());

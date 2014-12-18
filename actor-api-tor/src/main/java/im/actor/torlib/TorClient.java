@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.crypto.PRNGFixes;
-import im.actor.torlib.dashboard.Dashboard;
 import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.socks.SocksTorProxy;
@@ -24,7 +23,6 @@ public class TorClient {
     private final CircuitManager circuitManager;
     private final SocksTorProxy socksListener;
     private final DirectoryManager directoryManager;
-    private final Dashboard dashboard;
 
     private boolean isStarted = false;
     private boolean isStopped = false;
@@ -42,9 +40,6 @@ public class TorClient {
         directoryManager = new DirectoryManager(circuitManager);
 
         socksListener = new SocksTorProxy(circuitManager);
-
-        dashboard = new Dashboard();
-        dashboard.addRenderables(circuitManager, directoryManager, socksListener);
     }
 
     public TorConfig getConfig() {
@@ -73,9 +68,6 @@ public class TorClient {
         }
         try {
             socksListener.stop();
-            if (dashboard.isListening()) {
-                dashboard.stopListening();
-            }
             directoryManager.stop();
             circuitManager.stopBuildingCircuits();
             newDirectory.close();
@@ -95,25 +87,5 @@ public class TorClient {
     @Deprecated
     public void enableSocksListener() {
         enableSocksListener(9150);
-    }
-
-    @Deprecated
-    public void enableDashboard() {
-        if (!dashboard.isListening()) {
-            dashboard.startListening();
-        }
-    }
-
-    @Deprecated
-    public void enableDashboard(int port) {
-        dashboard.setListeningPort(port);
-        enableDashboard();
-    }
-
-    @Deprecated
-    public void disableDashboard() {
-        if (dashboard.isListening()) {
-            dashboard.stopListening();
-        }
     }
 }

@@ -101,50 +101,50 @@ public class HybridEncryption {
 	 * @return A new byte array containing the decrypted data.
 	 */
 	
-	public byte[] decrypt(byte[] data, TorPrivateKey privateKey) {
-		if(data.length < PK_ENC_LEN)
-			throw new TorException("Message is too short");
-		
-		if(data.length == PK_ENC_LEN) 
-			return decryptSimple(data, privateKey);
-		
-		// ( C1 | C2 ) --> C1, C2
-		final byte[] c1 = new byte[PK_ENC_LEN];
-		final byte[] c2 = new byte[data.length - PK_ENC_LEN];
-		System.arraycopy(data, 0, c1, 0, PK_ENC_LEN);
-		System.arraycopy(data, PK_ENC_LEN, c2, 0, c2.length);
-		
-		// RSA( C1 ) --> ( K | M1 ) --> K, M1
-		final byte[] kAndM1 = decryptSimple(c1, privateKey);
-		final byte[] streamKey = new byte[TorStreamCipher.KEY_LEN];
-		final int m1Length = kAndM1.length - TorStreamCipher.KEY_LEN;
-		final byte[] m1 = new byte[m1Length];
-		System.arraycopy(kAndM1, 0, streamKey, 0, TorStreamCipher.KEY_LEN);
-		System.arraycopy(kAndM1, TorStreamCipher.KEY_LEN, m1, 0, m1Length);
-		
-		// AES_CTR( C2 ) --> M2
-		final TorStreamCipher streamCipher = TorStreamCipher.createFromKeyBytes(streamKey);
-		streamCipher.encrypt(c2);
-		final byte[] m2 = c2;
-		
-		final byte[] output = new byte[m1.length + m2.length];
-		System.arraycopy(m1, 0, output, 0, m1.length);
-		System.arraycopy(m2, 0, output, m1.length, m2.length);
-		return output;		      
-	}
-	
-	private byte[] decryptSimple(byte[] data, TorPrivateKey privateKey) {
-		try {
-			cipher.init(Cipher.DECRYPT_MODE, privateKey.getRSAPrivateKey());
-			return cipher.doFinal(data);
-		} catch (InvalidKeyException e) {
-			throw new TorException(e);
-		} catch (IllegalBlockSizeException e) {
-			throw new TorException(e);
-		} catch (BadPaddingException e) {
-			throw new TorException(e);
-		}
-	}
+//	public byte[] decrypt(byte[] data, TorPrivateKey privateKey) {
+//		if(data.length < PK_ENC_LEN)
+//			throw new TorException("Message is too short");
+//
+//		if(data.length == PK_ENC_LEN)
+//			return decryptSimple(data, privateKey);
+//
+//		// ( C1 | C2 ) --> C1, C2
+//		final byte[] c1 = new byte[PK_ENC_LEN];
+//		final byte[] c2 = new byte[data.length - PK_ENC_LEN];
+//		System.arraycopy(data, 0, c1, 0, PK_ENC_LEN);
+//		System.arraycopy(data, PK_ENC_LEN, c2, 0, c2.length);
+//
+//		// RSA( C1 ) --> ( K | M1 ) --> K, M1
+//		final byte[] kAndM1 = decryptSimple(c1, privateKey);
+//		final byte[] streamKey = new byte[TorStreamCipher.KEY_LEN];
+//		final int m1Length = kAndM1.length - TorStreamCipher.KEY_LEN;
+//		final byte[] m1 = new byte[m1Length];
+//		System.arraycopy(kAndM1, 0, streamKey, 0, TorStreamCipher.KEY_LEN);
+//		System.arraycopy(kAndM1, TorStreamCipher.KEY_LEN, m1, 0, m1Length);
+//
+//		// AES_CTR( C2 ) --> M2
+//		final TorStreamCipher streamCipher = TorStreamCipher.createFromKeyBytes(streamKey);
+//		streamCipher.encrypt(c2);
+//		final byte[] m2 = c2;
+//
+//		final byte[] output = new byte[m1.length + m2.length];
+//		System.arraycopy(m1, 0, output, 0, m1.length);
+//		System.arraycopy(m2, 0, output, m1.length, m2.length);
+//		return output;
+//	}
+//
+//	private byte[] decryptSimple(byte[] data, TorPrivateKey privateKey) {
+//		try {
+//			cipher.init(Cipher.DECRYPT_MODE, privateKey.getRSAPrivateKey());
+//			return cipher.doFinal(data);
+//		} catch (InvalidKeyException e) {
+//			throw new TorException(e);
+//		} catch (IllegalBlockSizeException e) {
+//			throw new TorException(e);
+//		} catch (BadPaddingException e) {
+//			throw new TorException(e);
+//		}
+//	}
 	
 	
 }

@@ -1,7 +1,7 @@
 package im.actor.torlib.circuits.build;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitNode;
+import im.actor.torlib.circuits.streams.CircuitNode;
 import im.actor.torlib.circuits.build.extender.CircuitExtender;
 import im.actor.torlib.directory.routers.Router;
 

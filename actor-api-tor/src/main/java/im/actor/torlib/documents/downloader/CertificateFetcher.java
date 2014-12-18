@@ -2,11 +2,10 @@ package im.actor.torlib.documents.downloader;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Set;
 
 import im.actor.torlib.documents.KeyCertificateDocument;
 import im.actor.torlib.documents.ConsensusDocument.RequiredCertificate;
-import im.actor.torlib.directory.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParser;
 
 public class CertificateFetcher extends DocumentFetcher<KeyCertificateDocument>{
 

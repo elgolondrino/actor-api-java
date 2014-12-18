@@ -5,10 +5,10 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
-import im.actor.torlib.directory.parsing.DocumentParserFactoryImpl;
-import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
-import im.actor.torlib.directory.parsing.DocumentParser;
-import im.actor.torlib.directory.parsing.DocumentParserFactory;
+import im.actor.torlib.documents.parsing.DocumentParserFactoryImpl;
+import im.actor.torlib.documents.parsing.BasicDocumentParsingResult;
+import im.actor.torlib.documents.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParserFactory;
 import im.actor.torlib.errors.DirectoryRequestFailedException;
 
 public abstract class DocumentFetcher<T> {

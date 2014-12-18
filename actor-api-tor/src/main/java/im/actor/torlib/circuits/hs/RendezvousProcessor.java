@@ -7,6 +7,8 @@ import im.actor.torlib.circuits.*;
 import im.actor.torlib.circuits.build.InternalCircuitMutate;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.circuits.streams.CircuitNode;
+import im.actor.torlib.circuits.streams.CircuitNodeCryptoState;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.torlib.crypto.TorRandom;

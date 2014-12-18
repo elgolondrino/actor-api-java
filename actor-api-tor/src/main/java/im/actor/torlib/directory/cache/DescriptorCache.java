@@ -13,8 +13,8 @@ import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.directory.storage.DirectoryStorage.CacheFile;
 import im.actor.utils.Threading;
 import im.actor.utils.HexDigest;
-import im.actor.torlib.directory.parsing.DocumentParser;
-import im.actor.torlib.directory.parsing.DocumentParsingResult;
+import im.actor.torlib.documents.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParsingResult;
 import im.actor.utils.misc.GuardedBy;
 
 public abstract class DescriptorCache <T extends DescriptorDocument> {

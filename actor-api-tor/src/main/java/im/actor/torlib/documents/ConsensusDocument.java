@@ -8,11 +8,11 @@ import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.torlib.crypto.TorSignature;
 import im.actor.utils.HexDigest;
 import im.actor.utils.Timestamp;
-import im.actor.torlib.directory.parsing.consensus.VoteAuthorityEntry;
+import im.actor.torlib.documents.parsing.consensus.VoteAuthorityEntry;
 import im.actor.torlib.directory.routers.DirectoryServer;
 import im.actor.torlib.directory.TrustedAuthorities;
-import im.actor.torlib.directory.parsing.consensus.DirectorySignature;
-import im.actor.torlib.directory.parsing.consensus.RequiredCertificateImpl;
+import im.actor.torlib.documents.parsing.consensus.DirectorySignature;
+import im.actor.torlib.documents.parsing.consensus.RequiredCertificateImpl;
 import im.actor.torlib.utils.Tor;
 
 public class ConsensusDocument implements Document {

@@ -1,6 +1,7 @@
 package im.actor.torlib.directory;
 
 import im.actor.torlib.TorConfig;
+import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.routers.*;
 import im.actor.torlib.directory.storage.DirectoryStorage;
@@ -23,14 +24,11 @@ public class NewDirectory {
 
     private Routers routers;
 
-    private Guards guards;
-
     public NewDirectory(TorConfig config) {
         this.id = NEXT_ID.getAndIncrement();
         this.config = config;
         this.store = new DirectoryStorage(config);
         this.routers = new Routers(store);
-        this.guards = new Guards(this);
     }
 
     public TorConfig getConfig() {
@@ -51,7 +49,6 @@ public class NewDirectory {
 
     public void loadFromStore() {
         routers.load();
-        guards.load();
     }
 
     // Updating
@@ -85,10 +82,6 @@ public class NewDirectory {
 
     // Routers in directory
 
-    public boolean haveMinimumRouterInfo() {
-        return routers.haveMinimumRouterInfo();
-    }
-
     public List<Router> getAllRouters() {
         return routers.getAllRouters();
     }
@@ -119,23 +112,5 @@ public class NewDirectory {
 
     public List<Router> getRoutersWithDownloadableDescriptors() {
         return routers.getRoutersWithDownloadableDescriptors();
-    }
-
-    // Guards
-
-    public GuardEntry createGuardEntryFor(Router router) {
-        return guards.createGuardEntryFor(router);
-    }
-
-    public List<GuardEntry> getGuardEntries() {
-        return guards.getGuardEntries();
-    }
-
-    public void removeGuardEntry(GuardEntry entry) {
-        guards.removeGuardEntry(entry);
-    }
-
-    public void addGuardEntry(GuardEntry entry) {
-        guards.addGuardEntry(entry);
     }
 }

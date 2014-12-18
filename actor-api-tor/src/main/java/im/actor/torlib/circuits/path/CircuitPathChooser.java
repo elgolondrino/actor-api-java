@@ -11,7 +11,7 @@ import java.util.Set;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.utils.IPv4Address;
-import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
+import im.actor.torlib.circuits.build.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
 
 public class CircuitPathChooser {

@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import im.actor.torlib.directory.Consensus;
+import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.documents.ConsensusDocument;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorRandom;

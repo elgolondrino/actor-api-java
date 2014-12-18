@@ -4,7 +4,7 @@ import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.ExitCircuit;
 import im.actor.torlib.connections.Connection;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.directory.routers.exitpolicy.ExitTarget;
+import im.actor.torlib.circuits.build.ExitTarget;
 
 import java.util.List;
 

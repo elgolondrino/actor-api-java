@@ -1,7 +1,6 @@
 package im.actor.torlib.circuits.path;
 
-import im.actor.torlib.directory.Consensus;
-import im.actor.torlib.documents.ConsensusDocument;
+import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.torlib.directory.routers.Router;
 
 class CircuitNodeChooserWeightParameters {

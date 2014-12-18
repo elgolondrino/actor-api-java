@@ -47,10 +47,10 @@ public class DirectoryCircuitsActor extends TypedActor<DirectoryCircuitsInt> imp
     public Future<TorStream> openDirectoryStream() {
         final TypedFuture<TorStream> res = future();
         ask(CircuitBuildActor.build(new DirectoryCircuitFactory(manager),
-                manager.getConnectionCache()), new AskCallback<Circuit>() {
+                manager.getConnectionCache()), new AskCallback<DirectoryCircuit>() {
 
             @Override
-            public void onResult(Circuit result) {
+            public void onResult(DirectoryCircuit result) {
                 try {
                     TorStream torStream = CircuitStreamFactory.
                             openDirectoryStream(result, OPEN_DIRECTORY_STREAM_TIMEOUT, true);

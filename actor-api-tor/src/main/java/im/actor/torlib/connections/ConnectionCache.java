@@ -1,8 +1,5 @@
 package im.actor.torlib.connections;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -23,10 +20,8 @@ import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
 
-public class ConnectionCache implements DashboardRenderable {
+public class ConnectionCache {
     private final static Logger logger = Logger.getLogger(ConnectionCache.class.getName());
 
     private class ConnectionTask implements Callable<ConnectionImpl> {
@@ -152,37 +147,6 @@ public class ConnectionCache implements DashboardRenderable {
 
         futureTask.run();
         return futureTask;
-    }
-
-    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
-        if ((flags & DASHBOARD_CONNECTIONS) == 0) {
-            return;
-        }
-        printDashboardBanner(writer, flags);
-        for (Connection c : getActiveConnections()) {
-            if (!c.isClosed()) {
-                renderer.renderComponent(writer, flags, c);
-            }
-        }
-        writer.println();
-    }
-
-    private void printDashboardBanner(PrintWriter writer, int flags) {
-        final boolean verbose = (flags & DASHBOARD_CONNECTIONS_VERBOSE) != 0;
-        if (verbose) {
-            writer.println("[Connection Cache (verbose)]");
-        } else {
-            writer.println("[Connection Cache]");
-        }
-        writer.println();
-    }
-
-    List<Connection> getActiveConnections() {
-        final List<Connection> cs = new ArrayList<Connection>();
-        for (Future<ConnectionImpl> future : activeConnections.values()) {
-            addConnectionFromFuture(future, cs);
-        }
-        return cs;
     }
 
     private void addConnectionFromFuture(Future<ConnectionImpl> future, List<Connection> connectionList) {

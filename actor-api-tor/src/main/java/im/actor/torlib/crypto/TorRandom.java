@@ -21,13 +21,13 @@ public class TorRandom {
         random = createRandom();
     }
 
-    public byte[] getBytes(int n) {
+    public synchronized byte[] getBytes(int n) {
         final byte[] bs = new byte[n];
         random.nextBytes(bs);
         return bs;
     }
 
-    public long nextLong(long n) {
+    public synchronized long nextLong(long n) {
         long bits, val;
         do {
             bits = nextLong();

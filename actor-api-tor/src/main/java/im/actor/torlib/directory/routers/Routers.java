@@ -1,9 +1,9 @@
 package im.actor.torlib.directory.routers;
 
+import im.actor.torlib.directory.consensus.RouterStatus;
+import im.actor.torlib.directory.consensus.StatusFlag;
 import im.actor.utils.HexDigest;
-import im.actor.torlib.directory.Consensus;
-import im.actor.torlib.directory.RouterStatus;
-import im.actor.torlib.directory.StatusFlag;
+import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.torlib.directory.storage.DirectoryStorage;
 import im.actor.torlib.documents.DescriptorDocument;
 
@@ -19,8 +19,8 @@ public class Routers {
 
     private final Object LOCK = new Object();
 
-    private final Map<HexDigest, RouterImpl> routersByIdentity = new HashMap<HexDigest, RouterImpl>();
-    private final Map<String, RouterImpl> routersByNickname = new HashMap<String, RouterImpl>();
+    private final Map<HexDigest, Router> routersByIdentity = new HashMap<HexDigest, Router>();
+    private final Map<String, Router> routersByNickname = new HashMap<String, Router>();
 
     private RouterDescriptors descriptors;
 
@@ -165,7 +165,7 @@ public class Routers {
     public List<Router> getRoutersWithDownloadableDescriptors() {
         synchronized (LOCK) {
             final List<Router> routers = new ArrayList<Router>();
-            for (RouterImpl router : routersByIdentity.values()) {
+            for (Router router : routersByIdentity.values()) {
                 if (router.isDescriptorDownloadable())
                     routers.add(router);
             }
@@ -183,16 +183,16 @@ public class Routers {
 
     public void applyNewConsensus(Consensus consensus) {
         synchronized (LOCK) {
-            final Map<HexDigest, RouterImpl> oldRouterByIdentity = new HashMap<HexDigest, RouterImpl>(routersByIdentity);
+            final Map<HexDigest, Router> oldRouterByIdentity = new HashMap<HexDigest, Router>(routersByIdentity);
 
             routersByIdentity.clear();
             routersByNickname.clear();
 
             for (RouterStatus status : consensus.getRouters()) {
                 if (status.hasFlag(StatusFlag.RUNNING) && status.hasFlag(StatusFlag.VALID)) {
-                    RouterImpl router = oldRouterByIdentity.get(status.getIdentity());
+                    Router router = oldRouterByIdentity.get(status.getIdentity());
                     if (router == null) {
-                        router = RouterImpl.createFromRouterStatus(descriptors, status);
+                        router = Router.createFromRouterStatus(descriptors, status);
                     } else {
                         router.updateStatus(status);
                     }
@@ -208,7 +208,7 @@ public class Routers {
         }
     }
 
-    private void addRouter(RouterImpl router) {
+    private void addRouter(Router router) {
         routersByIdentity.put(router.getIdentityHash(), router);
 
         final String name = router.getNickname();

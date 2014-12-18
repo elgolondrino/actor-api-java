@@ -19,9 +19,9 @@ public class CircuitManager {
 
     private final ExitActiveCircuits exitActiveCircuits;
 
-    private final InternalCircuitsInt circuitsInt;
-    private final ExitCircuitsInt circuitCreationActor;
-    private final DirectoryCircuitsInt directoryCircuitsActor;
+    private final InternalCircuitsInt internalCircuits;
+    private final ExitCircuitsInt exitCircuits;
+    private final DirectoryCircuitsInt directoryCircuits;
 
     public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache) {
         this.config = config;
@@ -30,9 +30,9 @@ public class CircuitManager {
         this.pathChooser = CircuitPathChooser.create(config, directory);
         this.exitActiveCircuits = new ExitActiveCircuits();
 
-        this.circuitCreationActor = ExitCircuitsActor.get(this);
-        this.circuitsInt = InternalCircuitsActor.get(this);
-        this.directoryCircuitsActor = DirectoryCircuitsActor.get(this);
+        this.exitCircuits = ExitCircuitsActor.get(this);
+        this.internalCircuits = InternalCircuitsActor.get(this);
+        this.directoryCircuits = DirectoryCircuitsActor.get(this);
     }
 
     public TorConfig getConfig() {
@@ -43,42 +43,35 @@ public class CircuitManager {
         return directory;
     }
 
+    @Deprecated
     public ConnectionCache getConnectionCache() {
         return connectionCache;
     }
 
+    @Deprecated
     public CircuitPathChooser getPathChooser() {
         return pathChooser;
     }
 
+    @Deprecated
     public ExitActiveCircuits getExitActiveCircuits() {
         return exitActiveCircuits;
     }
 
-    public void startBuildingCircuits() {
-        circuitCreationActor.start();
-        circuitsInt.start();
-    }
-
-    public void stopBuildingCircuits() {
-        circuitCreationActor.stop();
-        circuitsInt.stop();
-    }
-
     public Future<TorStream> openDirectoryStream() {
-        return directoryCircuitsActor.openDirectoryStream();
+        return directoryCircuits.openDirectoryStream();
     }
 
     public Future<TorStream> openExitStreamTo(String hostname, int port) {
-        return circuitCreationActor.openExitStream(hostname, port, 15000);
+        return exitCircuits.openExitStream(hostname, port, 15000);
     }
 
     public Future<TorStream> openExitStreamTo(IPv4Address address, int port) {
-        return circuitCreationActor.openExitStream(address, port, 15000);
+        return exitCircuits.openExitStream(address, port, 15000);
     }
 
     public Circuit pickInternalCircuit() throws InterruptedException {
-        final Future<Circuit> future = circuitsInt.pickInternalCircuit();
+        final Future<Circuit> future = internalCircuits.pickInternalCircuit();
         final Circuit[] res = new Circuit[1];
         future.addListener(new FutureCallback<Circuit>() {
             @Override
@@ -108,5 +101,15 @@ public class CircuitManager {
             throw new InterruptedException();
         }
         return res[0];
+    }
+
+    public void startBuildingCircuits() {
+        exitCircuits.start();
+        internalCircuits.start();
+    }
+
+    public void stopBuildingCircuits() {
+        exitCircuits.stop();
+        internalCircuits.stop();
     }
 }

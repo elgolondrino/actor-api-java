@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import im.actor.torlib.directory.consensus.RouterStatus;
 import im.actor.utils.HexDigest;
-import im.actor.torlib.directory.RouterStatus;
 import im.actor.torlib.documents.KeyCertificateDocument;
 
 /**
  * Represents a directory authority server or a directory cache.
  */
-public class DirectoryServer extends RouterImpl {
+public class DirectoryServer extends Router {
     private final List<KeyCertificateDocument> certificates = new ArrayList<KeyCertificateDocument>();
 
     private int port;

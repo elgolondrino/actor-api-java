@@ -31,14 +31,12 @@ import im.actor.utils.Threading;
 import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorRandom;
-import im.actor.torlib.dashboard.DashboardRenderable;
-import im.actor.torlib.dashboard.DashboardRenderer;
 
 /**
  * This class represents a transport link between two onion routers or
  * between an onion proxy and an entry router.
  */
-public class ConnectionImpl implements Connection, DashboardRenderable {
+public class ConnectionImpl implements Connection {
     private final static Logger logger = Logger.getLogger(ConnectionImpl.class.getName());
     private final static int CONNECTION_IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     private final static int DEFAULT_CONNECT_TIMEOUT = 5000;
@@ -328,22 +326,5 @@ public class ConnectionImpl implements Connection, DashboardRenderable {
 
     public String toString() {
         return "!" + router.getNickname() + "!";
-    }
-
-    public void dashboardRender(DashboardRenderer renderer, PrintWriter writer, int flags) throws IOException {
-        final int circuitCount;
-        circuitsLock.lock();
-        try {
-            circuitCount = circuitMap.size();
-        } finally {
-            circuitsLock.unlock();
-        }
-        if (circuitCount == 0 && (flags & DASHBOARD_CONNECTIONS_VERBOSE) == 0) {
-            return;
-        }
-        writer.print("  [Connection router=" + router.getNickname());
-        writer.print(" circuits=" + circuitCount);
-        writer.print(" idle=" + (getIdleMilliseconds() / 1000) + "s");
-        writer.println("]");
     }
 }

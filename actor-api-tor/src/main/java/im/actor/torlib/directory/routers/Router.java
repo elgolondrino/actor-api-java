@@ -1,61 +1,194 @@
 package im.actor.torlib.directory.routers;
 
+import java.util.Collections;
 import java.util.Set;
 
+import im.actor.torlib.directory.consensus.RouterStatus;
+import im.actor.torlib.directory.consensus.StatusFlag;
+import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
-import im.actor.torlib.documents.DescriptorDocument;
+import im.actor.torlib.geoip.CountryCodeService;
 
-public interface Router {
+public class Router {
+    public static Router createFromRouterStatus(RouterDescriptors directory, RouterStatus status) {
+        return new Router(directory, status);
+    }
 
-    String getNickname();
+    private final RouterDescriptors directory;
+    private final HexDigest identityHash;
+    protected RouterStatus status;
+    private DescriptorDocument descriptorDocument;
 
-    String getCountryCode();
+    private volatile String cachedCountryCode;
 
-    IPv4Address getAddress();
+    protected Router(RouterDescriptors directory, RouterStatus status) {
+        this.directory = directory;
+        this.identityHash = status.getIdentity();
+        this.status = status;
+        refreshDescriptor();
+    }
 
-    int getOnionPort();
+    public void updateStatus(RouterStatus status) {
+        if (!identityHash.equals(status.getIdentity()))
+            throw new TorException("Identity hash does not match status update");
+        this.status = status;
+        this.cachedCountryCode = null;
+        this.descriptorDocument = null;
+        refreshDescriptor();
+    }
 
-    int getDirectoryPort();
+    public boolean isDescriptorDownloadable() {
+        refreshDescriptor();
+        if (descriptorDocument != null) {
+            return false;
+        }
 
-    HexDigest getIdentityHash();
+        final long now = System.currentTimeMillis();
+        final long diff = now - status.getPublicationTime() * 1000L;
+        return diff > (1000 * 60 * 10);
+    }
 
-    boolean isDescriptorDownloadable();
+    public String getVersion() {
+        return status.getVersion();
+    }
 
-    String getVersion();
+    public IPv4Address getAddress() {
+        return status.getAddress();
+    }
 
-    DescriptorDocument getCurrentDescriptor();
+    public DescriptorDocument getCurrentDescriptor() {
+        refreshDescriptor();
+        return descriptorDocument;
+    }
 
-    HexDigest getMicrodescriptorDigest();
+    private synchronized void refreshDescriptor() {
+        if (descriptorDocument != null || directory == null) {
+            return;
+        }
+        if (status.getMicrodescriptorDigest() != null) {
+            descriptorDocument = directory.getDescriptorFromCache(status.getMicrodescriptorDigest());
+        }
+    }
 
-    TorPublicKey getOnionKey();
+    public HexDigest getMicrodescriptorDigest() {
+        return status.getMicrodescriptorDigest();
+    }
 
-    byte[] getNTorOnionKey();
+    public boolean hasFlag(StatusFlag flag) {
+        return status.hasFlag(flag);
+    }
 
-    boolean hasBandwidth();
+    public boolean isRunning() {
+        return hasFlag(StatusFlag.RUNNING);
+    }
 
-    int getEstimatedBandwidth();
+    public boolean isValid() {
+        return hasFlag(StatusFlag.VALID);
+    }
 
-    Set<String> getFamilyMembers();
+    public boolean isBadExit() {
+        return hasFlag(StatusFlag.BAD_EXIT);
+    }
 
-    boolean isRunning();
+    public boolean isPossibleGuard() {
+        return hasFlag(StatusFlag.GUARD);
+    }
 
-    boolean isValid();
+    public boolean isExit() {
+        return hasFlag(StatusFlag.EXIT);
+    }
 
-    boolean isBadExit();
+    public boolean isFast() {
+        return hasFlag(StatusFlag.FAST);
+    }
 
-    boolean isPossibleGuard();
+    public boolean isStable() {
+        return hasFlag(StatusFlag.STABLE);
+    }
 
-    boolean isExit();
+    public boolean isHSDirectory() {
+        return hasFlag(StatusFlag.HS_DIR);
+    }
 
-    boolean isFast();
+    public int getDirectoryPort() {
+        return status.getDirectoryPort();
+    }
 
-    boolean isStable();
+    public HexDigest getIdentityHash() {
+        return identityHash;
+    }
 
-    boolean isHSDirectory();
+    public String getNickname() {
+        return status.getNickname();
+    }
 
-    boolean exitPolicyAccepts(IPv4Address address, int port);
+    public int getOnionPort() {
+        return status.getRouterPort();
+    }
 
-    boolean exitPolicyAccepts(int port);
+    public TorPublicKey getOnionKey() {
+        refreshDescriptor();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getOnionKey();
+        } else {
+            return null;
+        }
+    }
+
+    public byte[] getNTorOnionKey() {
+        refreshDescriptor();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getNTorOnionKey();
+        } else {
+            return null;
+        }
+    }
+
+    public boolean hasBandwidth() {
+        return status.isHasBandwidth();
+    }
+
+    public int getEstimatedBandwidth() {
+        return status.getBandwidthEstimate();
+    }
+
+    public Set<String> getFamilyMembers() {
+        refreshDescriptor();
+        if (descriptorDocument != null) {
+            return descriptorDocument.getFamilyMembers();
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    public boolean exitPolicyAccepts(IPv4Address address, int port) {
+        refreshDescriptor();
+        if (descriptorDocument == null) {
+            return false;
+        } else if (address == null) {
+            return descriptorDocument.exitPolicyAccepts(port);
+        } else {
+            return descriptorDocument.exitPolicyAccepts(address, port);
+        }
+    }
+
+    public boolean exitPolicyAccepts(int port) {
+        return exitPolicyAccepts(null, port);
+    }
+
+    public String toString() {
+        return "Router[" + getNickname() + " (" + getAddress() + ":" + getOnionPort() + ")]";
+    }
+
+    public String getCountryCode() {
+        String cc = cachedCountryCode;
+        if (cc == null) {
+            cc = CountryCodeService.getInstance().getCountryCodeForAddress(getAddress());
+            cachedCountryCode = cc;
+        }
+        return cc;
+    }
 }

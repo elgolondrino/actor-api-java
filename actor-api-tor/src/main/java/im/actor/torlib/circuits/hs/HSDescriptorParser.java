@@ -5,14 +5,14 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.errors.TorParsingException;
 import im.actor.torlib.crypto.TorSignature;
-import im.actor.torlib.directory.parsing.DocumentFieldParserImpl;
-import im.actor.torlib.directory.parsing.BasicDocumentParsingResult;
-import im.actor.torlib.directory.parsing.DocumentFieldParser;
-import im.actor.torlib.directory.parsing.DocumentObject;
-import im.actor.torlib.directory.parsing.DocumentParser;
-import im.actor.torlib.directory.parsing.DocumentParsingHandler;
-import im.actor.torlib.directory.parsing.DocumentParsingResult;
-import im.actor.torlib.directory.parsing.DocumentParsingResultHandler;
+import im.actor.torlib.documents.parsing.DocumentFieldParserImpl;
+import im.actor.torlib.documents.parsing.BasicDocumentParsingResult;
+import im.actor.torlib.documents.parsing.DocumentFieldParser;
+import im.actor.torlib.documents.parsing.DocumentObject;
+import im.actor.torlib.documents.parsing.DocumentParser;
+import im.actor.torlib.documents.parsing.DocumentParsingHandler;
+import im.actor.torlib.documents.parsing.DocumentParsingResult;
+import im.actor.torlib.documents.parsing.DocumentParsingResultHandler;
 import im.actor.utils.Base64;
 
 public class HSDescriptorParser implements DocumentParser<HSDescriptor> {
