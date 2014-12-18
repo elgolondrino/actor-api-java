@@ -160,19 +160,13 @@ public class Router {
         }
     }
 
-    public boolean exitPolicyAccepts(IPv4Address address, int port) {
+    public boolean exitPolicyAccepts(int port) {
         refreshDescriptor();
         if (descriptorDocument == null) {
             return false;
-        } else if (address == null) {
-            return descriptorDocument.exitPolicyAccepts(port);
         } else {
-            return descriptorDocument.exitPolicyAccepts(address, port);
+            return descriptorDocument.exitPolicyAccepts(port);
         }
-    }
-
-    public boolean exitPolicyAccepts(int port) {
-        return exitPolicyAccepts(null, port);
     }
 
     public String toString() {

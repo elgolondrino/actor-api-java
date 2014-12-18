@@ -8,15 +8,15 @@ import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.streams.CircuitIO;
 import im.actor.torlib.circuits.streams.CircuitNode;
 import im.actor.torlib.circuits.streams.TorStream;
-import im.actor.torlib.connections.Connection;
 import im.actor.torlib.circuits.cells.RelayCell;
+import im.actor.torlib.connections.ConnectionImpl;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.errors.TorException;
 
 /**
  * This class represents an established circuit through the Tor network.
  */
-public abstract class Circuit {
+public class Circuit {
     protected final static Logger LOG = Logger.getLogger(Circuit.class.getName());
 
     private final CircuitManager circuitManager;
@@ -27,7 +27,7 @@ public abstract class Circuit {
 
     private CircuitIO io;
 
-    protected Circuit(List<Router> path, Connection connection, CircuitManager circuitManager) {
+    public Circuit(List<Router> path, ConnectionImpl connection, CircuitManager circuitManager) {
         this.nodeList = new ArrayList<CircuitNode>();
         int id = connection.bindCircuit(this);
         io = new CircuitIO(this, connection, id);
@@ -73,7 +73,7 @@ public abstract class Circuit {
         }
     }
 
-    public Connection getConnection() {
+    public ConnectionImpl getConnection() {
         if (!isConnected())
             throw new TorException("Circuit is not connected.");
         return io.getConnection();
@@ -170,6 +170,66 @@ public abstract class Circuit {
             return false;
         } else {
             return io.isMarkedForClose();
+        }
+    }
+
+    public static class CircuitStatus {
+
+        enum CircuitState {
+            OPEN("Open"),
+            DESTROYED("Destroyed");
+            String name;
+
+            CircuitState(String name) {
+                this.name = name;
+            }
+
+            public String toString() {
+                return name;
+            }
+        }
+
+        private long timestampCreated;
+        private long timestampDirty;
+
+        private CircuitState state = CircuitState.OPEN;
+
+        public CircuitStatus() {
+            timestampCreated = System.currentTimeMillis();
+            timestampDirty = 0;
+        }
+
+        public synchronized void updateDirtyTimestamp() {
+            timestampDirty = System.currentTimeMillis();
+        }
+
+        public synchronized long getMillisecondsElapsedSinceCreated() {
+            return millisecondsElapsedSince(timestampCreated);
+        }
+
+        public synchronized long getMillisecondsDirty() {
+            return millisecondsElapsedSince(timestampDirty);
+        }
+
+        public synchronized boolean isDirty() {
+            return timestampDirty != 0;
+        }
+
+        public synchronized boolean isConnected() {
+            return state == CircuitState.OPEN;
+        }
+
+        public synchronized void destroy() {
+            state = CircuitState.DESTROYED;
+        }
+
+
+        private static long millisecondsElapsedSince(long then) {
+            if (then == 0) {
+                return 0;
+            }
+            final long now = System.currentTimeMillis();
+            return now - then;
         }
     }
 }

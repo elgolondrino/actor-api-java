@@ -1,8 +1,8 @@
 package im.actor.torlib.circuits.actors.path;
 
+import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.DirectoryCircuit;
-import im.actor.torlib.connections.Connection;
+import im.actor.torlib.connections.ConnectionImpl;
 import im.actor.torlib.directory.routers.Router;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by ex3ndr on 15.12.14.
  */
-public class DirectoryCircuitFactory extends CircuitFactory<DirectoryCircuit> {
+public class DirectoryCircuitFactory extends CircuitFactory {
 
     private CircuitManager circuitManager;
 
@@ -29,7 +29,7 @@ public class DirectoryCircuitFactory extends CircuitFactory<DirectoryCircuit> {
     }
 
     @Override
-    public DirectoryCircuit buildNewCircuit(List<Router> path, Connection connection) {
-        return new DirectoryCircuit(path, connection, circuitManager);
+    public Circuit buildNewCircuit(List<Router> path, ConnectionImpl connection) {
+        return new Circuit(path, connection, circuitManager);
     }
 }

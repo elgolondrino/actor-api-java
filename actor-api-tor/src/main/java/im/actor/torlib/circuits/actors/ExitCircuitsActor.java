@@ -242,11 +242,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         if (circuit.isMarkedForClose()) {
             return false;
         }
-        if (target.isAddressTarget()) {
-            return circuit.getLastRouter().exitPolicyAccepts(target.getAddress(), target.getPort());
-        } else {
-            return circuit.getLastRouter().exitPolicyAccepts(target.getPort());
-        }
+        return circuit.getLastRouter().exitPolicyAccepts(target.getPort());
     }
 
     @Override

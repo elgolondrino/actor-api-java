@@ -34,7 +34,7 @@ import im.actor.torlib.crypto.TorRandom;
  * This class represents a transport link between two onion routers or
  * between an onion proxy and an entry router.
  */
-public class ConnectionImpl implements Connection {
+public class ConnectionImpl {
     private final static Logger logger = Logger.getLogger(ConnectionImpl.class.getName());
     private final static int CONNECTION_IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     private final static int DEFAULT_CONNECT_TIMEOUT = 5000;

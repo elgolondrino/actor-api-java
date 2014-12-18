@@ -1,8 +1,8 @@
 package im.actor.torlib.circuits.actors.path;
 
+import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.ExitCircuit;
-import im.actor.torlib.connections.Connection;
+import im.actor.torlib.connections.ConnectionImpl;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.actors.target.ExitTarget;
 
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by ex3ndr on 15.12.14.
  */
-public class ExitCircuitFactory extends CircuitFactory<ExitCircuit> {
+public class ExitCircuitFactory extends CircuitFactory {
 
     private CircuitManager circuitManager;
     private List<ExitTarget> exitTargets;
@@ -36,7 +36,7 @@ public class ExitCircuitFactory extends CircuitFactory<ExitCircuit> {
     }
 
     @Override
-    public ExitCircuit buildNewCircuit(List<Router> path, Connection connection) {
-        return new ExitCircuit(path, connection, circuitManager);
+    public Circuit buildNewCircuit(List<Router> path, ConnectionImpl connection) {
+        return new Circuit(path, connection, circuitManager);
     }
 }

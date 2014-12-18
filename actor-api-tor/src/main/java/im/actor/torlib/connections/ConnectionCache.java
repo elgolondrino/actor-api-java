@@ -93,7 +93,7 @@ public class ConnectionCache {
         return isClosed;
     }
 
-    public Connection getConnectionTo(Router router) throws InterruptedException, ConnectionTimeoutException, ConnectionFailedException, ConnectionHandshakeException {
+    public ConnectionImpl getConnectionTo(Router router) throws InterruptedException, ConnectionTimeoutException, ConnectionFailedException, ConnectionHandshakeException {
         if (isClosed) {
             throw new IllegalStateException("ConnectionCache has been closed");
         }
@@ -101,7 +101,7 @@ public class ConnectionCache {
         while (true) {
             Future<ConnectionImpl> f = getFutureFor(router);
             try {
-                Connection c = f.get();
+                ConnectionImpl c = f.get();
                 if (c.isClosed()) {
                     activeConnections.remove(router, f);
                 } else {
@@ -143,16 +143,5 @@ public class ConnectionCache {
 
         futureTask.run();
         return futureTask;
-    }
-
-    private void addConnectionFromFuture(Future<ConnectionImpl> future, List<Connection> connectionList) {
-        try {
-            if (future.isDone() && !future.isCancelled()) {
-                connectionList.add(future.get());
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-        }
     }
 }

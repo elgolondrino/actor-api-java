@@ -14,12 +14,14 @@ mainClassName = "im.actor.tor.Main"
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
+    maven { url 'http://maven.tmatesoft.com/content/repositories/releases' }
     mavenCentral()
 }
 
 dependencies {
     compile 'com.droidkit:actors:0.6.1'
     compile 'com.droidkit:bser:1.2'
+    compile 'org.tmatesoft.sqljet:sqljet:1.1.10'
     testCompile project(":actor-api-java")
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

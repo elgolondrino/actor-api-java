@@ -28,16 +28,6 @@ public class ConsensusDocument implements Document {
 
     private final static Logger logger = Logger.getLogger(ConsensusDocument.class.getName());
 
-    private final static String BW_WEIGHT_SCALE_PARAM = "bwweightscale";
-    private final static int BW_WEIGHT_SCALE_DEFAULT = 10000;
-    private final static int BW_WEIGHT_SCALE_MIN = 1;
-    private final static int BW_WEIGHT_SCALE_MAX = Integer.MAX_VALUE;
-
-    private final static String CIRCWINDOW_PARAM = "circwindow";
-    private final static int CIRCWINDOW_DEFAULT = 1000;
-    private final static int CIRCWINDOW_MIN = 100;
-    private final static int CIRCWINDOW_MAX = 1000;
-
     private Set<RequiredCertificate> requiredCertificates = new HashSet<RequiredCertificate>();
 
     private Timestamp validAfter;
@@ -307,22 +297,6 @@ public class ConsensusDocument implements Document {
             return maxValue;
         } else {
             return value;
-        }
-    }
-
-    public int getCircWindowParameter() {
-        return getParameterValue(CIRCWINDOW_PARAM, CIRCWINDOW_DEFAULT, CIRCWINDOW_MIN, CIRCWINDOW_MAX);
-    }
-
-    public int getWeightScaleParameter() {
-        return getParameterValue(BW_WEIGHT_SCALE_PARAM, BW_WEIGHT_SCALE_DEFAULT, BW_WEIGHT_SCALE_MIN, BW_WEIGHT_SCALE_MAX);
-    }
-
-    public int getBandwidthWeight(String tag) {
-        if (bandwidthWeights.containsKey(tag)) {
-            return bandwidthWeights.get(tag);
-        } else {
-            return -1;
         }
     }
 }

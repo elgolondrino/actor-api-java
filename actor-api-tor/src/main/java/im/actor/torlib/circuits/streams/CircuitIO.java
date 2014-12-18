@@ -1,7 +1,5 @@
 package im.actor.torlib.circuits.streams;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.circuits.CircuitStatus;
 import im.actor.torlib.circuits.cells.Cell;
-import im.actor.torlib.connections.Connection;
+import im.actor.torlib.connections.ConnectionImpl;
 import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.utils.Threading;
@@ -28,7 +25,7 @@ public class CircuitIO {
     private final static long CIRCUIT_RELAY_RESPONSE_TIMEOUT = 20 * 1000;
 
     private final Circuit circuit;
-    private final Connection connection;
+    private final ConnectionImpl connection;
     private final int circuitId;
 
     private final BlockingQueue<RelayCell> relayCellResponseQueue;
@@ -40,7 +37,7 @@ public class CircuitIO {
     private boolean isMarkedForClose;
     private boolean isClosed;
 
-    public CircuitIO(Circuit circuit, Connection connection, int circuitId) {
+    public CircuitIO(Circuit circuit, ConnectionImpl connection, int circuitId) {
         this.circuit = circuit;
         this.connection = connection;
         this.circuitId = circuitId;
@@ -50,7 +47,7 @@ public class CircuitIO {
         this.streamMap = new HashMap<Integer, TorStream>();
     }
 
-    public Connection getConnection() {
+    public ConnectionImpl getConnection() {
         return connection;
     }
 
@@ -223,7 +220,7 @@ public class CircuitIO {
     }
 
     public void sendCell(Cell cell) {
-        final CircuitStatus status = circuit.getStatus();
+        final Circuit.CircuitStatus status = circuit.getStatus();
         if (!(status.isConnected()))
             return;
         try {

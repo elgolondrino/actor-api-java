@@ -8,9 +8,10 @@ import com.droidkit.actors.tasks.TaskActor;
 import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.actors.extender.CircuitExtender;
 import im.actor.torlib.circuits.actors.path.CircuitFactory;
-import im.actor.torlib.connections.Connection;
 import im.actor.torlib.connections.ConnectionCache;
+import im.actor.torlib.connections.ConnectionImpl;
 import im.actor.torlib.directory.routers.Router;
+import im.actor.torlib.log.Log;
 
 import java.net.ConnectException;
 import java.util.List;
@@ -21,27 +22,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by ex3ndr on 18.12.14.
  */
-public class CircuitBuildActor<T extends Circuit> extends TaskActor<T> {
+public class CircuitBuildActor extends TaskActor<im.actor.torlib.circuits.Circuit> {
 
     private static AtomicInteger NEXT_ID = new AtomicInteger(1);
 
     public static ActorRef build(final CircuitFactory factory, final ConnectionCache connectionCache) {
+        final int id = NEXT_ID.getAndIncrement();
         return ActorSystem.system().actorOf(Props.create(CircuitBuildActor.class, new ActorCreator<CircuitBuildActor>() {
             @Override
             public CircuitBuildActor create() {
-                return new CircuitBuildActor(factory, connectionCache);
+                return new CircuitBuildActor(factory, connectionCache, id);
             }
-        }), "/tor/circuit/build/" + NEXT_ID.getAndIncrement());
+        }), "/tor/circuit/build/" + id);
     }
 
     private static Executor EXECUTOR = Executors.newCachedThreadPool();
 
-    private CircuitFactory<T> factory;
-    private ConnectionCache connectionCache;
+    private final String TAG;
+    private final int ID;
 
-    public CircuitBuildActor(CircuitFactory<T> factory, ConnectionCache connectionCache) {
+    private final CircuitFactory factory;
+    private final ConnectionCache connectionCache;
+
+    public CircuitBuildActor(CircuitFactory factory, ConnectionCache connectionCache, int id) {
         this.factory = factory;
         this.connectionCache = connectionCache;
+        this.ID = id;
+        this.TAG = "CircuitBuild#" + id;
     }
 
     @Override
@@ -50,6 +57,7 @@ public class CircuitBuildActor<T extends Circuit> extends TaskActor<T> {
             @Override
             public void run() {
                 try {
+                    Log.d(TAG, "Building path...");
                     List<Router> path = factory.buildNewPath();
                     if (path == null || path.size() == 0) {
                         error(new Exception("Unable to build path"));
@@ -58,7 +66,8 @@ public class CircuitBuildActor<T extends Circuit> extends TaskActor<T> {
 
                     Router firstRouter = path.get(0);
 
-                    Connection connection;
+                    Log.d(TAG, "Opening connection...");
+                    ConnectionImpl connection;
                     try {
                         connection = connectionCache.getConnectionTo(firstRouter);
                     } catch (Exception e) {
@@ -67,8 +76,9 @@ public class CircuitBuildActor<T extends Circuit> extends TaskActor<T> {
                         return;
                     }
 
-                    T circuit = factory.buildNewCircuit(path, connection);
+                    Circuit circuit = factory.buildNewCircuit(path, connection);
 
+                    Log.d(TAG, "Building cell sequence...");
                     CircuitExtender extender = new CircuitExtender(circuit);
 
                     extender.createFastTo(firstRouter);
@@ -76,6 +86,7 @@ public class CircuitBuildActor<T extends Circuit> extends TaskActor<T> {
                         extender.extendTo(path.get(i));
                     }
 
+                    Log.d(TAG, "Completed");
                     complete(circuit);
                 } catch (Exception e) {
                     e.printStackTrace();
