@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.circuits.build.CircuitStreamFactory;
-import im.actor.torlib.circuits.build.InternalCircuitMutate;
+import im.actor.torlib.circuits.actors.CircuitStreamFactory;
+import im.actor.torlib.circuits.actors.InternalCircuitMutate;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.torlib.circuits.streams.TorStream;

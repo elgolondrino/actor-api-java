@@ -24,8 +24,8 @@ public class Routers {
 
     private RouterDescriptors descriptors;
 
-    private boolean haveMinimumRouterInfo;
-    private boolean needRecalculateMinimumRouterInfo;
+//    private boolean haveMinimumRouterInfo;
+//    private boolean needRecalculateMinimumRouterInfo;
 
     public Routers(DirectoryStorage store) {
         this.descriptors = new RouterDescriptors(store);
@@ -33,49 +33,49 @@ public class Routers {
 
     public void load() {
         descriptors.load();
-        needRecalculateMinimumRouterInfo = true;
+//        needRecalculateMinimumRouterInfo = true;
     }
 
     public void close() {
         descriptors.close();
     }
 
-    public int getRoutersCount() {
-        synchronized (LOCK) {
-            return routersByIdentity.size();
-        }
-    }
-
-    public int getDownloadedDescriptorsCount() {
-        synchronized (LOCK) {
-            int res = 0;
-            for (Router r : routersByIdentity.values()) {
-                if (!r.isDescriptorDownloadable())
-                    res++;
-            }
-            return res;
-        }
-    }
-
-    public synchronized boolean haveMinimumRouterInfo() {
-        if (needRecalculateMinimumRouterInfo) {
-            checkMinimumRouterInfo();
-        }
-        return haveMinimumRouterInfo;
-    }
-
-    private synchronized void checkMinimumRouterInfo() {
-//        if (currentConsensus == null || !currentConsensus.isLive()) {
-//            needRecalculateMinimumRouterInfo = true;
-//            haveMinimumRouterInfo = false;
-//            return;
+//    public int getRoutersCount() {
+//        synchronized (LOCK) {
+//            return routersByIdentity.size();
 //        }
+//    }
+//
+//    public int getDownloadedDescriptorsCount() {
+//        synchronized (LOCK) {
+//            int res = 0;
+//            for (Router r : routersByIdentity.values()) {
+//                if (!r.isDescriptorDownloadable())
+//                    res++;
+//            }
+//            return res;
+//        }
+//    }
 
-        int routerCount = getRoutersCount();
-        int descriptorCount = getDownloadedDescriptorsCount();
-        needRecalculateMinimumRouterInfo = false;
-        haveMinimumRouterInfo = (descriptorCount * 4 > routerCount);
-    }
+//    public synchronized boolean haveMinimumRouterInfo() {
+//        if (needRecalculateMinimumRouterInfo) {
+//            checkMinimumRouterInfo();
+//        }
+//        return haveMinimumRouterInfo;
+//    }
+
+//    private synchronized void checkMinimumRouterInfo() {
+////        if (currentConsensus == null || !currentConsensus.isLive()) {
+////            needRecalculateMinimumRouterInfo = true;
+////            haveMinimumRouterInfo = false;
+////            return;
+////        }
+//
+//        int routerCount = getRoutersCount();
+//        int descriptorCount = getDownloadedDescriptorsCount();
+//        needRecalculateMinimumRouterInfo = false;
+//        haveMinimumRouterInfo = (descriptorCount * 4 > routerCount);
+//    }
 
     public Router getRouterByName(String name) {
         if (name.equals("Unnamed")) {
@@ -178,7 +178,7 @@ public class Routers {
 
     public void addRouterDescriptors(List<DescriptorDocument> descriptorDocuments) {
         descriptors.addRouterDescriptors(descriptorDocuments);
-        needRecalculateMinimumRouterInfo = true;
+        // needRecalculateMinimumRouterInfo = true;
     }
 
     public void applyNewConsensus(Consensus consensus) {

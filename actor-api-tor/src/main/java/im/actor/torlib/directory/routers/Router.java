@@ -10,7 +10,6 @@ import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.HexDigest;
 import im.actor.utils.IPv4Address;
-import im.actor.torlib.geoip.CountryCodeService;
 
 public class Router {
     public static Router createFromRouterStatus(RouterDescriptors directory, RouterStatus status) {
@@ -21,8 +20,6 @@ public class Router {
     private final HexDigest identityHash;
     protected RouterStatus status;
     private DescriptorDocument descriptorDocument;
-
-    private volatile String cachedCountryCode;
 
     protected Router(RouterDescriptors directory, RouterStatus status) {
         this.directory = directory;
@@ -35,7 +32,6 @@ public class Router {
         if (!identityHash.equals(status.getIdentity()))
             throw new TorException("Identity hash does not match status update");
         this.status = status;
-        this.cachedCountryCode = null;
         this.descriptorDocument = null;
         refreshDescriptor();
     }
@@ -181,14 +177,5 @@ public class Router {
 
     public String toString() {
         return "Router[" + getNickname() + " (" + getAddress() + ":" + getOnionPort() + ")]";
-    }
-
-    public String getCountryCode() {
-        String cc = cachedCountryCode;
-        if (cc == null) {
-            cc = CountryCodeService.getInstance().getCountryCodeForAddress(getAddress());
-            cachedCountryCode = cc;
-        }
-        return cc;
     }
 }

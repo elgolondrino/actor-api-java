@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.*;
-import im.actor.torlib.circuits.build.InternalCircuitMutate;
+import im.actor.torlib.circuits.actors.InternalCircuitMutate;
 import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.circuits.cells.RelayCell;
 import im.actor.torlib.circuits.streams.CircuitNode;

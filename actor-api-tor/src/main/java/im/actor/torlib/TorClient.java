@@ -8,7 +8,7 @@ import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
-import im.actor.torlib.socks.SocksTorProxy;
+import im.actor.torlib.proxy.SocksTorProxy;
 import im.actor.torlib.utils.Tor;
 
 /**
@@ -19,7 +19,6 @@ public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
     private final TorConfig config;
     private final NewDirectory newDirectory;
-    private final ConnectionCache connectionCache;
     private final CircuitManager circuitManager;
     private final SocksTorProxy socksListener;
     private final DirectoryManager directoryManager;
@@ -34,9 +33,7 @@ public class TorClient {
         config = Tor.createConfig();
         newDirectory = new NewDirectory(config);
 
-        connectionCache = new ConnectionCache(config);
-
-        circuitManager = new CircuitManager(config, newDirectory, connectionCache);
+        circuitManager = new CircuitManager(newDirectory, config);
         directoryManager = new DirectoryManager(circuitManager);
 
         socksListener = new SocksTorProxy(circuitManager);
@@ -69,9 +66,8 @@ public class TorClient {
         try {
             socksListener.stop();
             directoryManager.stop();
-            circuitManager.stopBuildingCircuits();
+            circuitManager.close();
             newDirectory.close();
-            connectionCache.close();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unexpected exception while shutting down TorClient instance: " + e, e);
         } finally {

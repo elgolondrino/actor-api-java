@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.*;
-import im.actor.torlib.circuits.build.InternalCircuitMutate;
+import im.actor.torlib.circuits.actors.InternalCircuitMutate;
 import im.actor.torlib.crypto.TorTapKeyAgreement;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;

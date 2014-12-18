@@ -2,11 +2,11 @@ package im.actor.torlib.circuits;
 
 import com.droidkit.actors.concurrency.Future;
 import com.droidkit.actors.concurrency.FutureCallback;
-import im.actor.torlib.circuits.build.*;
+import im.actor.torlib.circuits.actors.*;
 import im.actor.torlib.circuits.streams.TorStream;
 import im.actor.torlib.connections.ConnectionCache;
 import im.actor.torlib.TorConfig;
-import im.actor.torlib.circuits.path.CircuitPathChooser;
+import im.actor.torlib.path.CircuitPathChooser;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.directory.NewDirectory;
 
@@ -23,10 +23,10 @@ public class CircuitManager {
     private final ExitCircuitsInt exitCircuits;
     private final DirectoryCircuitsInt directoryCircuits;
 
-    public CircuitManager(TorConfig config, NewDirectory directory, ConnectionCache connectionCache) {
+    public CircuitManager(NewDirectory directory, TorConfig config) {
         this.config = config;
         this.directory = directory;
-        this.connectionCache = connectionCache;
+        this.connectionCache = new ConnectionCache(config);
         this.pathChooser = CircuitPathChooser.create(config, directory);
         this.exitActiveCircuits = new ExitActiveCircuits();
 
@@ -108,8 +108,9 @@ public class CircuitManager {
         internalCircuits.start();
     }
 
-    public void stopBuildingCircuits() {
+    public void close() {
         exitCircuits.stop();
         internalCircuits.stop();
+        connectionCache.close();
     }
 }

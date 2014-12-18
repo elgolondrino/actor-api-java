@@ -10,7 +10,7 @@ import im.actor.torlib.*;
 import im.actor.torlib.circuits.Circuit;
 import im.actor.torlib.circuits.CircuitManager;
 import im.actor.torlib.circuits.streams.TorStream;
-import im.actor.torlib.circuits.build.CircuitStreamFactory;
+import im.actor.torlib.circuits.actors.CircuitStreamFactory;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.errors.OpenFailedException;
 import im.actor.torlib.errors.StreamConnectFailedException;
