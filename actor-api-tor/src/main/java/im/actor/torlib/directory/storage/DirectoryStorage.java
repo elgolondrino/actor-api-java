@@ -1,7 +1,6 @@
 package im.actor.torlib.directory.storage;
 
 import im.actor.torlib.documents.Document;
-import im.actor.torlib.TorConfig;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -28,11 +27,11 @@ public class DirectoryStorage {
         }
     }
 
-    private final TorConfig config;
+    private final String dataPath;
     private Map<CacheFile, DirectoryStorageFile> fileMap;
 
-    public DirectoryStorage(TorConfig config) {
-        this.config = config;
+    public DirectoryStorage(String dataPath) {
+        this.dataPath = dataPath;
         this.fileMap = new HashMap<CacheFile, DirectoryStorageFile>();
     }
 
@@ -68,7 +67,7 @@ public class DirectoryStorage {
 
     private DirectoryStorageFile getStoreFile(CacheFile cacheFile) {
         if (!fileMap.containsKey(cacheFile)) {
-            fileMap.put(cacheFile, new DirectoryStorageFile(config, cacheFile.getFilename()));
+            fileMap.put(cacheFile, new DirectoryStorageFile(dataPath, cacheFile.getFilename()));
         }
         return fileMap.get(cacheFile);
     }

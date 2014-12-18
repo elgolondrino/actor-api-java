@@ -1,11 +1,6 @@
 package im.actor.torlib.utils;
 
-import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
-import java.util.logging.Logger;
-
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.config.TorConfigProxy;
 
 /**
  * The <code>Tor</code> class is a collection of static methods for instantiating
@@ -41,29 +36,5 @@ public class Tor {
 
     public static String getVersion() {
         return version;
-    }
-
-    /**
-     * Determine if running on Android by inspecting java.runtime.name property.
-     *
-     * @return True if running on Android.
-     */
-    public static boolean isAndroidRuntime() {
-        final String runtime = System.getProperty("java.runtime.name");
-        return runtime != null && runtime.equals("Android Runtime");
-    }
-
-    /**
-     * Create and return a new <code>TorConfig</code> instance.
-     *
-     * @return A new <code>TorConfig</code> instance.
-     * @see im.actor.torlib.TorConfig
-     */
-    static public TorConfig createConfig() {
-        final TorConfig config = (TorConfig) Proxy.newProxyInstance(TorConfigProxy.class.getClassLoader(), new Class[]{TorConfig.class}, new TorConfigProxy());
-        if (isAndroidRuntime()) {
-            config.setHandshakeV2Enabled(false);
-        }
-        return config;
     }
 }

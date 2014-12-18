@@ -14,12 +14,10 @@ public class IntroductionProcessor {
     private final static Logger logger = Logger.getLogger(IntroductionProcessor.class.getName());
     private final static int INTRODUCTION_PROTOCOL_VERSION = 3;
 
-    private final HiddenService hiddenService;
     private final Circuit introductionCircuit;
     private final IntroductionPoint introductionPoint;
 
-    protected IntroductionProcessor(HiddenService hiddenService, Circuit introductionCircuit, IntroductionPoint introductionPoint) {
-        this.hiddenService = hiddenService;
+    protected IntroductionProcessor(Circuit introductionCircuit, IntroductionPoint introductionPoint) {
         this.introductionCircuit = introductionCircuit;
         this.introductionPoint = introductionPoint;
     }
@@ -84,14 +82,7 @@ public class IntroductionProcessor {
     }
 
     private void addAuthentication(ByteBuffer buffer) {
-        HSDescriptorCookie cookie = hiddenService.getAuthenticationCookie();
-        if (cookie == null) {
-            buffer.put((byte) 0);
-        } else {
-            buffer.put(cookie.getAuthTypeByte());
-            buffer.putShort((short) cookie.getValue().length);
-            buffer.put(cookie.getValue());
-        }
+        buffer.put((byte) 0);
     }
 
     private byte[] encryptIntroductionBuffer(ByteBuffer buffer, TorPublicKey key) {

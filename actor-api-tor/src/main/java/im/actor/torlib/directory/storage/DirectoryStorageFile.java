@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import im.actor.torlib.documents.Document;
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorRandom;
 
 public class DirectoryStorageFile {
@@ -21,7 +20,7 @@ public class DirectoryStorageFile {
     private final static ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
     private final static TorRandom random = new TorRandom();
 
-    private final TorConfig config;
+    private final String dataPath;
     private final String cacheFilename;
 
     private RandomAccessFile openFile;
@@ -29,8 +28,8 @@ public class DirectoryStorageFile {
     private boolean openFileFailed;
     private boolean directoryCreationFailed;
 
-    public DirectoryStorageFile(TorConfig config, String cacheFilename) {
-        this.config = config;
+    public DirectoryStorageFile(String dataPath, String cacheFilename) {
+        this.dataPath = dataPath;
         this.cacheFilename = cacheFilename;
     }
 
@@ -153,7 +152,7 @@ public class DirectoryStorageFile {
 
     private RandomAccessFile openFile() {
         try {
-            final File f = new File(config.getDataDirectory(), cacheFilename);
+            final File f = new File(dataPath, cacheFilename);
             createDirectoryIfMissing();
             return new RandomAccessFile(f, "rw");
         } catch (FileNotFoundException e) {
@@ -178,7 +177,7 @@ public class DirectoryStorageFile {
 
     private File createTempFile() {
         final long n = random.nextLong();
-        final File f = new File(config.getDataDirectory(), cacheFilename + Long.toString(n));
+        final File f = new File(dataPath, cacheFilename + Long.toString(n));
         f.deleteOnExit();
         return f;
     }
@@ -204,7 +203,7 @@ public class DirectoryStorageFile {
     }
 
     private File getFile() {
-        return new File(config.getDataDirectory(), cacheFilename);
+        return new File(dataPath, cacheFilename);
     }
 
     public void remove() {
@@ -216,7 +215,7 @@ public class DirectoryStorageFile {
         if (directoryCreationFailed) {
             return;
         }
-        final File dd = config.getDataDirectory();
+        final File dd = new File(dataPath);
         if (!dd.exists()) {
             if (!dd.mkdirs()) {
                 directoryCreationFailed = true;

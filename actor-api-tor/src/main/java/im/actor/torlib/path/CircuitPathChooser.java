@@ -9,23 +9,18 @@ import java.util.List;
 import java.util.Set;
 
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.TorConfig;
 import im.actor.utils.IPv4Address;
 import im.actor.torlib.circuits.actors.target.ExitTarget;
 import im.actor.torlib.directory.NewDirectory;
 
 public class CircuitPathChooser {
 
-    public static CircuitPathChooser create(TorConfig config, NewDirectory newDirectory) {
-        return new CircuitPathChooser(newDirectory, new CircuitNodeChooser(config, newDirectory));
-    }
-
     private final NewDirectory directory;
     private final CircuitNodeChooser nodeChooser;
 
-    public CircuitPathChooser(NewDirectory directory, CircuitNodeChooser nodeChooser) {
+    public CircuitPathChooser(NewDirectory directory) {
         this.directory = directory;
-        this.nodeChooser = nodeChooser;
+        this.nodeChooser = new CircuitNodeChooser(directory);
     }
 
     public List<Router> chooseDirectoryPath() throws InterruptedException {

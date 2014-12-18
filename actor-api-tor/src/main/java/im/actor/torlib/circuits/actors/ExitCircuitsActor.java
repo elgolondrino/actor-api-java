@@ -58,8 +58,7 @@ public class ExitCircuitsActor extends TypedActor<ExitCircuitsInt> implements Ex
         this.circuitManager = circuitManager;
         this.connectionCache = circuitManager.getConnectionCache();
 
-        this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getConfig(), circuitManager.getDirectory(),
-                circuitManager);
+        this.hiddenServiceManager = new HiddenServiceManager(circuitManager.getDirectory(), circuitManager);
         this.pendingRequests = new CopyOnWriteArraySet<ExitCircuitStreamRequest>();
         this.executor = Threading.newPool("ExitCircuitsActor worker");
 

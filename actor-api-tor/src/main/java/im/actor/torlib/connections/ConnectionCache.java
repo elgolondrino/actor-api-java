@@ -19,7 +19,6 @@ import im.actor.torlib.errors.ConnectionFailedException;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.TorConfig;
 
 public class ConnectionCache {
     private final static Logger logger = Logger.getLogger(ConnectionCache.class.getName());
@@ -34,7 +33,7 @@ public class ConnectionCache {
 
         public ConnectionImpl call() throws Exception {
             final SSLSocket socket = factory.createSocket();
-            final ConnectionImpl conn = new ConnectionImpl(config, socket, router);
+            final ConnectionImpl conn = new ConnectionImpl(socket, router);
             conn.connect();
             return conn;
         }
@@ -58,12 +57,9 @@ public class ConnectionCache {
     private final ConnectionSocketFactory factory = new ConnectionSocketFactory();
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    private final TorConfig config;
     private volatile boolean isClosed;
 
-
-    public ConnectionCache(TorConfig config) {
-        this.config = config;
+    public ConnectionCache() {
         scheduledExecutor.scheduleAtFixedRate(new CloseIdleConnectionCheckTask(), 5000, 5000, TimeUnit.MILLISECONDS);
     }
 

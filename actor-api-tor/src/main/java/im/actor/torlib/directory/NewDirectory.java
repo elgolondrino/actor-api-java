@@ -1,6 +1,5 @@
 package im.actor.torlib.directory;
 
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.utils.HexDigest;
 import im.actor.torlib.directory.routers.*;
@@ -16,23 +15,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NewDirectory {
     private final static AtomicInteger NEXT_ID = new AtomicInteger(1);
 
+    private final String dataPath;
     private final int id;
-    private final TorConfig config;
     private final DirectoryStorage store;
 
     private Consensus currentConsensus;
 
     private Routers routers;
 
-    public NewDirectory(TorConfig config) {
+    public NewDirectory(String dataPath) {
         this.id = NEXT_ID.getAndIncrement();
-        this.config = config;
-        this.store = new DirectoryStorage(config);
+        this.dataPath = dataPath;
+        this.store = new DirectoryStorage(dataPath);
         this.routers = new Routers(store);
     }
 
-    public TorConfig getConfig() {
-        return config;
+    public String getDataPath() {
+        return dataPath;
     }
 
     public int getId() {

@@ -5,15 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import im.actor.torlib.circuits.Circuit;
-import im.actor.torlib.TorConfig;
-import im.actor.torlib.circuits.hs.HSDescriptorCookie.CookieType;
 import im.actor.torlib.crypto.TorMessageDigest;
 import im.actor.utils.Base32;
 import im.actor.utils.HexDigest;
 
 public class HiddenService {
 
-    private final TorConfig config;
     private final byte[] permanentId;
 
     private HSDescriptor descriptor;
@@ -29,17 +26,12 @@ public class HiddenService {
     }
 
 
-    HiddenService(TorConfig config, byte[] permanentId) {
-        this.config = config;
+    HiddenService(byte[] permanentId) {
         this.permanentId = permanentId;
     }
 
     String getOnionAddressForLogging() {
-        if (config.getSafeLogging()) {
-            return "[scrubbed]";
-        } else {
-            return getOnionAddress();
-        }
+        return getOnionAddress();
     }
 
     String getOnionAddress() {
@@ -66,10 +58,6 @@ public class HiddenService {
         this.circuit = circuit;
     }
 
-    HSDescriptorCookie getAuthenticationCookie() {
-        return config.getHidServAuth(getOnionAddress());
-    }
-
     List<HexDigest> getAllCurrentDescriptorIds() {
         final List<HexDigest> ids = new ArrayList<HexDigest>();
         ids.add(getCurrentDescriptorId(0));
@@ -87,10 +75,6 @@ public class HiddenService {
     byte[] getCurrentSecretId(int replica) {
         final TorMessageDigest digest = new TorMessageDigest();
         digest.update(getCurrentTimePeriod());
-        final HSDescriptorCookie cookie = getAuthenticationCookie();
-        if (cookie != null && cookie.getType() == CookieType.COOKIE_STEALTH) {
-            digest.update(cookie.getValue());
-        }
         digest.update(new byte[]{(byte) replica});
         return digest.getDigestBytes();
     }

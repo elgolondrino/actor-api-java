@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSocket;
 
@@ -15,22 +14,17 @@ import im.actor.torlib.circuits.cells.Cell;
 import im.actor.torlib.errors.ConnectionHandshakeException;
 import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorPublicKey;
 import im.actor.utils.IPv4Address;
 
 public abstract class ConnectionHandshake {
-    private final static Logger logger = Logger.getLogger(ConnectionHandshake.class.getName());
 
-    static ConnectionHandshake createHandshake(TorConfig config, ConnectionImpl connection, SSLSocket socket) throws ConnectionHandshakeException {
-        if (config.getHandshakeV3Enabled() && ConnectionHandshakeV3.sessionSupportsHandshake(socket.getSession())) {
+    static ConnectionHandshake createHandshake(ConnectionImpl connection, SSLSocket socket) throws ConnectionHandshakeException {
+        if (ConnectionHandshakeV3.sessionSupportsHandshake(socket.getSession())) {
             return new ConnectionHandshakeV3(connection, socket);
-        } else if (config.getHandshakeV2Enabled()) {
-            return new ConnectionHandshakeV2(connection, socket);
         } else {
             throw new ConnectionHandshakeException("No valid handshake type available for this connection");
         }
-
     }
 
     protected final ConnectionImpl connection;

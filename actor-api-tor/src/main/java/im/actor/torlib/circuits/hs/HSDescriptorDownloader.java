@@ -104,7 +104,7 @@ public class HSDescriptorDownloader {
 
     private HSDescriptor readDocument(HSDescriptorDirectory dd, ByteBuffer body) {
         DocumentFieldParserImpl fieldParser = new DocumentFieldParserImpl(body);
-        HSDescriptorParser parser = new HSDescriptorParser(hiddenService, fieldParser, hiddenService.getAuthenticationCookie());
+        HSDescriptorParser parser = new HSDescriptorParser(hiddenService, fieldParser);
         DescriptorParseResult result = new DescriptorParseResult(dd);
         parser.parse(result);
         return result.getDescriptor();

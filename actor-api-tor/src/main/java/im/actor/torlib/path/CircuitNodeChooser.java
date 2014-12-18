@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import im.actor.torlib.directory.consensus.Consensus;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.directory.routers.Router;
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.crypto.TorRandom;
 
 public class CircuitNodeChooser {
@@ -18,12 +17,8 @@ public class CircuitNodeChooser {
     private final NewDirectory newDirectory;
     private final TorRandom random = new TorRandom();
 
-    private final TorConfigNodeFilter configNodeFilter;
-
-
-    public CircuitNodeChooser(TorConfig config, NewDirectory newDirectory) {
+    public CircuitNodeChooser(NewDirectory newDirectory) {
         this.newDirectory = newDirectory;
-        this.configNodeFilter = new TorConfigNodeFilter(config);
     }
 
     /**
@@ -31,8 +26,7 @@ public class CircuitNodeChooser {
      * @return The chosen exit router or 'null' if no suitable router is available
      */
     public Router chooseExitNode(List<Router> candidates) {
-        final List<Router> filteredCandidates = configNodeFilter.filterExitCandidates(candidates);
-        return chooseByBandwidth(filteredCandidates, WeightRule.WEIGHT_FOR_EXIT);
+        return chooseByBandwidth(candidates, WeightRule.WEIGHT_FOR_EXIT);
     }
 
     public Router chooseDirectory() {

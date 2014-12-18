@@ -71,7 +71,7 @@ public class RendezvousCircuitBuilder implements Callable<Circuit> {
         for (IntroductionPoint ip : serviceDescriptor.getShuffledIntroductionPoints()) {
             final Circuit circuit = attemptOpenIntroductionCircuit(ip);
             if (circuit != null) {
-                return new IntroductionProcessor(hiddenService, circuit, ip);
+                return new IntroductionProcessor(circuit, ip);
             }
         }
         return null;

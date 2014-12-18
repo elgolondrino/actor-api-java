@@ -4,8 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import im.actor.torlib.circuits.CircuitManager;
-import im.actor.torlib.connections.ConnectionCache;
-import im.actor.torlib.crypto.PRNGFixes;
 import im.actor.torlib.directory.DirectoryManager;
 import im.actor.torlib.directory.NewDirectory;
 import im.actor.torlib.proxy.SocksTorProxy;
@@ -17,7 +15,6 @@ import im.actor.torlib.utils.Tor;
  */
 public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
-    private final TorConfig config;
     private final NewDirectory newDirectory;
     private final CircuitManager circuitManager;
     private final SocksTorProxy socksListener;
@@ -26,21 +23,13 @@ public class TorClient {
     private boolean isStarted = false;
     private boolean isStopped = false;
 
-    public TorClient() {
-        if (Tor.isAndroidRuntime()) {
-            PRNGFixes.apply();
-        }
-        config = Tor.createConfig();
-        newDirectory = new NewDirectory(config);
+    public TorClient(String dataPath) {
+        newDirectory = new NewDirectory(dataPath);
 
-        circuitManager = new CircuitManager(newDirectory, config);
+        circuitManager = new CircuitManager(newDirectory);
         directoryManager = new DirectoryManager(circuitManager);
 
         socksListener = new SocksTorProxy(circuitManager);
-    }
-
-    public TorConfig getConfig() {
-        return config;
     }
 
     /**

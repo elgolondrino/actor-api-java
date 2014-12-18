@@ -11,10 +11,9 @@ public class ActorTorHelper {
     private TorClient torClient;
 
     public ActorTorHelper(String path) {
-        this.torClient = new TorClient();
         File file = new File(path);
         file.mkdirs();
-        this.torClient.getConfig().setDataDirectory(file);
+        this.torClient = new TorClient(path);
     }
 
     public TorClient getTorClient() {

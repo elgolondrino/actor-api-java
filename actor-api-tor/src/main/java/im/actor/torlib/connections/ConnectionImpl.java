@@ -4,7 +4,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -28,7 +27,6 @@ import im.actor.torlib.errors.ConnectionIOException;
 import im.actor.torlib.errors.ConnectionTimeoutException;
 import im.actor.torlib.directory.routers.Router;
 import im.actor.utils.Threading;
-import im.actor.torlib.TorConfig;
 import im.actor.torlib.errors.TorException;
 import im.actor.torlib.crypto.TorRandom;
 
@@ -42,7 +40,6 @@ public class ConnectionImpl implements Connection {
     private final static int DEFAULT_CONNECT_TIMEOUT = 5000;
     private final static Cell connectionClosedSentinel = Cell.createCell(0, 0);
 
-    private final TorConfig config;
     private final SSLSocket socket;
     private InputStream input;
     private OutputStream output;
@@ -60,8 +57,7 @@ public class ConnectionImpl implements Connection {
     private final AtomicLong lastActivity = new AtomicLong();
 
 
-    public ConnectionImpl(TorConfig config, SSLSocket socket, Router router) {
-        this.config = config;
+    public ConnectionImpl(SSLSocket socket, Router router) {
         this.socket = socket;
         this.router = router;
         this.circuitMap = new HashMap<Integer, Circuit>();
@@ -132,7 +128,7 @@ public class ConnectionImpl implements Connection {
 
     private void doConnect() throws IOException, InterruptedException, ConnectionIOException {
         connectSocket();
-        final ConnectionHandshake handshake = ConnectionHandshake.createHandshake(config, this, socket);
+        final ConnectionHandshake handshake = ConnectionHandshake.createHandshake(this, socket);
         input = socket.getInputStream();
         output = socket.getOutputStream();
         readCellsThread.start();

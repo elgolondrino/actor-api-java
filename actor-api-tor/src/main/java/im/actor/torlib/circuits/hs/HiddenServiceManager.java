@@ -23,13 +23,11 @@ public class HiddenServiceManager {
     private final static Logger logger = Logger.getLogger(HiddenServiceManager.class.getName());
 
     private final Map<String, HiddenService> hiddenServices;
-    private final TorConfig config;
     private final NewDirectory directory;
     private final HSDirectories hsDirectories;
     private final CircuitManager circuitManager;
 
-    public HiddenServiceManager(TorConfig config, NewDirectory directory, CircuitManager circuitManager) {
-        this.config = config;
+    public HiddenServiceManager(NewDirectory directory, CircuitManager circuitManager) {
         this.directory = directory;
         this.hiddenServices = new HashMap<String, HiddenService>();
         this.hsDirectories = new HSDirectories(directory);
@@ -109,9 +107,9 @@ public class HiddenServiceManager {
     private HiddenService createHiddenServiceFor(String key) throws OpenFailedException {
         try {
             byte[] decoded = HiddenService.decodeOnion(key);
-            return new HiddenService(config, decoded);
+            return new HiddenService(decoded);
         } catch (TorException e) {
-            final String target = config.getSafeLogging() ? "[scrubbed]" : (key + ".onion");
+            final String target = (key + ".onion");
             throw new OpenFailedException("Failed to decode onion address " + target + " : " + e.getMessage());
         }
     }

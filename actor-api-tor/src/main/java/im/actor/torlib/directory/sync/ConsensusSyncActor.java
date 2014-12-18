@@ -77,7 +77,7 @@ public class ConsensusSyncActor extends TypedActor<ConsensusSyncInt> implements 
         this.directory = directory;
         this.storage = directory.getStore();
         this.circuitManager = circuitManager;
-        this.safeFileWriter = new SafeFileWriter(directory.getConfig().getDataDirectory().getPath(), "consensus-mobile.bin");
+        this.safeFileWriter = new SafeFileWriter(directory.getDataPath(), "consensus-mobile.bin");
     }
 
 
