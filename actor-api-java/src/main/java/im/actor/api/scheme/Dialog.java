@@ -74,7 +74,10 @@ public class Dialog extends BserObject {
         this.rid = values.getLong(6);
         this.date = values.getLong(7);
         this.message = values.getObj(8, MessageContent.class);
-        this.state = MessageState.parse(values.getInt(9));
+        int val_state = values.getInt(9, 0);
+        if (val_state != 0) {
+            this.state = MessageState.parse(val_state);
+        }
     }
 
     @Override
@@ -92,10 +95,9 @@ public class Dialog extends BserObject {
             throw new IOException();
         }
         writer.writeObject(8, this.message);
-        if (this.state == null) {
-            throw new IOException();
+        if (this.state != null) {
+            writer.writeInt(9, this.state.getValue());
         }
-        writer.writeInt(9, this.state.getValue());
     }
 
 }

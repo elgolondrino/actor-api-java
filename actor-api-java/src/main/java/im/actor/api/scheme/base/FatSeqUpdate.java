@@ -21,14 +21,18 @@ public class FatSeqUpdate extends RpcScope {
     private byte[] update;
     private List<User> users;
     private List<Group> groups;
+    private List<Phone> phones;
+    private List<Email> emails;
 
-    public FatSeqUpdate(int seq, byte[] state, int updateHeader, byte[] update, List<User> users, List<Group> groups) {
+    public FatSeqUpdate(int seq, byte[] state, int updateHeader, byte[] update, List<User> users, List<Group> groups, List<Phone> phones, List<Email> emails) {
         this.seq = seq;
         this.state = state;
         this.updateHeader = updateHeader;
         this.update = update;
         this.users = users;
         this.groups = groups;
+        this.phones = phones;
+        this.emails = emails;
     }
 
     public FatSeqUpdate() {
@@ -59,6 +63,14 @@ public class FatSeqUpdate extends RpcScope {
         return this.groups;
     }
 
+    public List<Phone> getPhones() {
+        return this.phones;
+    }
+
+    public List<Email> getEmails() {
+        return this.emails;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.seq = values.getInt(1);
@@ -67,6 +79,8 @@ public class FatSeqUpdate extends RpcScope {
         this.update = values.getBytes(4);
         this.users = values.getRepeatedObj(5, User.class);
         this.groups = values.getRepeatedObj(6, Group.class);
+        this.phones = values.getRepeatedObj(7, Phone.class);
+        this.emails = values.getRepeatedObj(8, Email.class);
     }
 
     @Override
@@ -83,6 +97,8 @@ public class FatSeqUpdate extends RpcScope {
         writer.writeBytes(4, this.update);
         writer.writeRepeatedObj(5, this.users);
         writer.writeRepeatedObj(6, this.groups);
+        writer.writeRepeatedObj(7, this.phones);
+        writer.writeRepeatedObj(8, this.emails);
     }
 
     @Override

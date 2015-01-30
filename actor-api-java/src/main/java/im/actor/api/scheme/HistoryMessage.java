@@ -53,7 +53,10 @@ public class HistoryMessage extends BserObject {
         this.rid = values.getLong(2);
         this.date = values.getLong(3);
         this.message = values.getObj(5, MessageContent.class);
-        this.state = MessageState.parse(values.getInt(6));
+        int val_state = values.getInt(6, 0);
+        if (val_state != 0) {
+            this.state = MessageState.parse(val_state);
+        }
     }
 
     @Override
@@ -65,10 +68,9 @@ public class HistoryMessage extends BserObject {
             throw new IOException();
         }
         writer.writeObject(5, this.message);
-        if (this.state == null) {
-            throw new IOException();
+        if (this.state != null) {
+            writer.writeInt(6, this.state.getValue());
         }
-        writer.writeInt(6, this.state.getValue());
     }
 
 }

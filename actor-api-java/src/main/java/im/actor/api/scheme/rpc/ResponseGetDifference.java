@@ -19,14 +19,18 @@ public class ResponseGetDifference extends Response {
     private byte[] state;
     private List<User> users;
     private List<Group> groups;
+    private List<Phone> phones;
+    private List<Email> emails;
     private List<DifferenceUpdate> updates;
     private boolean needMore;
 
-    public ResponseGetDifference(int seq, byte[] state, List<User> users, List<Group> groups, List<DifferenceUpdate> updates, boolean needMore) {
+    public ResponseGetDifference(int seq, byte[] state, List<User> users, List<Group> groups, List<Phone> phones, List<Email> emails, List<DifferenceUpdate> updates, boolean needMore) {
         this.seq = seq;
         this.state = state;
         this.users = users;
         this.groups = groups;
+        this.phones = phones;
+        this.emails = emails;
         this.updates = updates;
         this.needMore = needMore;
     }
@@ -51,6 +55,14 @@ public class ResponseGetDifference extends Response {
         return this.groups;
     }
 
+    public List<Phone> getPhones() {
+        return this.phones;
+    }
+
+    public List<Email> getEmails() {
+        return this.emails;
+    }
+
     public List<DifferenceUpdate> getUpdates() {
         return this.updates;
     }
@@ -65,6 +77,8 @@ public class ResponseGetDifference extends Response {
         this.state = values.getBytes(2);
         this.users = values.getRepeatedObj(3, User.class);
         this.groups = values.getRepeatedObj(6, Group.class);
+        this.phones = values.getRepeatedObj(7, Phone.class);
+        this.emails = values.getRepeatedObj(8, Email.class);
         this.updates = values.getRepeatedObj(4, DifferenceUpdate.class);
         this.needMore = values.getBool(5);
     }
@@ -78,6 +92,8 @@ public class ResponseGetDifference extends Response {
         writer.writeBytes(2, this.state);
         writer.writeRepeatedObj(3, this.users);
         writer.writeRepeatedObj(6, this.groups);
+        writer.writeRepeatedObj(7, this.phones);
+        writer.writeRepeatedObj(8, this.emails);
         writer.writeRepeatedObj(4, this.updates);
         writer.writeBool(5, this.needMore);
     }

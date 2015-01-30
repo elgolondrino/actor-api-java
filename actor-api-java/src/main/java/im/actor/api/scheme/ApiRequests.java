@@ -307,6 +307,102 @@ public class ApiRequests {
         return this.api.rpcSync(new RequestRemoveAvatar(), requestTimeout);
     }
 
+    public Future<ResponseVoid> sendEmailCode(String email, String description) {
+        return this.api.rpc(new RequestSendEmailCode(email, description));
+    }
+
+    public Future<ResponseVoid> sendEmailCode(String email, String description, long requestTimeout) {
+        return this.api.rpc(new RequestSendEmailCode(email, description), requestTimeout);
+    }
+
+    public Future<ResponseVoid> sendEmailCode(String email, String description, FutureCallback<ResponseVoid> callback) {
+        return this.api.rpc(new RequestSendEmailCode(email, description), callback);
+    }
+
+    public Future<ResponseVoid> sendEmailCode(String email, String description, long requestTimeout, FutureCallback<ResponseVoid> callback) {
+        return this.api.rpc(new RequestSendEmailCode(email, description), requestTimeout, callback);
+    }
+
+    public ResponseVoid sendEmailCodeSync (String email, String description) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestSendEmailCode(email, description));
+    }
+
+    public ResponseVoid sendEmailCodeSync (String email, String description, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestSendEmailCode(email, description), requestTimeout);
+    }
+
+    public Future<ResponseSeq> detachEmail(int email, long accessHash) {
+        return this.api.rpc(new RequestDetachEmail(email, accessHash));
+    }
+
+    public Future<ResponseSeq> detachEmail(int email, long accessHash, long requestTimeout) {
+        return this.api.rpc(new RequestDetachEmail(email, accessHash), requestTimeout);
+    }
+
+    public Future<ResponseSeq> detachEmail(int email, long accessHash, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestDetachEmail(email, accessHash), callback);
+    }
+
+    public Future<ResponseSeq> detachEmail(int email, long accessHash, long requestTimeout, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestDetachEmail(email, accessHash), requestTimeout, callback);
+    }
+
+    public ResponseSeq detachEmailSync (int email, long accessHash) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestDetachEmail(email, accessHash));
+    }
+
+    public ResponseSeq detachEmailSync (int email, long accessHash, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestDetachEmail(email, accessHash), requestTimeout);
+    }
+
+    public Future<ResponseSeq> changePhoneTitle(int phoneId, String title) {
+        return this.api.rpc(new RequestChangePhoneTitle(phoneId, title));
+    }
+
+    public Future<ResponseSeq> changePhoneTitle(int phoneId, String title, long requestTimeout) {
+        return this.api.rpc(new RequestChangePhoneTitle(phoneId, title), requestTimeout);
+    }
+
+    public Future<ResponseSeq> changePhoneTitle(int phoneId, String title, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestChangePhoneTitle(phoneId, title), callback);
+    }
+
+    public Future<ResponseSeq> changePhoneTitle(int phoneId, String title, long requestTimeout, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestChangePhoneTitle(phoneId, title), requestTimeout, callback);
+    }
+
+    public ResponseSeq changePhoneTitleSync (int phoneId, String title) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestChangePhoneTitle(phoneId, title));
+    }
+
+    public ResponseSeq changePhoneTitleSync (int phoneId, String title, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestChangePhoneTitle(phoneId, title), requestTimeout);
+    }
+
+    public Future<ResponseSeq> changeEmailTitle(int emailId, String title) {
+        return this.api.rpc(new RequestChangeEmailTitle(emailId, title));
+    }
+
+    public Future<ResponseSeq> changeEmailTitle(int emailId, String title, long requestTimeout) {
+        return this.api.rpc(new RequestChangeEmailTitle(emailId, title), requestTimeout);
+    }
+
+    public Future<ResponseSeq> changeEmailTitle(int emailId, String title, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestChangeEmailTitle(emailId, title), callback);
+    }
+
+    public Future<ResponseSeq> changeEmailTitle(int emailId, String title, long requestTimeout, FutureCallback<ResponseSeq> callback) {
+        return this.api.rpc(new RequestChangeEmailTitle(emailId, title), requestTimeout, callback);
+    }
+
+    public ResponseSeq changeEmailTitleSync (int emailId, String title) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestChangeEmailTitle(emailId, title));
+    }
+
+    public ResponseSeq changeEmailTitleSync (int emailId, String title, long requestTimeout) throws TimeoutException, ApiRequestException {
+        return this.api.rpcSync(new RequestChangeEmailTitle(emailId, title), requestTimeout);
+    }
+
     public Future<ResponseImportContacts> importContacts(List<PhoneToImport> phones, List<EmailToImport> emails) {
         return this.api.rpc(new RequestImportContacts(phones, emails));
     }

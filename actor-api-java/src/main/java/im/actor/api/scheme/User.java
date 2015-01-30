@@ -17,8 +17,11 @@ public class User extends BserObject {
     private List<Long> keyHashes;
     private long phone;
     private Avatar avatar;
+    private List<Integer> phones;
+    private List<Integer> emails;
+    private UserState userState;
 
-    public User(int id, long accessHash, String name, String localName, Sex sex, List<Long> keyHashes, long phone, Avatar avatar) {
+    public User(int id, long accessHash, String name, String localName, Sex sex, List<Long> keyHashes, long phone, Avatar avatar, List<Integer> phones, List<Integer> emails, UserState userState) {
         this.id = id;
         this.accessHash = accessHash;
         this.name = name;
@@ -27,6 +30,9 @@ public class User extends BserObject {
         this.keyHashes = keyHashes;
         this.phone = phone;
         this.avatar = avatar;
+        this.phones = phones;
+        this.emails = emails;
+        this.userState = userState;
     }
 
     public User() {
@@ -65,6 +71,18 @@ public class User extends BserObject {
         return this.avatar;
     }
 
+    public List<Integer> getPhones() {
+        return this.phones;
+    }
+
+    public List<Integer> getEmails() {
+        return this.emails;
+    }
+
+    public UserState getUserState() {
+        return this.userState;
+    }
+
     @Override
     public void parse(BserValues values) throws IOException {
         this.id = values.getInt(1);
@@ -78,6 +96,9 @@ public class User extends BserObject {
         this.keyHashes = values.getRepeatedLong(6);
         this.phone = values.getLong(7);
         this.avatar = values.optObj(8, Avatar.class);
+        this.phones = values.getRepeatedInt(9);
+        this.emails = values.getRepeatedInt(10);
+        this.userState = UserState.parse(values.getInt(11));
     }
 
     @Override
@@ -99,6 +120,12 @@ public class User extends BserObject {
         if (this.avatar != null) {
             writer.writeObject(8, this.avatar);
         }
+        writer.writeRepeatedInt(9, this.phones);
+        writer.writeRepeatedInt(10, this.emails);
+        if (this.userState == null) {
+            throw new IOException();
+        }
+        writer.writeInt(11, this.userState.getValue());
     }
 
 }

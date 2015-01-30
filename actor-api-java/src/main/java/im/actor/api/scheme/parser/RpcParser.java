@@ -25,6 +25,10 @@ public class RpcParser extends BaseParser<RpcScope> {
             case 53: return RequestEditName.fromBytes(payload);
             case 31: return RequestEditAvatar.fromBytes(payload);
             case 91: return RequestRemoveAvatar.fromBytes(payload);
+            case 120: return RequestSendEmailCode.fromBytes(payload);
+            case 123: return RequestDetachEmail.fromBytes(payload);
+            case 124: return RequestChangePhoneTitle.fromBytes(payload);
+            case 125: return RequestChangeEmailTitle.fromBytes(payload);
             case 7: return RequestImportContacts.fromBytes(payload);
             case 87: return RequestGetContacts.fromBytes(payload);
             case 89: return RequestRemoveContact.fromBytes(payload);
